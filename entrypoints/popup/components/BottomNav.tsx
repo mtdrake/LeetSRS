@@ -1,3 +1,5 @@
+import { FaHouseChimney, FaChartSimple, FaGear, FaBug } from 'react-icons/fa6';
+
 interface BottomNavProps {
   activeView: string;
   onNavigate: (view: string) => void;
@@ -5,10 +7,10 @@ interface BottomNavProps {
 
 export function BottomNav({ activeView, onNavigate }: BottomNavProps) {
   const navItems = [
-    { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'stats', label: 'Stats', icon: '📊' },
-    { id: 'settings', label: 'Settings', icon: '⚙️' },
-    { id: 'debug', label: 'Debug', icon: '🐛' },
+    { id: 'home', label: 'Home', Icon: FaHouseChimney },
+    { id: 'stats', label: 'Stats', Icon: FaChartSimple },
+    { id: 'settings', label: 'Settings', Icon: FaGear },
+    { id: 'debug', label: 'Debug', Icon: FaBug },
   ];
 
   return (
@@ -21,7 +23,7 @@ export function BottomNav({ activeView, onNavigate }: BottomNavProps) {
           }`}
           onClick={() => onNavigate(item.id)}
         >
-          <span className="text-[20px]">{item.icon}</span>
+          <item.Icon className="text-lg" />
           <span className="text-[11px]">{item.label}</span>
         </button>
       ))}

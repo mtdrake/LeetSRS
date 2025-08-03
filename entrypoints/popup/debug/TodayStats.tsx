@@ -28,7 +28,6 @@ export function TodayStats({ style }: { style?: React.CSSProperties }) {
     try {
       setRefreshing(true);
       const todayStats = await sendMessage({ type: MessageType.GET_TODAY_STATS });
-      console.log('Refreshed stats:', todayStats);
       setStats(todayStats);
     } catch (error) {
       console.error('Failed to refresh stats:', error);

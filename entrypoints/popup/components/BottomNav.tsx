@@ -1,4 +1,5 @@
 import { FaHouseChimney, FaChartSimple, FaGear, FaBug } from 'react-icons/fa6';
+import { Button } from 'react-aria-components';
 
 export type ViewId = 'home' | 'stats' | 'settings' | 'debug';
 
@@ -18,16 +19,18 @@ export function BottomNav({ activeView, onNavigate }: BottomNavProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-14 border-t flex justify-around items-center z-[1000] bg-secondary border-current">
       {navItems.map((item) => (
-        <button
+        <Button
           key={item.id}
           className={`flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer p-2 transition-colors duration-200 hover:text-primary ${
             activeView === item.id ? 'text-accent' : 'text-secondary'
           }`}
-          onClick={() => onNavigate(item.id)}
+          onPress={() => onNavigate(item.id)}
+          aria-label={item.label}
+          aria-current={activeView === item.id ? 'page' : undefined}
         >
           <item.Icon className="text-lg" />
           <span className="text-[11px]">{item.label}</span>
-        </button>
+        </Button>
       ))}
     </nav>
   );

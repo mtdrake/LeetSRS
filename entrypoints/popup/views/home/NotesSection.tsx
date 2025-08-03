@@ -11,12 +11,7 @@ export function NotesSection() {
         aria-expanded={isExpanded}
       >
         <span className="text-sm font-semibold text-primary">Notes</span>
-        <span
-          className="text-xs text-secondary transition-transform duration-200"
-          style={{
-            transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-          }}
-        >
+        <span className={`text-xs text-secondary transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}>
           ▶
         </span>
       </button>

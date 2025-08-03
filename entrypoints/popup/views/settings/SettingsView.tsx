@@ -13,8 +13,9 @@ export function SettingsView() {
       <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
         <h3 className="text-lg font-semibold mb-4">Appearance</h3>
         <div className="flex items-center justify-between">
-          <label>Theme</label>
+          <label htmlFor="theme-toggle">Theme</label>
           <button
+            id="theme-toggle"
             onClick={toggleTheme}
             className="px-4 py-2 rounded-md transition-all hover:opacity-80 bg-accent text-white"
           >
@@ -27,24 +28,26 @@ export function SettingsView() {
         <h3 className="text-lg font-semibold mb-4">Review Settings</h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label>Daily Review Goal</label>
+            <label htmlFor="daily-review-goal">Daily Review Goal</label>
             <input
+              id="daily-review-goal"
               type="number"
               placeholder="10"
               className="w-20 px-2 py-1 rounded border bg-tertiary text-primary border-current"
             />
           </div>
           <div className="flex items-center justify-between">
-            <label>New Cards Per Day</label>
+            <label htmlFor="new-cards-per-day">New Cards Per Day</label>
             <input
+              id="new-cards-per-day"
               type="number"
               placeholder="5"
               className="w-20 px-2 py-1 rounded border bg-tertiary text-primary border-current"
             />
           </div>
           <div className="flex items-center justify-between">
-            <label>Review Order</label>
-            <select className="px-2 py-1 rounded border bg-tertiary text-primary border-current">
+            <label htmlFor="review-order">Review Order</label>
+            <select id="review-order" className="px-2 py-1 rounded border bg-tertiary text-primary border-current">
               <option>Random</option>
               <option>Due Date</option>
               <option>Difficulty</option>
@@ -57,12 +60,16 @@ export function SettingsView() {
         <h3 className="text-lg font-semibold mb-4">Notifications</h3>
         <div className="space-y-3">
           <div className="flex items-center">
-            <input type="checkbox" className="mr-2" />
-            <label>Enable Daily Reminders</label>
+            <input type="checkbox" id="enable-reminders" className="mr-2" />
+            <label htmlFor="enable-reminders">Enable Daily Reminders</label>
           </div>
           <div className="flex items-center justify-between">
-            <label>Reminder Time</label>
-            <input type="time" className="px-2 py-1 rounded border bg-tertiary text-primary border-current" />
+            <label htmlFor="reminder-time">Reminder Time</label>
+            <input
+              id="reminder-time"
+              type="time"
+              className="px-2 py-1 rounded border bg-tertiary text-primary border-current"
+            />
           </div>
         </div>
       </div>

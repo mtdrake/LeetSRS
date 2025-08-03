@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { MessageType } from '@/services/messages';
-import { useBackgroundQuery, useBackgroundMutation } from '@/hooks/useBackgroundQuery';
+import { useCardsQuery, useAddCardMutation, useRemoveCardMutation } from '@/hooks/useBackgroundQueries';
 import { DebugCard } from './DebugCard';
 import { ReviewQueue } from './ReviewQueue';
 import { TodayStats } from './TodayStats';
@@ -10,34 +9,21 @@ export function DebugPanel() {
   const [slug, setSlug] = useState('');
   const [isCardsCollapsed, setIsCardsCollapsed] = useState(false);
 
-  // Query hook for fetching all cards
-  const {
-    data: cards,
-    isLoading: isLoadingCards,
-    error: cardsError,
-    refetch: refetchCards,
-  } = useBackgroundQuery({ type: MessageType.GET_ALL_CARDS });
+  const { data: cards, isLoading: isLoadingCards, error: cardsError } = useCardsQuery();
+  const addCardMutation = useAddCardMutation();
+  const removeCardMutation = useRemoveCardMutation();
 
   const cardsList = cards ?? [];
-
-  // Mutation hooks for add and remove operations
-  const addCardMutation = useBackgroundMutation();
-  const removeCardMutation = useBackgroundMutation();
 
   const handleAddCard = async () => {
     if (!slug.trim()) return;
 
     try {
-      const card = await addCardMutation.mutate({
-        type: MessageType.ADD_CARD,
+      await addCardMutation.mutateAsync({
         slug: slug.trim(),
         name: slug.trim(), // Using slug as name for debug purposes
       });
-
-      if (card) {
-        setSlug('');
-        await refetchCards(); // Reload cards after adding
-      }
+      setSlug('');
     } catch (error) {
       console.error('Failed to add card:', error);
     }
@@ -45,20 +31,10 @@ export function DebugPanel() {
 
   const handleRemoveCard = async (slug: string) => {
     try {
-      await removeCardMutation.mutate({
-        type: MessageType.REMOVE_CARD,
-        slug: slug,
-      });
-      await refetchCards(); // Reload cards after removing
+      await removeCardMutation.mutateAsync(slug);
     } catch (error) {
       console.error('Failed to remove card:', error);
     }
-  };
-
-  const handleUpdateCard = async () => {
-    // Since we're using the query hook, we need to refetch after updates
-    // The update happens in the child component
-    await refetchCards();
   };
 
   return (
@@ -76,10 +52,10 @@ export function DebugPanel() {
         />
         <button
           onClick={handleAddCard}
-          disabled={addCardMutation.isLoading || !slug.trim()}
+          disabled={addCardMutation.isPending || !slug.trim()}
           className="debug-panel-button"
         >
-          {addCardMutation.isLoading ? 'Adding...' : 'Add Card'}
+          {addCardMutation.isPending ? 'Adding...' : 'Add Card'}
         </button>
       </div>
 
@@ -102,7 +78,7 @@ export function DebugPanel() {
           ) : (
             <div className="debug-panel-cards-container">
               {cardsList.map((card) => (
-                <DebugCard key={card.slug} card={card} onRemove={handleRemoveCard} onUpdate={handleUpdateCard} />
+                <DebugCard key={card.slug} card={card} onRemove={handleRemoveCard} />
               ))}
             </div>
           ))}

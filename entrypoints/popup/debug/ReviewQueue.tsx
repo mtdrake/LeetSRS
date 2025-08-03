@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import type { Card } from '@/services/cards';
-import { MessageType } from '@/services/messages';
-import { useBackgroundQuery } from '@/hooks/useBackgroundQuery';
+import { useReviewQueueQuery } from '@/hooks/useBackgroundQueries';
 import { State as FsrsState } from 'ts-fsrs';
 
 interface ReviewQueueProps {
@@ -9,39 +7,27 @@ interface ReviewQueueProps {
 }
 
 export function ReviewQueue({ style }: ReviewQueueProps) {
-  const [queryEnabled, setQueryEnabled] = useState(false);
-
-  const {
-    data: reviewQueue,
-    isLoading,
-    error,
-    refetch,
-  } = useBackgroundQuery({ type: MessageType.GET_REVIEW_QUEUE }, { enabled: queryEnabled });
+  const { data: reviewQueue, isLoading, isFetching, error, refetch } = useReviewQueueQuery(true);
 
   const queueList = reviewQueue ?? [];
-
-  const handleLoadQueue = () => {
-    if (!queryEnabled) {
-      setQueryEnabled(true);
-    } else {
-      refetch();
-    }
-  };
 
   return (
     <div style={style}>
       <h3 className="debug-panel-cards-header" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         Review Queue ({queueList.length})
+        {isFetching && !isLoading && <span style={{ fontSize: '0.8em', color: '#888' }}>Updating...</span>}
         <button
-          onClick={handleLoadQueue}
+          onClick={() => refetch()}
           className="debug-panel-button"
           style={{ marginLeft: 'auto' }}
-          disabled={isLoading}
+          disabled={isFetching}
         >
-          {isLoading ? 'Loading...' : 'Load Queue'}
+          {isFetching ? 'Refreshing...' : '🔄 Refresh'}
         </button>
       </h3>
-      {error ? (
+      {isLoading ? (
+        <p className="debug-panel-empty-state">Loading review queue...</p>
+      ) : error ? (
         <p className="debug-panel-empty-state">Error loading queue: {error.message}</p>
       ) : queueList.length === 0 ? (
         <p className="debug-panel-empty-state">No cards in review queue</p>
@@ -71,6 +57,7 @@ function ReviewQueueCard({ card, position }: ReviewQueueCardProps) {
         backgroundColor: '#2a2a2a',
         borderRadius: '4px',
         border: '1px solid #444',
+        transition: 'all 0.3s ease',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -1,9 +1,8 @@
-import { MessageType } from '@/services/messages';
-import { useBackgroundQuery } from '@/hooks/useBackgroundQuery';
+import { useTodayStatsQuery } from '@/hooks/useBackgroundQueries';
 import { Rating } from 'ts-fsrs';
 
 export function TodayStats({ style }: { style?: React.CSSProperties }) {
-  const { data: stats, isLoading, error, refetch } = useBackgroundQuery({ type: MessageType.GET_TODAY_STATS });
+  const { data: stats, isLoading, error, refetch } = useTodayStatsQuery();
 
   if (isLoading) {
     return (

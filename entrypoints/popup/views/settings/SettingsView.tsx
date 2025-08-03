@@ -1,53 +1,113 @@
+import { useTheme } from '../../contexts/ThemeContext';
+
 export function SettingsView() {
+  const { theme, toggleTheme } = useTheme();
+
+  const sectionStyle = {
+    backgroundColor: 'var(--current-bg-secondary)',
+    color: 'var(--current-text-primary)',
+  };
+
+  const inputStyle = {
+    backgroundColor: 'var(--current-bg-tertiary)',
+    color: 'var(--current-text-primary)',
+    borderColor: 'var(--current-border)',
+  };
+
+  const buttonStyle = {
+    backgroundColor: 'var(--current-bg-tertiary)',
+    color: 'var(--current-text-primary)',
+  };
+
   return (
-    <div className="settings-view">
-      <div className="view-header">
-        <h1>Settings</h1>
-        <span className="subtitle">Configure your preferences</span>
+    <div className="p-4">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--current-text-primary)' }}>Settings</h1>
+        <span className="text-sm" style={{ color: 'var(--current-text-secondary)' }}>Configure your preferences</span>
       </div>
 
-      <div className="settings-section">
-        <h3>Review Settings</h3>
-        <div className="setting-item">
-          <label>Daily Review Goal</label>
-          <input type="number" placeholder="10" />
-        </div>
-        <div className="setting-item">
-          <label>New Cards Per Day</label>
-          <input type="number" placeholder="5" />
-        </div>
-        <div className="setting-item">
-          <label>Review Order</label>
-          <select>
-            <option>Random</option>
-            <option>Due Date</option>
-            <option>Difficulty</option>
-          </select>
+      <div className="mb-6 p-4 rounded-lg" style={sectionStyle}>
+        <h3 className="text-lg font-semibold mb-4">Appearance</h3>
+        <div className="flex items-center justify-between">
+          <label>Theme</label>
+          <button
+            onClick={toggleTheme}
+            className="px-4 py-2 rounded-md transition-all hover:opacity-80"
+            style={{
+              backgroundColor: 'var(--current-accent)',
+              color: 'white',
+            }}
+          >
+            {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
+          </button>
         </div>
       </div>
 
-      <div className="settings-section">
-        <h3>Notifications</h3>
-        <div className="setting-item">
-          <label>
-            <input type="checkbox" />
-            Enable Daily Reminders
-          </label>
-        </div>
-        <div className="setting-item">
-          <label>Reminder Time</label>
-          <input type="time" />
+      <div className="mb-6 p-4 rounded-lg" style={sectionStyle}>
+        <h3 className="text-lg font-semibold mb-4">Review Settings</h3>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label>Daily Review Goal</label>
+            <input
+              type="number"
+              placeholder="10"
+              className="w-20 px-2 py-1 rounded border"
+              style={inputStyle}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <label>New Cards Per Day</label>
+            <input
+              type="number"
+              placeholder="5"
+              className="w-20 px-2 py-1 rounded border"
+              style={inputStyle}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <label>Review Order</label>
+            <select className="px-2 py-1 rounded border" style={inputStyle}>
+              <option>Random</option>
+              <option>Due Date</option>
+              <option>Difficulty</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <div className="settings-section">
-        <h3>Data</h3>
-        <button className="settings-button">Export Data</button>
-        <button className="settings-button">Import Data</button>
-        <button className="settings-button danger">Reset All Data</button>
+      <div className="mb-6 p-4 rounded-lg" style={sectionStyle}>
+        <h3 className="text-lg font-semibold mb-4">Notifications</h3>
+        <div className="space-y-3">
+          <div className="flex items-center">
+            <input type="checkbox" className="mr-2" />
+            <label>Enable Daily Reminders</label>
+          </div>
+          <div className="flex items-center justify-between">
+            <label>Reminder Time</label>
+            <input type="time" className="px-2 py-1 rounded border" style={inputStyle} />
+          </div>
+        </div>
       </div>
 
-      <div className="settings-footer">
+      <div className="mb-6 p-4 rounded-lg" style={sectionStyle}>
+        <h3 className="text-lg font-semibold mb-4">Data</h3>
+        <div className="space-y-2">
+          <button className="w-full px-4 py-2 rounded transition-opacity hover:opacity-80" style={buttonStyle}>
+            Export Data
+          </button>
+          <button className="w-full px-4 py-2 rounded transition-opacity hover:opacity-80" style={buttonStyle}>
+            Import Data
+          </button>
+          <button 
+            className="w-full px-4 py-2 rounded transition-opacity hover:opacity-80 text-white"
+            style={{ backgroundColor: 'var(--current-danger)' }}
+          >
+            Reset All Data
+          </button>
+        </div>
+      </div>
+
+      <div className="text-center text-sm" style={{ color: 'var(--current-text-tertiary)' }}>
         <p>Version 1.0.0</p>
       </div>
     </div>

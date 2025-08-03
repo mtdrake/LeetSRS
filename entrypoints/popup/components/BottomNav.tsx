@@ -12,13 +12,32 @@ export function BottomNav({ activeView, onNavigate }: BottomNavProps) {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-14 bg-[#1a1a1a] border-t border-[#333] flex justify-around items-center z-[1000]">
+    <nav 
+      className="fixed bottom-0 left-0 right-0 h-14 border-t flex justify-around items-center z-[1000]"
+      style={{ 
+        backgroundColor: 'var(--current-bg-secondary)', 
+        borderColor: 'var(--current-border)' 
+      }}
+    >
       {navItems.map((item) => (
         <button
           key={item.id}
-          className={`flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer p-2 transition-colors duration-200 ${
-            activeView === item.id ? 'text-[#54bc4a]' : 'text-[#888] hover:text-white'
-          }`}
+          className="flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer p-2 transition-colors duration-200"
+          style={{
+            color: activeView === item.id 
+              ? 'var(--current-accent)' 
+              : 'var(--current-text-secondary)'
+          }}
+          onMouseEnter={(e) => {
+            if (activeView !== item.id) {
+              e.currentTarget.style.color = 'var(--current-text-primary)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (activeView !== item.id) {
+              e.currentTarget.style.color = 'var(--current-text-secondary)';
+            }
+          }}
           onClick={() => onNavigate(item.id)}
         >
           <span className="text-[20px]">{item.icon}</span>

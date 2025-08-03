@@ -1,26 +1,32 @@
-interface StatCardProps {
-  label: string;
-  value: number;
-  color?: string;
-}
-
-function StatCard({ label, value, color = '#888' }: StatCardProps) {
-  return (
-    <div className="stat-card-mini" style={{ borderColor: color }}>
-      <div className="stat-value-mini" style={{ color }}>
-        {value}
-      </div>
-      <div className="stat-label-mini">{label}</div>
-    </div>
-  );
-}
-
 export function StatsBar() {
+  const stats = {
+    reviews: 10,
+    new: 3,
+    again: 12,
+  };
+
   return (
-    <div className="stats-bar">
-      <StatCard label="New" value={0} color="#54bc4a" />
-      <StatCard label="Review" value={0} color="#4a9fbc" />
-      <StatCard label="Again" value={0} color="#bc4a4a" />
+    <div 
+      className="flex items-center justify-center gap-2 p-3"
+      style={{ 
+        backgroundColor: 'var(--current-bg-secondary)',
+        color: 'var(--current-text-primary)'
+      }}
+    >
+      <span className="flex items-center gap-1">
+        <span className="font-semibold" style={{ color: 'var(--current-info)' }}>{stats.reviews}</span>
+        <span style={{ color: 'var(--current-text-secondary)' }}>reviews</span>
+      </span>
+      <span style={{ color: 'var(--current-text-tertiary)' }}>•</span>
+      <span className="flex items-center gap-1">
+        <span className="font-semibold" style={{ color: 'var(--current-accent)' }}>{stats.new}</span>
+        <span style={{ color: 'var(--current-text-secondary)' }}>new</span>
+      </span>
+      <span style={{ color: 'var(--current-text-tertiary)' }}>•</span>
+      <span className="flex items-center gap-1">
+        <span className="font-semibold" style={{ color: 'var(--current-danger)' }}>{stats.again}</span>
+        <span style={{ color: 'var(--current-text-secondary)' }}>again</span>
+      </span>
     </div>
   );
 }

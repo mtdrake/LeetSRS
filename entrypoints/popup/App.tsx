@@ -10,7 +10,7 @@ function App() {
   const [activeView, setActiveView] = useState('home');
 
   return (
-    <div className="flex flex-col h-full relative" style={{ backgroundColor: 'var(--current-bg-primary)', color: 'var(--current-text-primary)' }}>
+    <div className="flex flex-col h-full relative bg-primary text-primary">
       <div className="flex-1 overflow-y-auto pb-[60px]">
         {activeView === 'home' && <HomeView />}
         {activeView === 'stats' && <StatsView />}

@@ -8,7 +8,7 @@ export function ReviewCard() {
 
       <div className="review-card-content">
         <h3 className="problem-title">Two Sum</h3>
-        <p className="problem-description">
+        <p className="problem-description text-red-500">
           Given an array of integers nums and an integer target, return indices of the two numbers such that they add up
           to target.
         </p>

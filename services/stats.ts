@@ -16,10 +16,8 @@ export interface DailyStats {
   streak: number;
 }
 
-type StoredDailyStats = DailyStats;
-
-async function getStats(): Promise<Record<string, StoredDailyStats>> {
-  const stats = await storage.getItem<Record<string, StoredDailyStats>>(STORAGE_KEYS.stats);
+async function getStats(): Promise<Record<string, DailyStats>> {
+  const stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
   return stats ?? {};
 }
 

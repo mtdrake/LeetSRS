@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 
 #root {
-  width: 400px;
-  height: 600px;
+  width: 360px;
+  height: 550px;
   margin: 0;
   padding: 0;
   overflow: hidden;

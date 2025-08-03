@@ -1,12 +1,14 @@
 import { FaHouseChimney, FaChartSimple, FaGear, FaBug } from 'react-icons/fa6';
 
+export type ViewId = 'home' | 'stats' | 'settings' | 'debug';
+
 interface BottomNavProps {
-  activeView: string;
-  onNavigate: (view: string) => void;
+  activeView: ViewId;
+  onNavigate: (view: ViewId) => void;
 }
 
 export function BottomNav({ activeView, onNavigate }: BottomNavProps) {
-  const navItems = [
+  const navItems: Array<{ id: ViewId; label: string; Icon: typeof FaHouseChimney }> = [
     { id: 'home', label: 'Home', Icon: FaHouseChimney },
     { id: 'stats', label: 'Stats', Icon: FaChartSimple },
     { id: 'settings', label: 'Settings', Icon: FaGear },

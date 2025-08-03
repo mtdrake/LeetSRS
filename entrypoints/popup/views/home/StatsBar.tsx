@@ -6,7 +6,7 @@ export function StatsBar() {
   };
 
   return (
-    <div className="flex items-center justify-center gap-2 p-3 bg-secondary text-primary">
+    <div className="flex items-center gap-2 text-sm">
       <span className="flex items-center gap-1">
         <span className="font-semibold text-info">{stats.reviews}</span>
         <span className="text-secondary">reviews</span>

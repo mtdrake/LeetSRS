@@ -6,8 +6,9 @@ import { NotesSection } from './NotesSection';
 export function HomeView() {
   return (
     <div className="flex flex-col h-full">
-      <Header />
-      <StatsBar />
+      <Header>
+        <StatsBar />
+      </Header>
 
       <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto">
         <ReviewCard />

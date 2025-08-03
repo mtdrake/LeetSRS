@@ -1,18 +1,18 @@
+import { Header } from '../../components/Header';
 import { StatsBar } from './StatsBar';
 import { ReviewCard } from './ReviewCard';
 import { NotesSection } from './NotesSection';
 
 export function HomeView() {
   return (
-    <div className="home-view">
-      <div className="view-header">
-        <h1>LeetReps</h1>
-        <span className="subtitle">Daily Practice Tracker</span>
-      </div>
-
+    <div className="flex flex-col h-full">
+      <Header />
       <StatsBar />
-      <ReviewCard />
-      <NotesSection />
+
+      <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto">
+        <ReviewCard />
+        <NotesSection />
+      </div>
     </div>
   );
 }

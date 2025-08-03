@@ -40,23 +40,49 @@
 /* Theme-aware utility classes */
 @layer utilities {
   /* Background colors */
-  .bg-primary { background-color: var(--current-bg-primary); }
-  .bg-secondary { background-color: var(--current-bg-secondary); }
-  .bg-tertiary { background-color: var(--current-bg-tertiary); }
-  
+  .bg-primary {
+    background-color: var(--current-bg-primary);
+  }
+  .bg-secondary {
+    background-color: var(--current-bg-secondary);
+  }
+  .bg-tertiary {
+    background-color: var(--current-bg-tertiary);
+  }
+
   /* Text colors */
-  .text-primary { color: var(--current-text-primary); }
-  .text-secondary { color: var(--current-text-secondary); }
-  .text-tertiary { color: var(--current-text-tertiary); }
-  
+  .text-primary {
+    color: var(--current-text-primary);
+  }
+  .text-secondary {
+    color: var(--current-text-secondary);
+  }
+  .text-tertiary {
+    color: var(--current-text-tertiary);
+  }
+
   /* Accent colors */
-  .text-accent { color: var(--current-accent); }
-  .text-danger { color: var(--current-danger); }
-  .text-info { color: var(--current-info); }
-  .bg-accent { background-color: var(--current-accent); }
-  .bg-danger { background-color: var(--current-danger); }
-  .bg-info { background-color: var(--current-info); }
-  
+  .text-accent {
+    color: var(--current-accent);
+  }
+  .text-danger {
+    color: var(--current-danger);
+  }
+  .text-info {
+    color: var(--current-info);
+  }
+  .bg-accent {
+    background-color: var(--current-accent);
+  }
+  .bg-danger {
+    background-color: var(--current-danger);
+  }
+  .bg-info {
+    background-color: var(--current-info);
+  }
+
   /* Border colors */
-  .border-current { border-color: var(--current-border); }
+  .border-current {
+    border-color: var(--current-border);
+  }
 }

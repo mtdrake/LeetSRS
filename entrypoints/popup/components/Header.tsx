@@ -6,9 +6,9 @@ export function Header() {
   });
 
   return (
-    <div className="header">
-      <h1>LeetReps</h1>
-      <span className="timestamp">{timestamp}</span>
+    <div className="flex items-center justify-between px-4 py-3 bg-secondary border-b border-current">
+      <h1 className="text-xl font-bold text-primary">LeetReps</h1>
+      <span className="text-sm text-secondary">{timestamp}</span>
     </div>
   );
 }

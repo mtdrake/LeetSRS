@@ -76,9 +76,7 @@ export function SettingsView() {
           <button className="w-full px-4 py-2 rounded transition-opacity hover:opacity-80 bg-tertiary text-primary">
             Import Data
           </button>
-          <button 
-            className="w-full px-4 py-2 rounded transition-opacity hover:opacity-80 text-white bg-danger"
-          >
+          <button className="w-full px-4 py-2 rounded transition-opacity hover:opacity-80 text-white bg-danger">
             Reset All Data
           </button>
         </div>

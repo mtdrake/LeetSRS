@@ -486,6 +486,32 @@ describe('rateCard', () => {
 });
 
 describe('getReviewQueue', () => {
+  // Helper function to create test stats with sensible defaults
+  const createTestStats = (overrides: Partial<DailyStats> = {}): Record<string, DailyStats> => {
+    const todayKey = '2024-01-15';
+    const defaults: DailyStats = {
+      date: todayKey,
+      totalReviews: 0,
+      gradeBreakdown: {
+        [Rating.Again]: 0,
+        [Rating.Hard]: 0,
+        [Rating.Good]: 0,
+        [Rating.Easy]: 0,
+      },
+      newCards: 0,
+      reviewedCards: 0,
+      streak: 1,
+    };
+
+    // Auto-calculate totalReviews if not provided
+    const stats = { ...defaults, ...overrides };
+    if (!overrides.totalReviews) {
+      stats.totalReviews = stats.newCards + stats.reviewedCards;
+    }
+
+    return { [todayKey]: stats };
+  };
+
   beforeEach(() => {
     fakeBrowser.reset();
     vi.useFakeTimers();
@@ -668,20 +694,18 @@ describe('getReviewQueue', () => {
 
   it('should respect daily new cards already completed when building queue', async () => {
     // Create stats showing 1 new card already done today
-    const todayStats: DailyStats = {
-      date: '2024-01-15',
-      totalReviews: 1,
-      gradeBreakdown: {
-        [Rating.Again]: 0,
-        [Rating.Hard]: 0,
-        [Rating.Good]: 1,
-        [Rating.Easy]: 0,
-      },
-      newCards: 1, // Already did 1 new card today
-      reviewedCards: 0,
-      streak: 1,
-    };
-    await storage.setItem(STORAGE_KEYS.stats, { '2024-01-15': todayStats });
+    await storage.setItem(
+      STORAGE_KEYS.stats,
+      createTestStats({
+        newCards: 1,
+        gradeBreakdown: {
+          [Rating.Again]: 0,
+          [Rating.Hard]: 0,
+          [Rating.Good]: 1,
+          [Rating.Easy]: 0,
+        },
+      })
+    );
 
     // Create 5 new cards
     for (let i = 1; i <= 5; i++) {
@@ -697,20 +721,18 @@ describe('getReviewQueue', () => {
 
   it('should return no new cards when daily limit already reached', async () => {
     // Create stats showing MAX_NEW_CARDS_PER_DAY already done
-    const todayStats: DailyStats = {
-      date: '2024-01-15',
-      totalReviews: MAX_NEW_CARDS_PER_DAY,
-      gradeBreakdown: {
-        [Rating.Again]: 0,
-        [Rating.Hard]: 0,
-        [Rating.Good]: MAX_NEW_CARDS_PER_DAY,
-        [Rating.Easy]: 0,
-      },
-      newCards: MAX_NEW_CARDS_PER_DAY, // Already hit the limit
-      reviewedCards: 0,
-      streak: 1,
-    };
-    await storage.setItem(STORAGE_KEYS.stats, { '2024-01-15': todayStats });
+    await storage.setItem(
+      STORAGE_KEYS.stats,
+      createTestStats({
+        newCards: MAX_NEW_CARDS_PER_DAY,
+        gradeBreakdown: {
+          [Rating.Again]: 0,
+          [Rating.Hard]: 0,
+          [Rating.Good]: MAX_NEW_CARDS_PER_DAY,
+          [Rating.Easy]: 0,
+        },
+      })
+    );
 
     // Create new cards
     for (let i = 1; i <= 5; i++) {
@@ -725,20 +747,20 @@ describe('getReviewQueue', () => {
 
   it('should still include review cards when new card limit is reached', async () => {
     // Create stats showing new card limit reached
-    const todayStats: DailyStats = {
-      date: '2024-01-15',
-      totalReviews: MAX_NEW_CARDS_PER_DAY + 2,
-      gradeBreakdown: {
-        [Rating.Again]: 0,
-        [Rating.Hard]: 2,
-        [Rating.Good]: MAX_NEW_CARDS_PER_DAY,
-        [Rating.Easy]: 0,
-      },
-      newCards: MAX_NEW_CARDS_PER_DAY,
-      reviewedCards: 2,
-      streak: 1,
-    };
-    await storage.setItem(STORAGE_KEYS.stats, { '2024-01-15': todayStats });
+    await storage.setItem(
+      STORAGE_KEYS.stats,
+      createTestStats({
+        newCards: MAX_NEW_CARDS_PER_DAY,
+        reviewedCards: 2,
+        totalReviews: MAX_NEW_CARDS_PER_DAY + 2,
+        gradeBreakdown: {
+          [Rating.Again]: 0,
+          [Rating.Hard]: 2,
+          [Rating.Good]: MAX_NEW_CARDS_PER_DAY,
+          [Rating.Easy]: 0,
+        },
+      })
+    );
 
     // Create new cards (won't be included)
     await addCard('new1', 'New 1');
@@ -766,20 +788,18 @@ describe('getReviewQueue', () => {
 
   it('should handle partial new card limit correctly', async () => {
     // Set MAX_NEW_CARDS_PER_DAY = 3, already did 2
-    const todayStats: DailyStats = {
-      date: '2024-01-15',
-      totalReviews: 2,
-      gradeBreakdown: {
-        [Rating.Again]: 0,
-        [Rating.Hard]: 0,
-        [Rating.Good]: 2,
-        [Rating.Easy]: 0,
-      },
-      newCards: 2, // Already did 2 of 3 allowed
-      reviewedCards: 0,
-      streak: 1,
-    };
-    await storage.setItem(STORAGE_KEYS.stats, { '2024-01-15': todayStats });
+    await storage.setItem(
+      STORAGE_KEYS.stats,
+      createTestStats({
+        newCards: 2,
+        gradeBreakdown: {
+          [Rating.Again]: 0,
+          [Rating.Hard]: 0,
+          [Rating.Good]: 2,
+          [Rating.Easy]: 0,
+        },
+      })
+    );
 
     // Create 10 new cards
     for (let i = 1; i <= 10; i++) {

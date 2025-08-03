@@ -1,4 +1,4 @@
-import { DebugPanel } from '../debug/DebugPanel';
+import { DebugPanel } from '../../debug/DebugPanel';
 
 export function DebugView() {
   return (

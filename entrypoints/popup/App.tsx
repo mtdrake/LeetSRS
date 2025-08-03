@@ -10,8 +10,8 @@ function App() {
   const [activeView, setActiveView] = useState('home');
 
   return (
-    <div className="app">
-      <div className="main-content">
+    <div className="flex flex-col h-full relative">
+      <div className="flex-1 overflow-y-auto pb-[60px]">
         {activeView === 'home' && <HomeView />}
         {activeView === 'stats' && <StatsView />}
         {activeView === 'settings' && <SettingsView />}

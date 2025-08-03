@@ -9,7 +9,7 @@ describe('Header', () => {
   it('renders the LeetReps title', () => {
     render(<Header />);
 
-    const title = screen.getByText('LeetReps');
+    const title = screen.getByRole('heading', { name: 'LeetReps', level: 1 });
     expect(title).toBeInTheDocument();
     expect(title).toHaveClass('text-xl', 'font-bold', 'text-primary');
   });

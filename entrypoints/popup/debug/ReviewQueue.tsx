@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Card } from '@/services/cards';
 import { sendMessage, MessageType } from '@/services/messages';
+import { State as FsrsState } from 'ts-fsrs';
 
 interface ReviewQueueProps {
   style?: React.CSSProperties;
@@ -47,7 +48,7 @@ interface ReviewQueueCardProps {
 }
 
 function ReviewQueueCard({ card, position }: ReviewQueueCardProps) {
-  const isNew = card.fsrs.state === 0;
+  const isNew = card.fsrs.state === FsrsState.New;
 
   return (
     <div

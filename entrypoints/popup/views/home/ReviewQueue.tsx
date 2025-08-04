@@ -11,6 +11,7 @@ export function ReviewQueue() {
   const [queue, setQueue] = useState<Card[]>([]);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
 
   // Initialize queue only once when data first loads
   useEffect(() => {
@@ -24,6 +25,7 @@ export function ReviewQueue() {
     if (queue.length === 0 || isProcessing) return;
 
     setIsProcessing(true);
+
     const currentCard = queue[0];
     const restOfQueue = queue.slice(1);
 
@@ -36,15 +38,27 @@ export function ReviewQueue() {
         difficulty: currentCard.difficulty,
       });
 
+      // Set slide direction based on actual outcome, not rating
       if (result.shouldRequeue) {
-        const updatedCard = result.card;
-        const newQueue = [...restOfQueue, updatedCard];
-        setQueue(newQueue);
+        setSlideDirection('left'); // Card will be seen again today (back of queue)
       } else {
-        setQueue([...restOfQueue]);
+        setSlideDirection('right'); // Card is done for today (removed from queue)
       }
+
+      // Wait for animation to complete, then update queue
+      setTimeout(() => {
+        if (result.shouldRequeue) {
+          const updatedCard = result.card;
+          const newQueue = [...restOfQueue, updatedCard];
+          setQueue(newQueue);
+        } else {
+          setQueue([...restOfQueue]);
+        }
+        setSlideDirection(null);
+      }, 400);
     } catch (error) {
       console.error('Failed to rate card:', error);
+      setSlideDirection(null);
     } finally {
       setIsProcessing(false);
     }
@@ -78,8 +92,18 @@ export function ReviewQueue() {
   const currentCard = queue[0];
 
   return (
-    <div className="flex flex-col gap-4">
-      <ReviewCard key={currentCard.id} card={currentCard} onRate={handleRating} isProcessing={isProcessing} />
+    <div className="flex flex-col gap-4 overflow-hidden">
+      <div
+        className={`transition-all duration-300 ease-out ${
+          slideDirection === 'left'
+            ? 'animate-slide-left'
+            : slideDirection === 'right'
+              ? 'animate-slide-right'
+              : 'animate-slide-in'
+        }`}
+      >
+        <ReviewCard key={currentCard.id} card={currentCard} onRate={handleRating} isProcessing={isProcessing} />
+      </div>
       <NotesSection cardId={currentCard.id} />
     </div>
   );

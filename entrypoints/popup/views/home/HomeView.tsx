@@ -9,7 +9,7 @@ export function HomeView() {
         <StatsBar />
       </Header>
 
-      <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto">
+      <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto overflow-x-hidden">
         <ReviewQueue />
       </div>
     </div>

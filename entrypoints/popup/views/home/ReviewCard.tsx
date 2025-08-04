@@ -1,3 +1,5 @@
+import { FaArrowUpRightFromSquare } from 'react-icons/fa6';
+
 export function ReviewCard() {
   return (
     <div className="border border-current rounded-lg bg-secondary p-4 flex flex-col gap-3">
@@ -6,12 +8,16 @@ export function ReviewCard() {
         <span className="text-xs px-2 py-1 rounded bg-accent text-white">Easy</span>
       </div>
 
-      <div className="flex-1 flex flex-col gap-2">
-        <h3 className="text-lg font-semibold text-primary">Two Sum</h3>
-        <p className="text-sm text-secondary">
-          Given an array of integers nums and an integer target, return indices of the two numbers such that they add up
-          to target.
-        </p>
+      <div className="flex justify-center pb-3">
+        <a
+          href="https://google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-lg font-semibold text-primary flex items-center gap-1 hover:text-accent transition-colors"
+        >
+          Two Sum
+          <FaArrowUpRightFromSquare className="text-xs" />
+        </a>
       </div>
 
       <div className="flex gap-2 justify-center">

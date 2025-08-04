@@ -39,9 +39,9 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      expect(screen.getByText('review')).toBeInTheDocument();
-      expect(screen.getByText('new')).toBeInTheDocument();
-      expect(screen.getByText('learn')).toBeInTheDocument();
+      expect(screen.getByTestId('stat-review')).toBeInTheDocument();
+      expect(screen.getByTestId('stat-new')).toBeInTheDocument();
+      expect(screen.getByTestId('stat-learn')).toBeInTheDocument();
     });
 
     it('should display zero counts when no cards', () => {
@@ -51,8 +51,9 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      const zeros = screen.getAllByText('0');
-      expect(zeros).toHaveLength(3);
+      expect(screen.getByTestId('stat-review-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('stat-new-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('stat-learn-count')).toHaveTextContent('0');
     });
 
     it('should display zero counts when data is undefined', () => {
@@ -62,8 +63,9 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      const zeros = screen.getAllByText('0');
-      expect(zeros).toHaveLength(3);
+      expect(screen.getByTestId('stat-review-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('stat-new-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('stat-learn-count')).toHaveTextContent('0');
     });
   });
 
@@ -83,9 +85,7 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      // Find the review count (first occurrence of '3')
-      const reviewSection = screen.getByText('review').parentElement;
-      expect(reviewSection?.querySelector('.text-info')).toHaveTextContent('3');
+      expect(screen.getByTestId('stat-review-count')).toHaveTextContent('3');
     });
 
     it('should count New state cards correctly', () => {
@@ -102,9 +102,7 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      // Find the new count
-      const newSection = screen.getByText('new').parentElement;
-      expect(newSection?.querySelector('.text-accent')).toHaveTextContent('2');
+      expect(screen.getByTestId('stat-new-count')).toHaveTextContent('2');
     });
 
     it('should count Learning state cards correctly', () => {
@@ -122,9 +120,7 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      // Find the learn count
-      const learnSection = screen.getByText('learn').parentElement;
-      expect(learnSection?.querySelector('.text-danger')).toHaveTextContent('3');
+      expect(screen.getByTestId('stat-learn-count')).toHaveTextContent('3');
     });
 
     it('should count Relearning state cards correctly', () => {
@@ -141,9 +137,7 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      // Find the learn count (Relearning should be counted as learn)
-      const learnSection = screen.getByText('learn').parentElement;
-      expect(learnSection?.querySelector('.text-danger')).toHaveTextContent('2');
+      expect(screen.getByTestId('stat-learn-count')).toHaveTextContent('2');
     });
 
     it('should count mixed Learning and Relearning states together', () => {
@@ -161,9 +155,7 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      // Find the learn count (Learning + Relearning)
-      const learnSection = screen.getByText('learn').parentElement;
-      expect(learnSection?.querySelector('.text-danger')).toHaveTextContent('4');
+      expect(screen.getByTestId('stat-learn-count')).toHaveTextContent('4');
     });
 
     it('should handle all states correctly in one dataset', () => {
@@ -190,14 +182,9 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      const reviewSection = screen.getByText('review').parentElement;
-      expect(reviewSection?.querySelector('.text-info')).toHaveTextContent('5');
-
-      const newSection = screen.getByText('new').parentElement;
-      expect(newSection?.querySelector('.text-accent')).toHaveTextContent('3');
-
-      const learnSection = screen.getByText('learn').parentElement;
-      expect(learnSection?.querySelector('.text-danger')).toHaveTextContent('3');
+      expect(screen.getByTestId('stat-review-count')).toHaveTextContent('5');
+      expect(screen.getByTestId('stat-new-count')).toHaveTextContent('3');
+      expect(screen.getByTestId('stat-learn-count')).toHaveTextContent('3');
     });
 
     it('should ignore cards with unknown states', () => {
@@ -217,14 +204,9 @@ describe('StatsBar', () => {
       renderWithProviders();
 
       // Should only count the valid states
-      const reviewSection = screen.getByText('review').parentElement;
-      expect(reviewSection?.querySelector('.text-info')).toHaveTextContent('1');
-
-      const newSection = screen.getByText('new').parentElement;
-      expect(newSection?.querySelector('.text-accent')).toHaveTextContent('1');
-
-      const learnSection = screen.getByText('learn').parentElement;
-      expect(learnSection?.querySelector('.text-danger')).toHaveTextContent('1');
+      expect(screen.getByTestId('stat-review-count')).toHaveTextContent('1');
+      expect(screen.getByTestId('stat-new-count')).toHaveTextContent('1');
+      expect(screen.getByTestId('stat-learn-count')).toHaveTextContent('1');
     });
   });
 
@@ -236,8 +218,9 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      const zeros = screen.getAllByText('0');
-      expect(zeros).toHaveLength(3);
+      expect(screen.getByTestId('stat-review-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('stat-new-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('stat-learn-count')).toHaveTextContent('0');
     });
 
     it('should handle large numbers correctly', () => {
@@ -251,8 +234,7 @@ describe('StatsBar', () => {
 
       renderWithProviders();
 
-      const reviewSection = screen.getByText('review').parentElement;
-      expect(reviewSection?.querySelector('.text-info')).toHaveTextContent('999');
+      expect(screen.getByTestId('stat-review-count')).toHaveTextContent('999');
     });
   });
 });

@@ -5,13 +5,18 @@ interface StatItemProps {
   count: number;
   label: string;
   colorClass: string;
+  testId: string;
 }
 
-function StatItem({ count, label, colorClass }: StatItemProps) {
+function StatItem({ count, label, colorClass, testId }: StatItemProps) {
   return (
-    <span className="flex items-center gap-1">
-      <span className={`font-semibold ${colorClass}`}>{count}</span>
-      <span className="text-secondary">{label}</span>
+    <span className="flex items-center gap-1" data-testid={`stat-${testId}`}>
+      <span className={`font-semibold ${colorClass}`} data-testid={`stat-${testId}-count`}>
+        {count}
+      </span>
+      <span className="text-secondary" data-testid={`stat-${testId}-label`}>
+        {label}
+      </span>
     </span>
   );
 }
@@ -31,11 +36,11 @@ export function StatsBar() {
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <StatItem count={stats.reviews} label="review" colorClass="text-info" />
+      <StatItem count={stats.reviews} label="review" colorClass="text-info" testId="review" />
       <span className="text-tertiary">•</span>
-      <StatItem count={stats.new} label="new" colorClass="text-accent" />
+      <StatItem count={stats.new} label="new" colorClass="text-accent" testId="new" />
       <span className="text-tertiary">•</span>
-      <StatItem count={stats.learn} label="learn" colorClass="text-danger" />
+      <StatItem count={stats.learn} label="learn" colorClass="text-danger" testId="learn" />
     </div>
   );
 }

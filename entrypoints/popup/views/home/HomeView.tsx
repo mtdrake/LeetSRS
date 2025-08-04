@@ -2,12 +2,15 @@ import { Header } from '../../components/Header';
 import { StatsBar } from './StatsBar';
 import { ReviewCard } from './ReviewCard';
 import { NotesSection } from './NotesSection';
+import { Difficulty } from '@/types';
 
 export function HomeView() {
   const card = {
+    id: '132fb1c2-3d4e-5f6g-7h8i-9j0k1l2m3n4o',
+    leetcodeId: '1',
     slug: 'two-sum',
-    title: 'Two Sum',
-    notes: '',
+    name: 'Two Sum',
+    difficulty: 'Hard' as Difficulty,
   };
 
   return (

@@ -2,15 +2,15 @@ import { FaArrowUpRightFromSquare } from 'react-icons/fa6';
 import { type Card } from '@/types';
 
 type ReviewCardProps = {
-  card: Pick<Card, 'slug'>;
+  card: Pick<Card, 'slug' | 'leetcodeId' | 'name' | 'difficulty'>;
 };
 
 export function ReviewCard({ card }: ReviewCardProps) {
   return (
     <div className="border border-current rounded-lg bg-secondary p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-accent">#1</span>
-        <span className="text-xs px-2 py-1 rounded bg-accent text-white">Easy</span>
+        <span className="text-sm font-semibold text-accent">#{card.leetcodeId}</span>
+        <span className="text-xs px-2 py-1 rounded bg-accent text-white">{card.difficulty}</span>
       </div>
 
       <div className="flex justify-center pb-3">
@@ -20,7 +20,7 @@ export function ReviewCard({ card }: ReviewCardProps) {
           rel="noopener noreferrer"
           className="text-lg font-semibold text-primary flex items-center gap-1 hover:text-accent transition-colors"
         >
-          Two Sum
+          {card.name}
           <FaArrowUpRightFromSquare className="text-xs" />
         </a>
       </div>

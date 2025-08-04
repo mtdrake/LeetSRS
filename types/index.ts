@@ -6,6 +6,7 @@ export interface Card {
   id: string;
   slug: string;
   name: string;
+  leetcodeId: string;
   difficulty: Difficulty;
   createdAt: Date;
   fsrs: FsrsCard;

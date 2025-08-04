@@ -6,40 +6,68 @@ import { ReviewQueue } from './ReviewQueue';
 import { TodayStats } from './TodayStats';
 import './DebugPanel.css';
 
-// Sample LeetCode problems
+// Sample LeetCode problems with their actual IDs
 const SAMPLE_PROBLEMS = [
-  { slug: 'two-sum', name: 'Two Sum', difficulty: 'Easy' as Difficulty },
-  { slug: 'add-two-numbers', name: 'Add Two Numbers', difficulty: 'Medium' as Difficulty },
+  { slug: 'two-sum', name: 'Two Sum', leetcodeId: '1', difficulty: 'Easy' as Difficulty },
+  { slug: 'add-two-numbers', name: 'Add Two Numbers', leetcodeId: '2', difficulty: 'Medium' as Difficulty },
   {
     slug: 'longest-substring-without-repeating-characters',
     name: 'Longest Substring Without Repeating Characters',
+    leetcodeId: '3',
     difficulty: 'Medium' as Difficulty,
   },
-  { slug: 'median-of-two-sorted-arrays', name: 'Median of Two Sorted Arrays', difficulty: 'Hard' as Difficulty },
-  { slug: 'reverse-integer', name: 'Reverse Integer', difficulty: 'Easy' as Difficulty },
-  { slug: 'container-with-most-water', name: 'Container With Most Water', difficulty: 'Medium' as Difficulty },
-  { slug: 'valid-parentheses', name: 'Valid Parentheses', difficulty: 'Easy' as Difficulty },
-  { slug: 'merge-two-sorted-lists', name: 'Merge Two Sorted Lists', difficulty: 'Easy' as Difficulty },
-  { slug: 'trapping-rain-water', name: 'Trapping Rain Water', difficulty: 'Hard' as Difficulty },
-  { slug: 'group-anagrams', name: 'Group Anagrams', difficulty: 'Medium' as Difficulty },
-  { slug: 'maximum-subarray', name: 'Maximum Subarray', difficulty: 'Medium' as Difficulty },
-  { slug: 'climbing-stairs', name: 'Climbing Stairs', difficulty: 'Easy' as Difficulty },
+  {
+    slug: 'median-of-two-sorted-arrays',
+    name: 'Median of Two Sorted Arrays',
+    leetcodeId: '4',
+    difficulty: 'Hard' as Difficulty,
+  },
+  { slug: 'reverse-integer', name: 'Reverse Integer', leetcodeId: '7', difficulty: 'Easy' as Difficulty },
+  {
+    slug: 'container-with-most-water',
+    name: 'Container With Most Water',
+    leetcodeId: '11',
+    difficulty: 'Medium' as Difficulty,
+  },
+  { slug: 'valid-parentheses', name: 'Valid Parentheses', leetcodeId: '20', difficulty: 'Easy' as Difficulty },
+  {
+    slug: 'merge-two-sorted-lists',
+    name: 'Merge Two Sorted Lists',
+    leetcodeId: '21',
+    difficulty: 'Easy' as Difficulty,
+  },
+  { slug: 'trapping-rain-water', name: 'Trapping Rain Water', leetcodeId: '42', difficulty: 'Hard' as Difficulty },
+  { slug: 'group-anagrams', name: 'Group Anagrams', leetcodeId: '49', difficulty: 'Medium' as Difficulty },
+  { slug: 'maximum-subarray', name: 'Maximum Subarray', leetcodeId: '53', difficulty: 'Medium' as Difficulty },
+  { slug: 'climbing-stairs', name: 'Climbing Stairs', leetcodeId: '70', difficulty: 'Easy' as Difficulty },
   {
     slug: 'best-time-to-buy-and-sell-stock',
     name: 'Best Time to Buy and Sell Stock',
+    leetcodeId: '121',
     difficulty: 'Easy' as Difficulty,
   },
-  { slug: 'house-robber', name: 'House Robber', difficulty: 'Medium' as Difficulty },
-  { slug: 'reverse-linked-list', name: 'Reverse Linked List', difficulty: 'Easy' as Difficulty },
-  { slug: 'binary-tree-inorder-traversal', name: 'Binary Tree Inorder Traversal', difficulty: 'Easy' as Difficulty },
+  { slug: 'house-robber', name: 'House Robber', leetcodeId: '198', difficulty: 'Medium' as Difficulty },
+  { slug: 'reverse-linked-list', name: 'Reverse Linked List', leetcodeId: '206', difficulty: 'Easy' as Difficulty },
+  {
+    slug: 'binary-tree-inorder-traversal',
+    name: 'Binary Tree Inorder Traversal',
+    leetcodeId: '94',
+    difficulty: 'Easy' as Difficulty,
+  },
   {
     slug: 'kth-largest-element-in-an-array',
     name: 'Kth Largest Element in an Array',
+    leetcodeId: '215',
     difficulty: 'Medium' as Difficulty,
   },
-  { slug: 'product-of-array-except-self', name: 'Product of Array Except Self', difficulty: 'Medium' as Difficulty },
-  { slug: 'min-stack', name: 'Min Stack', difficulty: 'Medium' as Difficulty },
-  { slug: 'number-of-islands', name: 'Number of Islands', difficulty: 'Medium' as Difficulty },
+  {
+    slug: 'product-of-array-except-self',
+    name: 'Product of Array Except Self',
+    leetcodeId: '238',
+    difficulty: 'Medium' as Difficulty,
+  },
+  { slug: 'min-stack', name: 'Min Stack', leetcodeId: '155', difficulty: 'Medium' as Difficulty },
+  { slug: 'number-of-islands', name: 'Number of Islands', leetcodeId: '200', difficulty: 'Medium' as Difficulty },
 ];
 
 export function DebugPanel() {
@@ -68,6 +96,7 @@ export function DebugPanel() {
       await addCardMutation.mutateAsync({
         slug: randomProblem.slug,
         name: randomProblem.name,
+        leetcodeId: randomProblem.leetcodeId,
         difficulty: randomProblem.difficulty,
       });
     } catch (error) {

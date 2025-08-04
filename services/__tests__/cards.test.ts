@@ -25,6 +25,7 @@ describe('Card serialization', () => {
         id: 'test-id-1',
         slug: 'two-sum',
         name: 'Two Sum',
+        leetcodeId: '1',
         difficulty: 'Easy',
         createdAt: testDate,
         fsrs: createEmptyCard(),
@@ -47,6 +48,7 @@ describe('Card serialization', () => {
         id: 'test-id-2',
         slug: 'two-sum',
         name: 'Two Sum',
+        leetcodeId: '1',
         difficulty: 'Medium',
         createdAt: testDate,
         fsrs: fsrsCard,
@@ -71,6 +73,7 @@ describe('Card serialization', () => {
         id: 'test-id-3',
         slug: 'merge-intervals',
         name: 'Merge Intervals',
+        leetcodeId: '56',
         difficulty: 'Hard',
         createdAt: timestamp,
         fsrs: {
@@ -95,6 +98,7 @@ describe('Card serialization', () => {
         id: 'test-id-4',
         slug: 'two-pointers',
         name: 'Two Pointers',
+        leetcodeId: '999',
         difficulty: 'Medium',
         createdAt: new Date(),
         fsrs: createEmptyCard(),
@@ -117,7 +121,7 @@ describe('addCard', () => {
   });
 
   it('should create and store a new card', async () => {
-    const card = await addCard('two-sum', 'Two Sum', 'Easy');
+    const card = await addCard('two-sum', 'Two Sum', '1', 'Easy');
 
     expect(card.id).toBeDefined();
     expect(card.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
@@ -149,12 +153,12 @@ describe('addCard', () => {
 
   it('should return existing card when adding same slug (idempotent)', async () => {
     // Add card first time
-    const firstCard = await addCard('valid-parentheses', 'Valid Parentheses', 'Medium');
+    const firstCard = await addCard('valid-parentheses', 'Valid Parentheses', '20', 'Medium');
     const firstCreatedAt = firstCard.createdAt;
     const firstId = firstCard.id;
 
     // Add same card again
-    const secondCard = await addCard('valid-parentheses', 'A different name', 'Hard');
+    const secondCard = await addCard('valid-parentheses', 'A different name', '20', 'Hard');
 
     // Should return the same card
     expect(secondCard.id).toBe(firstId);
@@ -171,9 +175,9 @@ describe('addCard', () => {
 
   it('should store multiple different cards correctly', async () => {
     // Add multiple cards
-    await addCard('two-sum', 'Two Sum', 'Easy');
-    await addCard('valid-parentheses', 'Valid Parentheses', 'Medium');
-    await addCard('merge-two-sorted-lists', 'Merge Two Sorted Lists', 'Hard');
+    await addCard('two-sum', 'Two Sum', '1', 'Easy');
+    await addCard('valid-parentheses', 'Valid Parentheses', '20', 'Medium');
+    await addCard('merge-two-sorted-lists', 'Merge Two Sorted Lists', '21', 'Hard');
 
     // Verify all cards are stored
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -188,7 +192,7 @@ describe('addCard', () => {
 
   it('should set createdAt to current date', async () => {
     const beforeTime = new Date();
-    const card = await addCard('test-problem', 'Test Problem', 'Medium');
+    const card = await addCard('test-problem', 'Test Problem', '999', 'Medium');
     const afterTime = new Date();
 
     expect(card.createdAt).toBeInstanceOf(Date);
@@ -197,7 +201,7 @@ describe('addCard', () => {
   });
 
   it('should properly serialize card when storing', async () => {
-    const card = await addCard('serialize-test', 'Serialize Test', 'Easy');
+    const card = await addCard('serialize-test', 'Serialize Test', '1000', 'Easy');
 
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
     const storedCard = cards![card.slug];
@@ -221,9 +225,9 @@ describe('getAllCards', () => {
 
   it('should return all cards from storage', async () => {
     // Add multiple cards
-    await addCard('two-sum', 'Two Sum', 'Easy');
-    await addCard('valid-parentheses', 'Valid Parentheses', 'Medium');
-    await addCard('merge-intervals', 'Merge Intervals', 'Hard');
+    await addCard('two-sum', 'Two Sum', '1', 'Easy');
+    await addCard('valid-parentheses', 'Valid Parentheses', '20', 'Medium');
+    await addCard('merge-intervals', 'Merge Intervals', '56', 'Hard');
 
     // Get all cards
     const allCards = await getAllCards();
@@ -256,6 +260,7 @@ describe('getAllCards', () => {
       id: 'test-id-deserialize',
       slug: 'test-problem',
       name: 'Test Problem',
+      leetcodeId: '999',
       difficulty: 'Medium',
       createdAt: testDate.getTime(),
       fsrs: {
@@ -286,7 +291,7 @@ describe('removeCard', () => {
 
   it('should remove an existing card and its slug mapping', async () => {
     // Add a card first
-    await addCard('two-sum', 'Two Sum', 'Easy');
+    await addCard('two-sum', 'Two Sum', '1', 'Easy');
 
     // Verify it exists
     let cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -311,9 +316,9 @@ describe('removeCard', () => {
 
   it('should only remove the specified card when multiple cards exist', async () => {
     // Add multiple cards
-    await addCard('two-sum', 'Two Sum', 'Easy');
-    await addCard('valid-parentheses', 'Valid Parentheses', 'Medium');
-    await addCard('merge-intervals', 'Merge Intervals', 'Hard');
+    await addCard('two-sum', 'Two Sum', '1', 'Easy');
+    await addCard('valid-parentheses', 'Valid Parentheses', '20', 'Medium');
+    await addCard('merge-intervals', 'Merge Intervals', '56', 'Hard');
 
     // Remove the middle card
     await removeCard('valid-parentheses');
@@ -335,9 +340,9 @@ describe('removeCard', () => {
 
   it('should verify card is actually removed from getAllCards', async () => {
     // Add multiple cards
-    await addCard('two-sum', 'Two Sum', 'Easy');
-    await addCard('valid-parentheses', 'Valid Parentheses', 'Medium');
-    await addCard('merge-intervals', 'Merge Intervals', 'Hard');
+    await addCard('two-sum', 'Two Sum', '1', 'Easy');
+    await addCard('valid-parentheses', 'Valid Parentheses', '20', 'Medium');
+    await addCard('merge-intervals', 'Merge Intervals', '56', 'Hard');
 
     // Get initial count
     let allCards = await getAllCards();
@@ -368,7 +373,7 @@ describe('rateCard', () => {
   });
 
   it('should create a new card if it does not exist', async () => {
-    const card = await rateCard('new-problem', Rating.Good, 'Medium');
+    const card = await rateCard('new-problem', Rating.Good, '9999', 'Medium');
 
     expect(card.slug).toBe('new-problem');
     expect(card.name).toBe('new-problem');
@@ -382,12 +387,12 @@ describe('rateCard', () => {
 
   it('should update existing card when rating', async () => {
     // First create a card
-    const initialCard = await addCard('two-sum', 'Two Sum', 'Easy');
+    const initialCard = await addCard('two-sum', 'Two Sum', '1', 'Easy');
     const initialReps = initialCard.fsrs.reps;
     const initialStability = initialCard.fsrs.stability;
 
     // Rate the card as Good
-    const ratedCard = await rateCard('two-sum', Rating.Good, 'Easy');
+    const ratedCard = await rateCard('two-sum', Rating.Good, '1', 'Easy');
 
     expect(ratedCard.slug).toBe('two-sum');
     expect(ratedCard.name).toBe('Two Sum');
@@ -400,33 +405,33 @@ describe('rateCard', () => {
 
   it('should handle different grades correctly', async () => {
     // Create a card
-    await addCard('test-problem', 'Test Problem', 'Medium');
+    await addCard('test-problem', 'Test Problem', '999', 'Medium');
 
     // Rate as Again (fail)
-    const failedCard = await rateCard('test-problem', Rating.Again, 'Medium');
+    const failedCard = await rateCard('test-problem', Rating.Again, '999', 'Medium');
     expect(failedCard.fsrs.reps).toBe(1);
     expect(failedCard.fsrs.lapses).toBe(0);
 
     // Rate as Easy
-    const easyCard = await rateCard('test-problem', Rating.Easy, 'Medium');
+    const easyCard = await rateCard('test-problem', Rating.Easy, '999', 'Medium');
     expect(easyCard.fsrs.reps).toBeGreaterThan(0);
   });
 
   it('should update the due date after rating', async () => {
-    const card = await addCard('merge-sort', 'Merge Sort', 'Hard');
+    const card = await addCard('merge-sort', 'Merge Sort', '88', 'Hard');
     const initialDue = card.fsrs.due;
 
-    const ratedCard = await rateCard('merge-sort', Rating.Good, 'Hard');
+    const ratedCard = await rateCard('merge-sort', Rating.Good, '88', 'Hard');
 
     expect(ratedCard.fsrs.due).toBeInstanceOf(Date);
     expect(ratedCard.fsrs.due.getTime()).toBeGreaterThan(initialDue.getTime());
   });
 
   it('should persist card updates to storage', async () => {
-    await addCard('binary-search', 'Binary Search', 'Medium');
+    await addCard('binary-search', 'Binary Search', '704', 'Medium');
 
     // Rate the card
-    await rateCard('binary-search', Rating.Hard, 'Medium');
+    await rateCard('binary-search', Rating.Hard, '704', 'Medium');
 
     // Verify the updated card is in storage
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -440,16 +445,16 @@ describe('rateCard', () => {
     const slug = 'dynamic-programming';
 
     // First rating (creates card)
-    const card1 = await rateCard(slug, Rating.Again, 'Hard');
+    const card1 = await rateCard(slug, Rating.Again, '9998', 'Hard');
     expect(card1.fsrs.reps).toBe(1);
     expect(card1.fsrs.lapses).toBe(0);
 
     // Second rating
-    const card2 = await rateCard(slug, Rating.Hard, 'Hard');
+    const card2 = await rateCard(slug, Rating.Hard, '9998', 'Hard');
     expect(card2.fsrs.reps).toBeGreaterThan(0);
 
     // Third rating
-    const card3 = await rateCard(slug, Rating.Good, 'Hard');
+    const card3 = await rateCard(slug, Rating.Good, '9998', 'Hard');
     expect(card3.fsrs.reps).toBeGreaterThan(card2.fsrs.reps);
 
     // Verify only one card exists in storage
@@ -460,7 +465,7 @@ describe('rateCard', () => {
 
   it('should update stats when rating a new card', async () => {
     // Rate a new card (doesn't exist yet)
-    await rateCard('new-problem', Rating.Good, 'Medium');
+    await rateCard('new-problem', Rating.Good, '9999', 'Medium');
 
     // Check that stats were created
     const stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
@@ -475,10 +480,10 @@ describe('rateCard', () => {
 
   it('should update stats correctly for review cards vs new cards', async () => {
     // Create a card
-    await addCard('test-card', 'Test Card', 'Easy');
+    await addCard('test-card', 'Test Card', '1000', 'Easy');
 
     // First rating (card is new)
-    await rateCard('test-card', Rating.Good, 'Easy');
+    await rateCard('test-card', Rating.Good, '1000', 'Easy');
 
     let stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
     let todayStats = stats?.['2024-03-15'];
@@ -488,7 +493,7 @@ describe('rateCard', () => {
     expect(todayStats?.reviewedCards).toBe(0);
 
     // Second rating (card is now a review card)
-    await rateCard('test-card', Rating.Hard, 'Easy');
+    await rateCard('test-card', Rating.Hard, '1000', 'Easy');
 
     stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
     todayStats = stats?.['2024-03-15'];
@@ -545,11 +550,11 @@ describe('getReviewQueue', () => {
 
   it('should return only new cards when no reviews are due', async () => {
     // Create cards - all new
-    await addCard('problem1', 'Problem 1', 'Easy');
-    await addCard('problem2', 'Problem 2', 'Medium');
-    await addCard('problem3', 'Problem 3', 'Hard');
-    await addCard('problem4', 'Problem 4', 'Easy');
-    await addCard('problem5', 'Problem 5', 'Medium');
+    await addCard('problem1', 'Problem 1', '1001', 'Easy');
+    await addCard('problem2', 'Problem 2', '1002', 'Medium');
+    await addCard('problem3', 'Problem 3', '1003', 'Hard');
+    await addCard('problem4', 'Problem 4', '1004', 'Easy');
+    await addCard('problem5', 'Problem 5', '1005', 'Medium');
 
     const queue = await getReviewQueue();
 
@@ -560,12 +565,12 @@ describe('getReviewQueue', () => {
 
   it('should return only review cards when they are due', async () => {
     // Create and rate cards to make them review cards
-    await addCard('problem1', 'Problem 1', 'Easy');
-    await addCard('problem2', 'Problem 2', 'Medium');
+    await addCard('problem1', 'Problem 1', '1001', 'Easy');
+    await addCard('problem2', 'Problem 2', '1002', 'Medium');
 
     // Rate them to move out of New state
-    await rateCard('problem1', Rating.Good, 'Easy');
-    await rateCard('problem2', Rating.Good, 'Medium');
+    await rateCard('problem1', Rating.Good, '1001', 'Easy');
+    await rateCard('problem2', Rating.Good, '1002', 'Medium');
 
     // Manually update their due dates to be in the past
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -585,18 +590,18 @@ describe('getReviewQueue', () => {
     await storage.setItem(STORAGE_KEYS.stats, {});
 
     // Create some new cards
-    await addCard('new1', 'New 1', 'Easy');
-    await addCard('new2', 'New 2', 'Medium');
-    await addCard('new3', 'New 3', 'Hard');
-    await addCard('new4', 'New 4', 'Easy'); // This won't be included (exceeds limit)
+    await addCard('new1', 'New 1', '2001', 'Easy');
+    await addCard('new2', 'New 2', '2002', 'Medium');
+    await addCard('new3', 'New 3', '2003', 'Hard');
+    await addCard('new4', 'New 4', '2004', 'Easy'); // This won't be included (exceeds limit)
 
     // Create some review cards
-    await addCard('review1', 'Review 1', 'Medium');
-    await addCard('review2', 'Review 2', 'Hard');
+    await addCard('review1', 'Review 1', '3001', 'Medium');
+    await addCard('review2', 'Review 2', '3002', 'Hard');
 
     // Rate review cards to move them out of New state
-    await rateCard('review1', Rating.Good, 'Medium');
-    await rateCard('review2', Rating.Good, 'Hard');
+    await rateCard('review1', Rating.Good, '3001', 'Medium');
+    await rateCard('review2', Rating.Good, '3002', 'Hard');
 
     // Set their due dates to the past
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -621,8 +626,8 @@ describe('getReviewQueue', () => {
   });
 
   it('should not include future due cards', async () => {
-    await addCard('future1', 'Future 1', 'Easy');
-    await rateCard('future1', Rating.Good, 'Easy');
+    await addCard('future1', 'Future 1', '4001', 'Easy');
+    await rateCard('future1', Rating.Good, '4001', 'Easy');
 
     // Set due date to future
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -640,16 +645,16 @@ describe('getReviewQueue', () => {
     await storage.setItem(STORAGE_KEYS.stats, {});
 
     // Create new cards
-    await addCard('new1', 'New 1', 'Easy');
-    await addCard('new2', 'New 2', 'Medium');
+    await addCard('new1', 'New 1', '2001', 'Easy');
+    await addCard('new2', 'New 2', '2002', 'Medium');
 
     // Create due review cards
-    await addCard('due1', 'Due 1', 'Medium');
-    await rateCard('due1', Rating.Good, 'Medium');
+    await addCard('due1', 'Due 1', '5001', 'Medium');
+    await rateCard('due1', Rating.Good, '5001', 'Medium');
 
     // Create future review cards
-    await addCard('future1', 'Future 1', 'Easy');
-    await rateCard('future1', Rating.Easy, 'Easy');
+    await addCard('future1', 'Future 1', '4001', 'Easy');
+    await rateCard('future1', Rating.Easy, '4001', 'Easy');
 
     // Manually set due dates
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -676,7 +681,7 @@ describe('getReviewQueue', () => {
   it('should respect MAX_NEW_CARDS_PER_DAY limit', async () => {
     // Create many new cards
     for (let i = 1; i <= 10; i++) {
-      await addCard(`new${i}`, `New ${i}`, 'Medium');
+      await addCard(`new${i}`, `New ${i}`, `${6000 + i}`, 'Medium');
     }
 
     const queue = await getReviewQueue();
@@ -689,8 +694,8 @@ describe('getReviewQueue', () => {
   it('should include all due review cards regardless of limit', async () => {
     // Create many review cards
     for (let i = 1; i <= 10; i++) {
-      await addCard(`review${i}`, `Review ${i}`, 'Medium');
-      await rateCard(`review${i}`, Rating.Good, 'Medium');
+      await addCard(`review${i}`, `Review ${i}`, `${7000 + i}`, 'Medium');
+      await rateCard(`review${i}`, Rating.Good, `${7000 + i}`, 'Medium');
     }
 
     // Set all to be due
@@ -725,7 +730,7 @@ describe('getReviewQueue', () => {
 
     // Create 5 new cards
     for (let i = 1; i <= 5; i++) {
-      await addCard(`new${i}`, `New ${i}`, 'Medium');
+      await addCard(`new${i}`, `New ${i}`, `${6000 + i}`, 'Medium');
     }
 
     const queue = await getReviewQueue();
@@ -752,7 +757,7 @@ describe('getReviewQueue', () => {
 
     // Create new cards
     for (let i = 1; i <= 5; i++) {
-      await addCard(`new${i}`, `New ${i}`, 'Easy');
+      await addCard(`new${i}`, `New ${i}`, `${8000 + i}`, 'Easy');
     }
 
     const queue = await getReviewQueue();
@@ -779,14 +784,14 @@ describe('getReviewQueue', () => {
     );
 
     // Create new cards (won't be included)
-    await addCard('new1', 'New 1', 'Easy');
-    await addCard('new2', 'New 2', 'Medium');
+    await addCard('new1', 'New 1', '2001', 'Easy');
+    await addCard('new2', 'New 2', '2002', 'Medium');
 
     // Create review cards (should be included)
-    await addCard('review1', 'Review 1', 'Medium');
-    await addCard('review2', 'Review 2', 'Hard');
-    await rateCard('review1', Rating.Good, 'Medium');
-    await rateCard('review2', Rating.Good, 'Hard');
+    await addCard('review1', 'Review 1', '3001', 'Medium');
+    await addCard('review2', 'Review 2', '3002', 'Hard');
+    await rateCard('review1', Rating.Good, '3001', 'Medium');
+    await rateCard('review2', Rating.Good, '3002', 'Hard');
 
     // Set review cards to be due
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -819,7 +824,7 @@ describe('getReviewQueue', () => {
 
     // Create 10 new cards
     for (let i = 1; i <= 10; i++) {
-      await addCard(`new${i}`, `New ${i}`, 'Medium');
+      await addCard(`new${i}`, `New ${i}`, `${6000 + i}`, 'Medium');
     }
 
     const queue = await getReviewQueue();
@@ -834,7 +839,7 @@ describe('getReviewQueue', () => {
 
     // Create new cards
     for (let i = 1; i <= 5; i++) {
-      await addCard(`new${i}`, `New ${i}`, 'Easy');
+      await addCard(`new${i}`, `New ${i}`, `${8000 + i}`, 'Easy');
     }
 
     const queue = await getReviewQueue();

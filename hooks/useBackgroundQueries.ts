@@ -40,8 +40,17 @@ export function useAddCardMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ slug, name, difficulty }: { slug: string; name: string; difficulty: Difficulty }) =>
-      sendMessage({ type: MessageType.ADD_CARD, slug, name, difficulty }),
+    mutationFn: ({
+      slug,
+      name,
+      leetcodeId,
+      difficulty,
+    }: {
+      slug: string;
+      name: string;
+      leetcodeId: string;
+      difficulty: Difficulty;
+    }) => sendMessage({ type: MessageType.ADD_CARD, slug, name, leetcodeId, difficulty }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cards });
       queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });
@@ -66,8 +75,17 @@ export function useRateCardMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ slug, rating, difficulty }: { slug: string; rating: Grade; difficulty: Difficulty }) =>
-      sendMessage({ type: MessageType.RATE_CARD, slug, rating, difficulty }),
+    mutationFn: ({
+      slug,
+      rating,
+      leetcodeId,
+      difficulty,
+    }: {
+      slug: string;
+      rating: Grade;
+      leetcodeId: string;
+      difficulty: Difficulty;
+    }) => sendMessage({ type: MessageType.RATE_CARD, slug, rating, leetcodeId, difficulty }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cards });
       queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });

@@ -54,24 +54,25 @@ export function deserializeCard(stored: StoredCard): Card {
   };
 }
 
-function createCard(slug: string, name: string, difficulty: Difficulty): Card {
+function createCard(slug: string, name: string, leetcodeId: string, difficulty: Difficulty): Card {
   return {
     id: crypto.randomUUID(),
     slug,
     name,
+    leetcodeId,
     difficulty,
     createdAt: new Date(),
     fsrs: createEmptyCard(),
   };
 }
 
-export async function addCard(slug: string, name: string, difficulty: Difficulty): Promise<Card> {
+export async function addCard(slug: string, name: string, leetcodeId: string, difficulty: Difficulty): Promise<Card> {
   const cards = await getCards();
   if (slug in cards) {
     return deserializeCard(cards[slug]);
   }
 
-  const card = createCard(slug, name, difficulty);
+  const card = createCard(slug, name, leetcodeId, difficulty);
   cards[slug] = serializeCard(card);
   await storage.setItem(STORAGE_KEYS.cards, cards);
   return card;
@@ -88,7 +89,7 @@ export async function removeCard(slug: string): Promise<void> {
   await storage.setItem(STORAGE_KEYS.cards, cards);
 }
 
-export async function rateCard(slug: string, rating: Grade, difficulty: Difficulty): Promise<Card> {
+export async function rateCard(slug: string, rating: Grade, leetcodeId: string, difficulty: Difficulty): Promise<Card> {
   const cards = await getCards();
 
   let card: Card;
@@ -97,7 +98,7 @@ export async function rateCard(slug: string, rating: Grade, difficulty: Difficul
     card = deserializeCard(cards[slug]);
     isNewCard = card.fsrs.state === FsrsState.New;
   } else {
-    card = createCard(slug, slug, difficulty);
+    card = createCard(slug, slug, leetcodeId, difficulty);
   }
 
   const now = new Date();

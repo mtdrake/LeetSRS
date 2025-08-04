@@ -35,16 +35,16 @@ export function ReviewCard({ card }: ReviewCardProps) {
       </div>
 
       <div className="flex gap-2 justify-center">
-        <button className="px-3 py-1.5 rounded text-sm bg-danger text-white hover:opacity-80 transition-opacity">
+        <button className="w-16 py-1.5 rounded text-sm bg-rating-again text-white hover:opacity-80 transition-opacity">
           Again
         </button>
-        <button className="px-3 py-1.5 rounded text-sm bg-tertiary text-primary hover:opacity-80 transition-opacity">
+        <button className="w-16 py-1.5 rounded text-sm bg-rating-hard text-white hover:opacity-80 transition-opacity">
           Hard
         </button>
-        <button className="px-3 py-1.5 rounded text-sm bg-tertiary text-primary hover:opacity-80 transition-opacity">
+        <button className="w-16 py-1.5 rounded text-sm bg-rating-good text-white hover:opacity-80 transition-opacity">
           Good
         </button>
-        <button className="px-3 py-1.5 rounded text-sm bg-accent text-white hover:opacity-80 transition-opacity">
+        <button className="w-16 py-1.5 rounded text-sm bg-rating-easy text-white hover:opacity-80 transition-opacity">
           Easy
         </button>
       </div>

@@ -5,9 +5,10 @@ import { bounceButton } from '@/shared/styles';
 interface ActionsSectionProps {
   slug: string;
   onDelete?: () => void;
+  onDelay?: (days: number) => void;
 }
 
-export function ActionsSection({ slug: _slug, onDelete }: ActionsSectionProps) {
+export function ActionsSection({ slug: _slug, onDelete, onDelay }: ActionsSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
@@ -32,13 +33,13 @@ export function ActionsSection({ slug: _slug, onDelete }: ActionsSectionProps) {
               <div className="flex gap-2">
                 <Button
                   className={`flex-1 px-4 py-2 rounded text-sm bg-tertiary text-primary hover:bg-accent hover:text-white transition-colors ${bounceButton}`}
-                  onPress={() => console.log('Delay 1 day')}
+                  onPress={() => onDelay?.(1)}
                 >
                   1 day
                 </Button>
                 <Button
                   className={`flex-1 px-4 py-2 rounded text-sm bg-tertiary text-primary hover:bg-accent hover:text-white transition-colors ${bounceButton}`}
-                  onPress={() => console.log('Delay 5 days')}
+                  onPress={() => onDelay?.(5)}
                 >
                   5 days
                 </Button>

@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react';
 import { ReviewCard } from './ReviewCard';
 import { NotesSection } from './NotesSection';
 import { ActionsSection } from './ActionsSection';
-import { useReviewQueueQuery, useRateCardMutation, useRemoveCardMutation } from '@/hooks/useBackgroundQueries';
+import {
+  useReviewQueueQuery,
+  useRateCardMutation,
+  useRemoveCardMutation,
+  useDelayCardMutation,
+} from '@/hooks/useBackgroundQueries';
 import type { Card } from '@/shared/cards';
 import type { Grade } from 'ts-fsrs';
 
@@ -14,6 +19,7 @@ export function ReviewQueue({ disableAnimations = false }: ReviewQueueProps) {
   const { data: initialQueue, isLoading, error } = useReviewQueueQuery();
   const rateCardMutation = useRateCardMutation();
   const removeCardMutation = useRemoveCardMutation();
+  const delayCardMutation = useDelayCardMutation();
   const [queue, setQueue] = useState<Card[]>([]);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -101,6 +107,34 @@ export function ReviewQueue({ disableAnimations = false }: ReviewQueueProps) {
     }
   };
 
+  const handleDelay = async (days: number) => {
+    if (queue.length === 0 || isProcessing) return;
+
+    setIsProcessing(true);
+    const currentCard = queue[0];
+    const restOfQueue = queue.slice(1);
+
+    try {
+      await delayCardMutation.mutateAsync({ slug: currentCard.slug, days });
+
+      if (!disableAnimations) {
+        setSlideDirection('right');
+      }
+
+      // Wait for animation to complete, then update queue
+      const animationDelay = disableAnimations ? 0 : 400;
+      setTimeout(() => {
+        setQueue([...restOfQueue]);
+        setSlideDirection(null);
+        setIsProcessing(false);
+      }, animationDelay);
+    } catch (error) {
+      console.error('Failed to delay card:', error);
+      setSlideDirection(null);
+      setIsProcessing(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -148,7 +182,7 @@ export function ReviewQueue({ disableAnimations = false }: ReviewQueueProps) {
         <ReviewCard key={currentCard.id} card={currentCard} onRate={handleRating} isProcessing={isProcessing} />
       </div>
       <NotesSection cardId={currentCard.id} />
-      <ActionsSection slug={currentCard.slug} onDelete={handleDelete} />
+      <ActionsSection slug={currentCard.slug} onDelete={handleDelete} onDelay={handleDelay} />
     </div>
   );
 }

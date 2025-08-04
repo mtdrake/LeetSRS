@@ -20,6 +20,7 @@ export function DebugCard({ card, onRemove }: DebugCardProps) {
     try {
       await rateCardMutation.mutateAsync({
         slug: card.slug,
+        name: card.name,
         rating: rating,
         leetcodeId: card.leetcodeId,
         difficulty: card.difficulty,

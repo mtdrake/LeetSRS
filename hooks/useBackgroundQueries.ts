@@ -77,15 +77,17 @@ export function useRateCardMutation() {
   return useMutation({
     mutationFn: ({
       slug,
+      name,
       rating,
       leetcodeId,
       difficulty,
     }: {
       slug: string;
+      name: string;
       rating: Grade;
       leetcodeId: string;
       difficulty: Difficulty;
-    }) => sendMessage({ type: MessageType.RATE_CARD, slug, rating, leetcodeId, difficulty }),
+    }) => sendMessage({ type: MessageType.RATE_CARD, slug, name, rating, leetcodeId, difficulty }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cards });
       queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });

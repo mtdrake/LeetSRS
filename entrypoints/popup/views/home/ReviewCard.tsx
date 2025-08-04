@@ -36,6 +36,7 @@ export function ReviewCard({ card }: ReviewCardProps) {
   const handleRating = (rating: Grade) => {
     rateCardMutation.mutate({
       slug: card.slug,
+      name: card.name,
       rating,
       leetcodeId: card.leetcodeId,
       difficulty: card.difficulty,

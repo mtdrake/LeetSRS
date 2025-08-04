@@ -373,10 +373,10 @@ describe('rateCard', () => {
   });
 
   it('should create a new card if it does not exist', async () => {
-    const card = await rateCard('new-problem', Rating.Good, '9999', 'Medium');
+    const card = await rateCard('new-problem', 'New Problem', Rating.Good, '9999', 'Medium');
 
     expect(card.slug).toBe('new-problem');
-    expect(card.name).toBe('new-problem');
+    expect(card.name).toBe('New Problem');
     expect(card.createdAt).toBeInstanceOf(Date);
     expect(card.fsrs).toBeDefined();
 
@@ -392,7 +392,7 @@ describe('rateCard', () => {
     const initialStability = initialCard.fsrs.stability;
 
     // Rate the card as Good
-    const ratedCard = await rateCard('two-sum', Rating.Good, '1', 'Easy');
+    const ratedCard = await rateCard('two-sum', 'Two Sum', Rating.Good, '1', 'Easy');
 
     expect(ratedCard.slug).toBe('two-sum');
     expect(ratedCard.name).toBe('Two Sum');
@@ -408,12 +408,12 @@ describe('rateCard', () => {
     await addCard('test-problem', 'Test Problem', '999', 'Medium');
 
     // Rate as Again (fail)
-    const failedCard = await rateCard('test-problem', Rating.Again, '999', 'Medium');
+    const failedCard = await rateCard('test-problem', 'Test Problem', Rating.Again, '999', 'Medium');
     expect(failedCard.fsrs.reps).toBe(1);
     expect(failedCard.fsrs.lapses).toBe(0);
 
     // Rate as Easy
-    const easyCard = await rateCard('test-problem', Rating.Easy, '999', 'Medium');
+    const easyCard = await rateCard('test-problem', 'Test Problem', Rating.Easy, '999', 'Medium');
     expect(easyCard.fsrs.reps).toBeGreaterThan(0);
   });
 
@@ -421,7 +421,7 @@ describe('rateCard', () => {
     const card = await addCard('merge-sort', 'Merge Sort', '88', 'Hard');
     const initialDue = card.fsrs.due;
 
-    const ratedCard = await rateCard('merge-sort', Rating.Good, '88', 'Hard');
+    const ratedCard = await rateCard('merge-sort', 'Merge Sort', Rating.Good, '88', 'Hard');
 
     expect(ratedCard.fsrs.due).toBeInstanceOf(Date);
     expect(ratedCard.fsrs.due.getTime()).toBeGreaterThan(initialDue.getTime());
@@ -431,7 +431,7 @@ describe('rateCard', () => {
     await addCard('binary-search', 'Binary Search', '704', 'Medium');
 
     // Rate the card
-    await rateCard('binary-search', Rating.Hard, '704', 'Medium');
+    await rateCard('binary-search', 'Binary Search', Rating.Hard, '704', 'Medium');
 
     // Verify the updated card is in storage
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -445,16 +445,16 @@ describe('rateCard', () => {
     const slug = 'dynamic-programming';
 
     // First rating (creates card)
-    const card1 = await rateCard(slug, Rating.Again, '9998', 'Hard');
+    const card1 = await rateCard(slug, 'Multi Rate', Rating.Again, '9998', 'Hard');
     expect(card1.fsrs.reps).toBe(1);
     expect(card1.fsrs.lapses).toBe(0);
 
     // Second rating
-    const card2 = await rateCard(slug, Rating.Hard, '9998', 'Hard');
+    const card2 = await rateCard(slug, 'Multi Rate', Rating.Hard, '9998', 'Hard');
     expect(card2.fsrs.reps).toBeGreaterThan(0);
 
     // Third rating
-    const card3 = await rateCard(slug, Rating.Good, '9998', 'Hard');
+    const card3 = await rateCard(slug, 'Multi Rate', Rating.Good, '9998', 'Hard');
     expect(card3.fsrs.reps).toBeGreaterThan(card2.fsrs.reps);
 
     // Verify only one card exists in storage
@@ -465,7 +465,7 @@ describe('rateCard', () => {
 
   it('should update stats when rating a new card', async () => {
     // Rate a new card (doesn't exist yet)
-    await rateCard('new-problem', Rating.Good, '9999', 'Medium');
+    await rateCard('new-problem', 'New Problem', Rating.Good, '9999', 'Medium');
 
     // Check that stats were created
     const stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
@@ -483,7 +483,7 @@ describe('rateCard', () => {
     await addCard('test-card', 'Test Card', '1000', 'Easy');
 
     // First rating (card is new)
-    await rateCard('test-card', Rating.Good, '1000', 'Easy');
+    await rateCard('test-card', 'Test Card', Rating.Good, '1000', 'Easy');
 
     let stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
     let todayStats = stats?.['2024-03-15'];
@@ -493,7 +493,7 @@ describe('rateCard', () => {
     expect(todayStats?.reviewedCards).toBe(0);
 
     // Second rating (card is now a review card)
-    await rateCard('test-card', Rating.Hard, '1000', 'Easy');
+    await rateCard('test-card', 'Test Card', Rating.Hard, '1000', 'Easy');
 
     stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
     todayStats = stats?.['2024-03-15'];
@@ -569,8 +569,8 @@ describe('getReviewQueue', () => {
     await addCard('problem2', 'Problem 2', '1002', 'Medium');
 
     // Rate them to move out of New state
-    await rateCard('problem1', Rating.Good, '1001', 'Easy');
-    await rateCard('problem2', Rating.Good, '1002', 'Medium');
+    await rateCard('problem1', 'Problem 1', Rating.Good, '1001', 'Easy');
+    await rateCard('problem2', 'Problem 2', Rating.Good, '1002', 'Medium');
 
     // Manually update their due dates to be in the past
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -600,8 +600,8 @@ describe('getReviewQueue', () => {
     await addCard('review2', 'Review 2', '3002', 'Hard');
 
     // Rate review cards to move them out of New state
-    await rateCard('review1', Rating.Good, '3001', 'Medium');
-    await rateCard('review2', Rating.Good, '3002', 'Hard');
+    await rateCard('review1', 'Review 1', Rating.Good, '3001', 'Medium');
+    await rateCard('review2', 'Review 2', Rating.Good, '3002', 'Hard');
 
     // Set their due dates to the past
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -627,7 +627,7 @@ describe('getReviewQueue', () => {
 
   it('should not include future due cards', async () => {
     await addCard('future1', 'Future 1', '4001', 'Easy');
-    await rateCard('future1', Rating.Good, '4001', 'Easy');
+    await rateCard('future1', 'Future 1', Rating.Good, '4001', 'Easy');
 
     // Set due date to future
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -650,11 +650,11 @@ describe('getReviewQueue', () => {
 
     // Create due review cards
     await addCard('due1', 'Due 1', '5001', 'Medium');
-    await rateCard('due1', Rating.Good, '5001', 'Medium');
+    await rateCard('due1', 'Due 1', Rating.Good, '5001', 'Medium');
 
     // Create future review cards
     await addCard('future1', 'Future 1', '4001', 'Easy');
-    await rateCard('future1', Rating.Easy, '4001', 'Easy');
+    await rateCard('future1', 'Future 1', Rating.Easy, '4001', 'Easy');
 
     // Manually set due dates
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -695,7 +695,7 @@ describe('getReviewQueue', () => {
     // Create many review cards
     for (let i = 1; i <= 10; i++) {
       await addCard(`review${i}`, `Review ${i}`, `${7000 + i}`, 'Medium');
-      await rateCard(`review${i}`, Rating.Good, `${7000 + i}`, 'Medium');
+      await rateCard(`review${i}`, `Review ${i}`, Rating.Good, `${7000 + i}`, 'Medium');
     }
 
     // Set all to be due
@@ -790,8 +790,8 @@ describe('getReviewQueue', () => {
     // Create review cards (should be included)
     await addCard('review1', 'Review 1', '3001', 'Medium');
     await addCard('review2', 'Review 2', '3002', 'Hard');
-    await rateCard('review1', Rating.Good, '3001', 'Medium');
-    await rateCard('review2', Rating.Good, '3002', 'Hard');
+    await rateCard('review1', 'Review 1', Rating.Good, '3001', 'Medium');
+    await rateCard('review2', 'Review 2', Rating.Good, '3002', 'Hard');
 
     // Set review cards to be due
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);

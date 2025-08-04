@@ -16,7 +16,7 @@ export default defineBackground(() => {
         return await removeCard(request.slug);
 
       case MessageType.RATE_CARD:
-        return await rateCard(request.slug, request.rating, request.leetcodeId, request.difficulty);
+        return await rateCard(request.slug, request.name, request.rating, request.leetcodeId, request.difficulty);
 
       case MessageType.GET_REVIEW_QUEUE:
         return await getReviewQueue();

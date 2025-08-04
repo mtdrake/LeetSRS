@@ -89,7 +89,13 @@ export async function removeCard(slug: string): Promise<void> {
   await storage.setItem(STORAGE_KEYS.cards, cards);
 }
 
-export async function rateCard(slug: string, rating: Grade, leetcodeId: string, difficulty: Difficulty): Promise<Card> {
+export async function rateCard(
+  slug: string,
+  name: string,
+  rating: Grade,
+  leetcodeId: string,
+  difficulty: Difficulty
+): Promise<Card> {
   const cards = await getCards();
 
   let card: Card;
@@ -98,7 +104,7 @@ export async function rateCard(slug: string, rating: Grade, leetcodeId: string, 
     card = deserializeCard(cards[slug]);
     isNewCard = card.fsrs.state === FsrsState.New;
   } else {
-    card = createCard(slug, slug, leetcodeId, difficulty);
+    card = createCard(slug, name, leetcodeId, difficulty);
   }
 
   const now = new Date();

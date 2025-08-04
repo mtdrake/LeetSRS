@@ -4,6 +4,12 @@ import { ReviewCard } from './ReviewCard';
 import { NotesSection } from './NotesSection';
 
 export function HomeView() {
+  const card = {
+    slug: 'two-sum',
+    title: 'Two Sum',
+    notes: '',
+  };
+
   return (
     <div className="flex flex-col h-full">
       <Header>
@@ -11,7 +17,7 @@ export function HomeView() {
       </Header>
 
       <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto">
-        <ReviewCard />
+        <ReviewCard card={card} />
         <NotesSection />
       </div>
     </div>

@@ -1,6 +1,11 @@
 import { FaArrowUpRightFromSquare } from 'react-icons/fa6';
+import { type Card } from '@/services/cards';
 
-export function ReviewCard() {
+type ReviewCardProps = {
+  card: Pick<Card, 'slug'>
+}
+
+export function ReviewCard({ card }: ReviewCardProps) {
   return (
     <div className="border border-current rounded-lg bg-secondary p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -10,7 +15,7 @@ export function ReviewCard() {
 
       <div className="flex justify-center pb-3">
         <a
-          href="https://google.com"
+          href={`https://leetcode.com/problems/${card.slug}/description/`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-lg font-semibold text-primary flex items-center gap-1 hover:text-accent transition-colors"

@@ -12,7 +12,7 @@ import {
   MAX_NEW_CARDS_PER_DAY,
   type StoredCard,
 } from '../cards';
-import { type Card } from '@/types';
+import { type Card } from '@/shared/cards';
 import { STORAGE_KEYS } from '../storage-keys';
 import { createEmptyCard, Rating, State as FsrsState } from 'ts-fsrs';
 import type { DailyStats } from '../stats';

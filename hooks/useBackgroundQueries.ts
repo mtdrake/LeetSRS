@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sendMessage, MessageType } from '@/services/messages';
 import type { Grade } from 'ts-fsrs';
-import type { Difficulty } from '@/types';
+import type { Difficulty } from '@/shared/cards';
 
 // Query Keys
 export const queryKeys = {

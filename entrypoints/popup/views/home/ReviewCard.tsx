@@ -1,5 +1,5 @@
 import { FaArrowUpRightFromSquare } from 'react-icons/fa6';
-import { Difficulty, type Card } from '@/types';
+import { Difficulty, type Card } from '@/shared/cards';
 import { useRateCardMutation } from '@/hooks/useBackgroundQueries';
 import { Rating } from 'ts-fsrs';
 import type { Grade } from 'ts-fsrs';

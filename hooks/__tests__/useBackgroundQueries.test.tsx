@@ -8,7 +8,7 @@ import { sendMessage } from '@/services/messages';
 import { MessageType } from '@/services/messages';
 import { Rating, type Grade, createEmptyCard } from 'ts-fsrs';
 import { createWrapper } from '@/test/utils/test-wrapper';
-import type { Card } from '@/types';
+import type { Card } from '@/shared/cards';
 
 // Mock the sendMessage function
 vi.mock('@/services/messages', () => ({

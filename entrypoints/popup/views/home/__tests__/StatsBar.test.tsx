@@ -6,7 +6,7 @@ import { render, screen } from '@testing-library/react';
 import { StatsBar } from '../StatsBar';
 import { useReviewQueueQuery } from '@/hooks/useBackgroundQueries';
 import { State } from 'ts-fsrs';
-import type { Card } from '@/types';
+import type { Card } from '@/shared/cards';
 import { createTestWrapper } from '@/test/utils/test-wrapper';
 import { createMockCard } from '@/test/utils/card-mocks';
 import { createQueryMock } from '@/test/utils/query-mocks';

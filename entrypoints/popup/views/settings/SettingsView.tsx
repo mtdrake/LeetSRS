@@ -4,7 +4,7 @@ export function SettingsView() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="p-4">
+    <div className="h-full overflow-y-auto overflow-x-hidden p-4">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-primary">Settings</h1>
         <span className="text-sm text-secondary">Configure your preferences</span>

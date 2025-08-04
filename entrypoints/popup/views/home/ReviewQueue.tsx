@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ReviewCard } from './ReviewCard';
 import { NotesSection } from './NotesSection';
+import { ActionsSection } from './ActionsSection';
 import { useReviewQueueQuery, useRateCardMutation } from '@/hooks/useBackgroundQueries';
 import type { Card } from '@/shared/cards';
 import type { Grade } from 'ts-fsrs';
@@ -113,11 +114,12 @@ export function ReviewQueue({ disableAnimations = false }: ReviewQueueProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 overflow-hidden">
+    <div className="flex flex-col gap-4">
       <div className={getAnimationClass()}>
         <ReviewCard key={currentCard.id} card={currentCard} onRate={handleRating} isProcessing={isProcessing} />
       </div>
       <NotesSection cardId={currentCard.id} />
+      <ActionsSection cardId={currentCard.id} />
     </div>
   );
 }

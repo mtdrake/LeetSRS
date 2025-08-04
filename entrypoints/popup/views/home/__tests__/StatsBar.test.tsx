@@ -9,6 +9,7 @@ import { State } from 'ts-fsrs';
 import type { Card } from '@/types';
 import { createTestWrapper } from '@/test/utils/test-wrapper';
 import { createMockCard } from '@/test/utils/card-mocks';
+import { createQueryMock } from '@/test/utils/query-mocks';
 
 // Mock the useReviewQueueQuery hook
 vi.mock('@/hooks/useBackgroundQueries', () => ({
@@ -28,9 +29,9 @@ describe('StatsBar', () => {
 
   describe('Rendering', () => {
     it('should render all three stat categories', () => {
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: [] as Card[],
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock<Card[]>([]) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -40,9 +41,9 @@ describe('StatsBar', () => {
     });
 
     it('should display zero counts when no cards', () => {
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: [] as Card[],
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock<Card[]>([]) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -52,9 +53,9 @@ describe('StatsBar', () => {
     });
 
     it('should display zero counts when data is undefined', () => {
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: undefined,
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock<Card[] | undefined>(undefined) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -74,9 +75,9 @@ describe('StatsBar', () => {
         createMockCard(State.Learning),
       ];
 
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards,
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock(mockCards) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -91,9 +92,9 @@ describe('StatsBar', () => {
         createMockCard(State.Learning),
       ];
 
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards,
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock(mockCards) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -109,9 +110,9 @@ describe('StatsBar', () => {
         createMockCard(State.Review),
       ];
 
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards,
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock(mockCards) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -126,9 +127,9 @@ describe('StatsBar', () => {
         createMockCard(State.Review),
       ];
 
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards,
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock(mockCards) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -144,9 +145,9 @@ describe('StatsBar', () => {
         createMockCard(State.New),
       ];
 
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards,
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock(mockCards) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -171,9 +172,9 @@ describe('StatsBar', () => {
         createMockCard(State.Relearning),
       ];
 
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards,
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock(mockCards) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -193,9 +194,9 @@ describe('StatsBar', () => {
         { ...createMockCard(State.New), fsrs: {} as any }, // No state property
       ];
 
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards,
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock(mockCards) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -208,9 +209,9 @@ describe('StatsBar', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty array gracefully', () => {
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: [] as Card[],
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock<Card[]>([]) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 
@@ -224,9 +225,9 @@ describe('StatsBar', () => {
         .fill(null)
         .map(() => createMockCard(State.Review));
 
-      vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards,
-      } as ReturnType<typeof useReviewQueueQuery>);
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock(mockCards) as ReturnType<typeof useReviewQueueQuery>
+      );
 
       renderWithProviders();
 

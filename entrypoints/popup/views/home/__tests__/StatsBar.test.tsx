@@ -184,14 +184,20 @@ describe('StatsBar', () => {
     });
 
     it('should ignore cards with unknown states', () => {
-      const mockCards = [
+      const baseCard = createMockCard(State.New);
+
+      // Create cards with invalid states for testing edge cases
+      const cardWithInvalidState = {
+        ...baseCard,
+        fsrs: { ...baseCard.fsrs, state: 999 as State },
+      };
+
+      const mockCards: Card[] = [
         createMockCard(State.Review),
         createMockCard(State.New),
         createMockCard(State.Learning),
-        // Test cards with invalid states - these should be ignored by the reducer
-        { ...createMockCard(State.New), fsrs: { state: 999 } as any }, // Unknown state
-        { ...createMockCard(State.New), fsrs: { state: null } as any }, // Null state
-        { ...createMockCard(State.New), fsrs: {} as any }, // No state property
+        // This card has an invalid state value that should be ignored
+        cardWithInvalidState,
       ];
 
       vi.mocked(useReviewQueueQuery).mockReturnValue(

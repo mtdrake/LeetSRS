@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sendMessage, MessageType } from '@/services/messages';
 import type { Grade } from 'ts-fsrs';
+import type { Difficulty } from '@/types';
 
 // Query Keys
 export const queryKeys = {
@@ -39,8 +40,8 @@ export function useAddCardMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ slug, name }: { slug: string; name: string }) =>
-      sendMessage({ type: MessageType.ADD_CARD, slug, name }),
+    mutationFn: ({ slug, name, difficulty }: { slug: string; name: string; difficulty: Difficulty }) =>
+      sendMessage({ type: MessageType.ADD_CARD, slug, name, difficulty }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cards });
       queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });
@@ -65,8 +66,8 @@ export function useRateCardMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ slug, rating }: { slug: string; rating: Grade }) =>
-      sendMessage({ type: MessageType.RATE_CARD, slug, rating }),
+    mutationFn: ({ slug, rating, difficulty }: { slug: string; rating: Grade; difficulty: Difficulty }) =>
+      sendMessage({ type: MessageType.RATE_CARD, slug, rating, difficulty }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cards });
       queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });

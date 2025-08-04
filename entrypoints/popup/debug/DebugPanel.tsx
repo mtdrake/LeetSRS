@@ -1,13 +1,49 @@
 import { useState } from 'react';
 import { useCardsQuery, useAddCardMutation, useRemoveCardMutation } from '@/hooks/useBackgroundQueries';
+import { type Difficulty } from '@/types';
 import { DebugCard } from './DebugCard';
 import { ReviewQueue } from './ReviewQueue';
 import { TodayStats } from './TodayStats';
 import './DebugPanel.css';
 
+// Sample LeetCode problems
+const SAMPLE_PROBLEMS = [
+  { slug: 'two-sum', name: 'Two Sum', difficulty: 'Easy' as Difficulty },
+  { slug: 'add-two-numbers', name: 'Add Two Numbers', difficulty: 'Medium' as Difficulty },
+  {
+    slug: 'longest-substring-without-repeating-characters',
+    name: 'Longest Substring Without Repeating Characters',
+    difficulty: 'Medium' as Difficulty,
+  },
+  { slug: 'median-of-two-sorted-arrays', name: 'Median of Two Sorted Arrays', difficulty: 'Hard' as Difficulty },
+  { slug: 'reverse-integer', name: 'Reverse Integer', difficulty: 'Easy' as Difficulty },
+  { slug: 'container-with-most-water', name: 'Container With Most Water', difficulty: 'Medium' as Difficulty },
+  { slug: 'valid-parentheses', name: 'Valid Parentheses', difficulty: 'Easy' as Difficulty },
+  { slug: 'merge-two-sorted-lists', name: 'Merge Two Sorted Lists', difficulty: 'Easy' as Difficulty },
+  { slug: 'trapping-rain-water', name: 'Trapping Rain Water', difficulty: 'Hard' as Difficulty },
+  { slug: 'group-anagrams', name: 'Group Anagrams', difficulty: 'Medium' as Difficulty },
+  { slug: 'maximum-subarray', name: 'Maximum Subarray', difficulty: 'Medium' as Difficulty },
+  { slug: 'climbing-stairs', name: 'Climbing Stairs', difficulty: 'Easy' as Difficulty },
+  {
+    slug: 'best-time-to-buy-and-sell-stock',
+    name: 'Best Time to Buy and Sell Stock',
+    difficulty: 'Easy' as Difficulty,
+  },
+  { slug: 'house-robber', name: 'House Robber', difficulty: 'Medium' as Difficulty },
+  { slug: 'reverse-linked-list', name: 'Reverse Linked List', difficulty: 'Easy' as Difficulty },
+  { slug: 'binary-tree-inorder-traversal', name: 'Binary Tree Inorder Traversal', difficulty: 'Easy' as Difficulty },
+  {
+    slug: 'kth-largest-element-in-an-array',
+    name: 'Kth Largest Element in an Array',
+    difficulty: 'Medium' as Difficulty,
+  },
+  { slug: 'product-of-array-except-self', name: 'Product of Array Except Self', difficulty: 'Medium' as Difficulty },
+  { slug: 'min-stack', name: 'Min Stack', difficulty: 'Medium' as Difficulty },
+  { slug: 'number-of-islands', name: 'Number of Islands', difficulty: 'Medium' as Difficulty },
+];
+
 export function DebugPanel() {
-  const [slug, setSlug] = useState('');
-  const [isCardsCollapsed, setIsCardsCollapsed] = useState(false);
+  const [isCardsCollapsed, setIsCardsCollapsed] = useState(true);
 
   const { data: cards, isLoading: isLoadingCards, error: cardsError } = useCardsQuery();
   const addCardMutation = useAddCardMutation();
@@ -15,17 +51,27 @@ export function DebugPanel() {
 
   const cardsList = cards ?? [];
 
-  const handleAddCard = async () => {
-    if (!slug.trim()) return;
+  const handleAddRandomCard = async () => {
+    // Filter out problems that already exist
+    const existingsSlugs = new Set(cardsList.map((card) => card.slug));
+    const availableProblems = SAMPLE_PROBLEMS.filter((p) => !existingsSlugs.has(p.slug));
+
+    if (availableProblems.length === 0) {
+      console.log('All sample problems already added');
+      return;
+    }
+
+    // Pick a random problem
+    const randomProblem = availableProblems[Math.floor(Math.random() * availableProblems.length)];
 
     try {
       await addCardMutation.mutateAsync({
-        slug: slug.trim(),
-        name: slug.trim(), // Using slug as name for debug purposes
+        slug: randomProblem.slug,
+        name: randomProblem.name,
+        difficulty: randomProblem.difficulty,
       });
-      setSlug('');
     } catch (error) {
-      console.error('Failed to add card:', error);
+      console.error('Failed to add random card:', error);
     }
   };
 
@@ -37,37 +83,75 @@ export function DebugPanel() {
     }
   };
 
+  const handleDeleteAllCards = async () => {
+    if (!confirm('Are you sure you want to delete all cards? This cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // Delete all cards one by one
+      for (const card of cardsList) {
+        await removeCardMutation.mutateAsync(card.slug);
+      }
+    } catch (error) {
+      console.error('Failed to delete all cards:', error);
+    }
+  };
+
   return (
     <div className="debug-panel">
       <h2 className="debug-panel-title">🔧 DEBUG PANEL</h2>
 
-      <div className="debug-panel-input-container">
-        <input
-          type="text"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAddCard()}
-          placeholder="Enter card slug (e.g., two-sum)"
-          className="debug-panel-input"
-        />
+      <div className="debug-panel-input-container" style={{ marginBottom: '16px' }}>
         <button
-          onClick={handleAddCard}
-          disabled={addCardMutation.isPending || !slug.trim()}
+          onClick={handleAddRandomCard}
+          disabled={addCardMutation.isPending || cardsList.length >= SAMPLE_PROBLEMS.length}
           className="debug-panel-button"
+          style={{
+            width: '100%',
+            backgroundColor: cardsList.length >= SAMPLE_PROBLEMS.length ? '#666' : '#4CAF50',
+            padding: '12px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+          }}
+          title={
+            cardsList.length >= SAMPLE_PROBLEMS.length ? 'All sample problems added' : 'Add a random LeetCode problem'
+          }
         >
-          {addCardMutation.isPending ? 'Adding...' : 'Add Card'}
+          {addCardMutation.isPending
+            ? 'Adding...'
+            : cardsList.length >= SAMPLE_PROBLEMS.length
+              ? '✅ All Problems Added'
+              : `🎲 Add Random Problem (${SAMPLE_PROBLEMS.length - cardsList.length} available)`}
         </button>
       </div>
 
       <div>
-        <h3
-          className="debug-panel-cards-header"
-          style={{ cursor: 'pointer', userSelect: 'none' }}
-          onClick={() => setIsCardsCollapsed(!isCardsCollapsed)}
-        >
-          <span style={{ marginRight: '8px' }}>{isCardsCollapsed ? '▶' : '▼'}</span>
-          Cards in Storage ({cardsList.length})
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3
+            className="debug-panel-cards-header"
+            style={{ cursor: 'pointer', userSelect: 'none', margin: 0 }}
+            onClick={() => setIsCardsCollapsed(!isCardsCollapsed)}
+          >
+            <span style={{ marginRight: '8px' }}>{isCardsCollapsed ? '▶' : '▼'}</span>
+            Cards in Storage ({cardsList.length})
+          </h3>
+          {cardsList.length > 0 && (
+            <button
+              onClick={handleDeleteAllCards}
+              disabled={removeCardMutation.isPending}
+              className="debug-panel-button"
+              style={{
+                backgroundColor: '#d32f2f',
+                padding: '4px 12px',
+                fontSize: '12px',
+              }}
+              title="Delete all cards"
+            >
+              {removeCardMutation.isPending ? 'Deleting...' : '🗑️ Delete All'}
+            </button>
+          )}
+        </div>
         {!isCardsCollapsed &&
           (isLoadingCards ? (
             <p className="debug-panel-empty-state">Loading cards...</p>

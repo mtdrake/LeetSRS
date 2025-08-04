@@ -6,8 +6,9 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useRateCardMutation } from '../useBackgroundQueries';
 import { sendMessage } from '@/services/messages';
 import { MessageType } from '@/services/messages';
-import { Rating, type Grade } from 'ts-fsrs';
+import { Rating, type Grade, createEmptyCard } from 'ts-fsrs';
 import { createWrapper } from '@/test/utils/test-wrapper';
+import type { Card } from '@/types';
 
 // Mock the sendMessage function
 vi.mock('@/services/messages', () => ({
@@ -31,11 +32,14 @@ describe('useRateCardMutation', () => {
       difficulty: 'Easy' as const,
     };
 
-    const mockResponse = {
+    const mockResponse: Card = {
       id: 'test-id',
-      ...mockCard,
+      slug: mockCard.slug,
+      name: mockCard.name,
+      leetcodeId: mockCard.leetcodeId,
+      difficulty: mockCard.difficulty,
       createdAt: new Date(),
-      fsrs: {} as any,
+      fsrs: createEmptyCard(),
     };
 
     vi.mocked(sendMessage).mockResolvedValue(mockResponse);

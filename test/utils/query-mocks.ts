@@ -41,7 +41,7 @@ export const createPendingMutationMock = (overrides = {}) =>
 /**
  * Creates a mock for a successful mutation
  */
-export const createSuccessMutationMock = (data: any, overrides = {}) =>
+export const createSuccessMutationMock = <TData = unknown>(data: TData, overrides = {}) =>
   createMutationMock({
     isSuccess: true,
     isIdle: false,

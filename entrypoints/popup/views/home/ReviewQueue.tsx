@@ -5,7 +5,11 @@ import { useReviewQueueQuery, useRateCardMutation } from '@/hooks/useBackgroundQ
 import type { Card } from '@/shared/cards';
 import type { Grade } from 'ts-fsrs';
 
-export function ReviewQueue() {
+interface ReviewQueueProps {
+  disableAnimations?: boolean;
+}
+
+export function ReviewQueue({ disableAnimations = false }: ReviewQueueProps) {
   const { data: initialQueue, isLoading, error } = useReviewQueueQuery();
   const rateCardMutation = useRateCardMutation();
   const [queue, setQueue] = useState<Card[]>([]);
@@ -39,13 +43,16 @@ export function ReviewQueue() {
       });
 
       // Set slide direction based on actual outcome, not rating
-      if (result.shouldRequeue) {
-        setSlideDirection('left'); // Card will be seen again today (back of queue)
-      } else {
-        setSlideDirection('right'); // Card is done for today (removed from queue)
+      if (!disableAnimations) {
+        if (result.shouldRequeue) {
+          setSlideDirection('left'); // Card will be seen again today (back of queue)
+        } else {
+          setSlideDirection('right'); // Card is done for today (removed from queue)
+        }
       }
 
       // Wait for animation to complete, then update queue
+      const animationDelay = disableAnimations ? 0 : 400;
       setTimeout(() => {
         if (result.shouldRequeue) {
           const updatedCard = result.card;
@@ -55,7 +62,7 @@ export function ReviewQueue() {
           setQueue([...restOfQueue]);
         }
         setSlideDirection(null);
-      }, 400);
+      }, animationDelay);
     } catch (error) {
       console.error('Failed to rate card:', error);
       setSlideDirection(null);
@@ -91,17 +98,23 @@ export function ReviewQueue() {
 
   const currentCard = queue[0];
 
+  const getAnimationClass = () => {
+    if (disableAnimations) return '';
+
+    const baseClasses = 'transition-all duration-300 ease-out';
+
+    if (slideDirection === 'left') {
+      return `${baseClasses} animate-slide-left`;
+    }
+    if (slideDirection === 'right') {
+      return `${baseClasses} animate-slide-right`;
+    }
+    return `${baseClasses} animate-slide-in`;
+  };
+
   return (
     <div className="flex flex-col gap-4 overflow-hidden">
-      <div
-        className={`transition-all duration-300 ease-out ${
-          slideDirection === 'left'
-            ? 'animate-slide-left'
-            : slideDirection === 'right'
-              ? 'animate-slide-right'
-              : 'animate-slide-in'
-        }`}
-      >
+      <div className={getAnimationClass()}>
         <ReviewCard key={currentCard.id} card={currentCard} onRate={handleRating} isProcessing={isProcessing} />
       </div>
       <NotesSection cardId={currentCard.id} />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Button, TextArea, TextField, Label } from 'react-aria-components';
 import { useNoteQuery, useSaveNoteMutation } from '@/hooks/useBackgroundQueries';
 import { NOTES_MAX_LENGTH } from '@/shared/notes';
 import { bounceButton } from '@/shared/styles';
@@ -42,39 +43,42 @@ export function NotesSection({ cardId }: NotesSectionProps) {
 
   return (
     <div className="border border-current rounded-lg bg-secondary overflow-hidden">
-      <button
+      <Button
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-tertiary transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
+        onPress={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
       >
         <span className="text-sm font-semibold text-primary">Notes</span>
         <span className={`text-xs text-secondary transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}>
           ▶
         </span>
-      </button>
+      </Button>
 
       {isExpanded && (
         <div className="px-4 pb-4 border-t border-current">
-          <textarea
-            className="w-full mt-3 p-2 rounded border border-current bg-tertiary text-primary text-sm resize-none focus:outline-none focus:ring-1 focus:ring-accent"
-            placeholder={isLoading ? 'Loading...' : 'Add your notes here...'}
-            rows={4}
-            value={noteText}
-            onChange={(e) => setNoteText(e.target.value)}
-            disabled={isLoading || saveNoteMutation.isPending}
-            maxLength={NOTES_MAX_LENGTH + 100} // Allow typing over limit to show error
-          />
+          <TextField className="w-full">
+            <Label className="sr-only">Note text</Label>
+            <TextArea
+              className="w-full mt-3 p-2 rounded border border-current bg-tertiary text-primary text-sm resize-none focus:outline-none focus:ring-1 focus:ring-accent"
+              placeholder={isLoading ? 'Loading...' : 'Add your notes here...'}
+              rows={4}
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              disabled={isLoading || saveNoteMutation.isPending}
+              maxLength={NOTES_MAX_LENGTH + 100} // Allow typing over limit to show error
+            />
+          </TextField>
           <div className="mt-2 flex items-center justify-between">
             <span className={`text-xs ${isOverLimit ? 'text-red-500' : 'text-secondary'}`}>
               {characterCount}/{NOTES_MAX_LENGTH}
             </span>
-            <button
+            <Button
               className={`px-4 py-1.5 rounded text-sm bg-accent text-white hover:opacity-90 disabled:opacity-50 ${bounceButton}`}
-              onClick={handleSave}
-              disabled={!canSave || saveNoteMutation.isPending}
+              onPress={handleSave}
+              isDisabled={!canSave || saveNoteMutation.isPending}
             >
               {saveNoteMutation.isPending ? 'Saving...' : 'Save'}
-            </button>
+            </Button>
           </div>
         </div>
       )}

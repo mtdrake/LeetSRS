@@ -8,6 +8,7 @@ export const queryKeys = {
   cards: ['cards'] as const,
   reviewQueue: ['reviewQueue'] as const,
   todayStats: ['todayStats'] as const,
+  note: (cardId: string) => ['note', cardId] as const,
 } as const;
 
 // Queries
@@ -32,6 +33,13 @@ export function useTodayStatsQuery() {
   return useQuery({
     queryKey: queryKeys.todayStats,
     queryFn: () => sendMessage({ type: MessageType.GET_TODAY_STATS }),
+  });
+}
+export function useNoteQuery(cardId: string) {
+  return useQuery({
+    queryKey: queryKeys.note(cardId),
+    queryFn: () => sendMessage({ type: MessageType.GET_NOTE, cardId }),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 
@@ -92,6 +100,17 @@ export function useRateCardMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.cards });
       queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });
       queryClient.invalidateQueries({ queryKey: queryKeys.todayStats });
+    },
+  });
+}
+
+export function useSaveNoteMutation(cardId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (text: string) => sendMessage({ type: MessageType.SAVE_NOTE, cardId, text }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.note(cardId) });
     },
   });
 }

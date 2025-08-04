@@ -32,13 +32,13 @@ export function ActionsSection({ onDelete, onDelay }: ActionsSectionProps) {
               <div className="flex gap-2">
                 <Button
                   className={`flex-1 px-4 py-2 rounded text-sm bg-tertiary text-primary hover:bg-accent hover:text-white transition-colors ${bounceButton}`}
-                  onPress={() => onDelay?.(1)}
+                  onPress={() => onDelay(1)}
                 >
                   1 day
                 </Button>
                 <Button
                   className={`flex-1 px-4 py-2 rounded text-sm bg-tertiary text-primary hover:bg-accent hover:text-white transition-colors ${bounceButton}`}
-                  onPress={() => onDelay?.(5)}
+                  onPress={() => onDelay(5)}
                 >
                   5 days
                 </Button>
@@ -55,7 +55,7 @@ export function ActionsSection({ onDelete, onDelay }: ActionsSectionProps) {
                     setDeleteConfirm(true);
                     setTimeout(() => setDeleteConfirm(false), 3000);
                   } else {
-                    onDelete?.();
+                    onDelete();
                     setDeleteConfirm(false);
                   }
                 }}

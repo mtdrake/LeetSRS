@@ -8,6 +8,7 @@ import { useReviewQueueQuery } from '@/hooks/useBackgroundQueries';
 import { State } from 'ts-fsrs';
 import type { Card } from '@/types';
 import { createTestWrapper } from '@/test/utils/test-wrapper';
+import { createMockCard } from '@/test/utils/card-mocks';
 
 // Mock the useReviewQueueQuery hook
 vi.mock('@/hooks/useBackgroundQueries', () => ({
@@ -20,12 +21,6 @@ describe('StatsBar', () => {
   const renderWithProviders = () => {
     return render(<StatsBar />, { wrapper: TestWrapper });
   };
-
-  const createMockCard = (state: State): Partial<Card> => ({
-    fsrs: {
-      state,
-    } as Card['fsrs'],
-  });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -80,7 +75,7 @@ describe('StatsBar', () => {
       ];
 
       vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards as Card[],
+        data: mockCards,
       } as ReturnType<typeof useReviewQueueQuery>);
 
       renderWithProviders();
@@ -97,7 +92,7 @@ describe('StatsBar', () => {
       ];
 
       vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards as Card[],
+        data: mockCards,
       } as ReturnType<typeof useReviewQueueQuery>);
 
       renderWithProviders();
@@ -115,7 +110,7 @@ describe('StatsBar', () => {
       ];
 
       vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards as Card[],
+        data: mockCards,
       } as ReturnType<typeof useReviewQueueQuery>);
 
       renderWithProviders();
@@ -132,7 +127,7 @@ describe('StatsBar', () => {
       ];
 
       vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards as Card[],
+        data: mockCards,
       } as ReturnType<typeof useReviewQueueQuery>);
 
       renderWithProviders();
@@ -150,7 +145,7 @@ describe('StatsBar', () => {
       ];
 
       vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards as Card[],
+        data: mockCards,
       } as ReturnType<typeof useReviewQueueQuery>);
 
       renderWithProviders();
@@ -177,7 +172,7 @@ describe('StatsBar', () => {
       ];
 
       vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards as Card[],
+        data: mockCards,
       } as ReturnType<typeof useReviewQueueQuery>);
 
       renderWithProviders();
@@ -192,13 +187,14 @@ describe('StatsBar', () => {
         createMockCard(State.Review),
         createMockCard(State.New),
         createMockCard(State.Learning),
-        { fsrs: { state: 999 } as unknown as Card['fsrs'] } as Partial<Card>, // Unknown state
-        { fsrs: { state: null } as unknown as Card['fsrs'] } as Partial<Card>, // Null state
-        { fsrs: {} as unknown as Card['fsrs'] } as Partial<Card>, // No state
+        // Test cards with invalid states - these should be ignored by the reducer
+        { ...createMockCard(State.New), fsrs: { state: 999 } as any }, // Unknown state
+        { ...createMockCard(State.New), fsrs: { state: null } as any }, // Null state
+        { ...createMockCard(State.New), fsrs: {} as any }, // No state property
       ];
 
       vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards as Card[],
+        data: mockCards,
       } as ReturnType<typeof useReviewQueueQuery>);
 
       renderWithProviders();
@@ -229,7 +225,7 @@ describe('StatsBar', () => {
         .map(() => createMockCard(State.Review));
 
       vi.mocked(useReviewQueueQuery).mockReturnValue({
-        data: mockCards as Card[],
+        data: mockCards,
       } as ReturnType<typeof useReviewQueueQuery>);
 
       renderWithProviders();

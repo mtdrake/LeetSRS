@@ -26,9 +26,20 @@ export function StatsBar() {
 
   const stats = cards.reduce(
     (acc, card) => {
-      if (card.fsrs.state === State.Review) acc.reviews++;
-      else if (card.fsrs.state === State.New) acc.new++;
-      else if (card.fsrs.state === State.Learning || card.fsrs.state === State.Relearning) acc.learn++;
+      switch (card.fsrs?.state) {
+        case State.Review:
+          acc.reviews++;
+          break;
+        case State.New:
+          acc.new++;
+          break;
+        case State.Learning:
+        case State.Relearning:
+          acc.learn++;
+          break;
+        default:
+          break;
+      }
       return acc;
     },
     { reviews: 0, new: 0, learn: 0 }

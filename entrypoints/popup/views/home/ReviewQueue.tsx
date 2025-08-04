@@ -62,11 +62,11 @@ export function ReviewQueue({ disableAnimations = false }: ReviewQueueProps) {
           setQueue([...restOfQueue]);
         }
         setSlideDirection(null);
+        setIsProcessing(false);
       }, animationDelay);
     } catch (error) {
       console.error('Failed to rate card:', error);
       setSlideDirection(null);
-    } finally {
       setIsProcessing(false);
     }
   };

@@ -3,12 +3,11 @@ import { Button } from 'react-aria-components';
 import { bounceButton } from '@/shared/styles';
 
 interface ActionsSectionProps {
-  slug: string;
-  onDelete?: () => void;
-  onDelay?: (days: number) => void;
+  onDelete: () => void;
+  onDelay: (days: number) => void;
 }
 
-export function ActionsSection({ slug: _slug, onDelete, onDelay }: ActionsSectionProps) {
+export function ActionsSection({ onDelete, onDelay }: ActionsSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 

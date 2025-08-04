@@ -182,7 +182,7 @@ export function ReviewQueue({ disableAnimations = false }: ReviewQueueProps) {
         <ReviewCard key={currentCard.id} card={currentCard} onRate={handleRating} isProcessing={isProcessing} />
       </div>
       <NotesSection cardId={currentCard.id} />
-      <ActionsSection slug={currentCard.slug} onDelete={handleDelete} onDelay={handleDelay} />
+      <ActionsSection onDelete={handleDelete} onDelay={handleDelay} />
     </div>
   );
 }

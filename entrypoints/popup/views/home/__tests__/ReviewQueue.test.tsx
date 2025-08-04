@@ -5,7 +5,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ReviewQueue } from '../ReviewQueue';
 import { createTestWrapper } from '@/test/utils/test-wrapper';
-import { useReviewQueueQuery, useRateCardMutation, useRemoveCardMutation } from '@/hooks/useBackgroundQueries';
+import {
+  useReviewQueueQuery,
+  useRateCardMutation,
+  useRemoveCardMutation,
+  useDelayCardMutation,
+} from '@/hooks/useBackgroundQueries';
 import { createQueryMock, createMutationMock } from '@/test/utils/query-mocks';
 import { createMockCard } from '@/test/utils/card-mocks';
 import { Rating, State } from 'ts-fsrs';
@@ -15,6 +20,7 @@ vi.mock('@/hooks/useBackgroundQueries', () => ({
   useReviewQueueQuery: vi.fn(),
   useRateCardMutation: vi.fn(),
   useRemoveCardMutation: vi.fn(),
+  useDelayCardMutation: vi.fn(),
   queryKeys: {
     reviewQueue: ['reviewQueue'],
     cards: ['cards'],
@@ -66,11 +72,16 @@ vi.mock('../NotesSection', () => ({
 }));
 
 vi.mock('../ActionsSection', () => ({
-  ActionsSection: ({ slug, onDelete }: { slug: string; onDelete?: () => void }) => (
+  ActionsSection: ({ onDelete, onDelay }: { onDelete: () => void; onDelay: (days: number) => void }) => (
     <div data-testid="actions-section">
-      Actions for {slug}
       <button onClick={onDelete} data-testid="delete-button">
         Delete
+      </button>
+      <button onClick={() => onDelay(1)} data-testid="delay-1-button">
+        Delay 1 day
+      </button>
+      <button onClick={() => onDelay(5)} data-testid="delay-5-button">
+        Delay 5 days
       </button>
     </div>
   ),
@@ -130,6 +141,14 @@ describe('ReviewQueue', () => {
         mutateAsync: vi.fn(),
         isPending: false,
       }) as ReturnType<typeof useRemoveCardMutation>
+    );
+
+    // Default mock for delay mutation
+    vi.mocked(useDelayCardMutation).mockReturnValue(
+      createMutationMock({
+        mutateAsync: vi.fn(),
+        isPending: false,
+      }) as ReturnType<typeof useDelayCardMutation>
     );
   });
 
@@ -769,6 +788,260 @@ describe('ReviewQueue', () => {
     });
   });
 
+  describe('Card Delay', () => {
+    let mockDelayMutateAsync: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      mockDelayMutateAsync = vi.fn();
+      vi.mocked(useDelayCardMutation).mockReturnValue(
+        createMutationMock({
+          mutateAsync: mockDelayMutateAsync,
+          isPending: false,
+        }) as ReturnType<typeof useDelayCardMutation>
+      );
+    });
+
+    it('should delay card by 1 day when delay 1 button is clicked', async () => {
+      const delayedCard = {
+        ...mockCards[0],
+        fsrs: {
+          ...mockCards[0].fsrs,
+          due: new Date(Date.now() + 86400000), // 1 day from now
+        },
+      };
+      mockDelayMutateAsync.mockResolvedValue(delayedCard);
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      // Click delay 1 day button
+      const delay1Button = screen.getByTestId('delay-1-button');
+      fireEvent.click(delay1Button);
+
+      // Wait for the card to be removed and next card to appear
+      await waitFor(() => {
+        expect(screen.queryByText('Two Sum')).not.toBeInTheDocument();
+        expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
+      });
+
+      // Verify the mutation was called with correct params
+      expect(mockDelayMutateAsync).toHaveBeenCalledWith({
+        slug: 'two-sum',
+        days: 1,
+      });
+    });
+
+    it('should delay card by 5 days when delay 5 button is clicked', async () => {
+      const delayedCard = {
+        ...mockCards[0],
+        fsrs: {
+          ...mockCards[0].fsrs,
+          due: new Date(Date.now() + 432000000), // 5 days from now
+        },
+      };
+      mockDelayMutateAsync.mockResolvedValue(delayedCard);
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      // Click delay 5 days button
+      const delay5Button = screen.getByTestId('delay-5-button');
+      fireEvent.click(delay5Button);
+
+      // Wait for the card to be removed and next card to appear
+      await waitFor(() => {
+        expect(screen.queryByText('Two Sum')).not.toBeInTheDocument();
+        expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
+      });
+
+      // Verify the mutation was called with correct params
+      expect(mockDelayMutateAsync).toHaveBeenCalledWith({
+        slug: 'two-sum',
+        days: 5,
+      });
+    });
+
+    it('should show empty state when last card is delayed', async () => {
+      // Start with only one card
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock([mockCards[0]]) as ReturnType<typeof useReviewQueueQuery>
+      );
+
+      const delayedCard = {
+        ...mockCards[0],
+        fsrs: {
+          ...mockCards[0].fsrs,
+          due: new Date(Date.now() + 86400000),
+        },
+      };
+      mockDelayMutateAsync.mockResolvedValue(delayedCard);
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      // Click delay button
+      const delay1Button = screen.getByTestId('delay-1-button');
+      fireEvent.click(delay1Button);
+
+      // Should show empty state
+      await waitFor(() => {
+        expect(screen.getByText('No cards to review!')).toBeInTheDocument();
+        expect(screen.getByText('Check back tomorrow for more reviews.')).toBeInTheDocument();
+      });
+
+      expect(mockDelayMutateAsync).toHaveBeenCalledWith({
+        slug: 'two-sum',
+        days: 1,
+      });
+    });
+
+    it('should handle delay errors gracefully', async () => {
+      mockDelayMutateAsync.mockRejectedValue(new Error('Failed to delay card'));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      const delay1Button = screen.getByTestId('delay-1-button');
+      fireEvent.click(delay1Button);
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith('Failed to delay card:', expect.any(Error));
+      });
+
+      // Card should still be displayed (not removed from queue)
+      expect(screen.getByText('Two Sum')).toBeInTheDocument();
+
+      // Should be able to interact with card again after error
+      const goodButton = screen.getByRole('button', { name: 'Good' });
+      expect(goodButton).not.toBeDisabled();
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should disable all interactions while delaying', async () => {
+      // Make delay never resolve
+      mockDelayMutateAsync.mockImplementation(() => new Promise(() => {}));
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      const delay1Button = screen.getByTestId('delay-1-button');
+      const againButton = screen.getByRole('button', { name: 'Again' });
+      const hardButton = screen.getByRole('button', { name: 'Hard' });
+      const goodButton = screen.getByRole('button', { name: 'Good' });
+      const easyButton = screen.getByRole('button', { name: 'Easy' });
+
+      // All buttons should be enabled initially
+      expect(againButton).not.toBeDisabled();
+      expect(hardButton).not.toBeDisabled();
+      expect(goodButton).not.toBeDisabled();
+      expect(easyButton).not.toBeDisabled();
+
+      // Click delay button
+      fireEvent.click(delay1Button);
+
+      // All rating buttons should be disabled while processing
+      await waitFor(() => {
+        expect(againButton).toBeDisabled();
+        expect(hardButton).toBeDisabled();
+        expect(goodButton).toBeDisabled();
+        expect(easyButton).toBeDisabled();
+      });
+    });
+
+    it('should handle rapid delay clicks correctly', async () => {
+      // Make delay take some time
+      mockDelayMutateAsync.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve(mockCards[0]), 100))
+      );
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      const delay1Button = screen.getByTestId('delay-1-button');
+      const delay5Button = screen.getByTestId('delay-5-button');
+
+      // Click delay buttons multiple times rapidly
+      fireEvent.click(delay1Button);
+      fireEvent.click(delay5Button);
+      fireEvent.click(delay1Button);
+
+      // Should only have called delay mutation once
+      expect(mockDelayMutateAsync).toHaveBeenCalledTimes(1);
+
+      // Wait for delay to complete
+      await waitFor(() => {
+        expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
+      });
+
+      // Should still only have been called once
+      expect(mockDelayMutateAsync).toHaveBeenCalledTimes(1);
+    });
+
+    it('should maintain queue state after failed delay', async () => {
+      mockDelayMutateAsync.mockRejectedValue(new Error('Network error'));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      const delay1Button = screen.getByTestId('delay-1-button');
+      fireEvent.click(delay1Button);
+
+      // Wait for error
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      // Card should still be the first card
+      expect(screen.getByText('Two Sum')).toBeInTheDocument();
+
+      // Now successfully rate the card
+      mockMutateAsync.mockResolvedValue({
+        card: mockCards[0],
+        shouldRequeue: false,
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Good' }));
+
+      // Should move to next card normally
+      await waitFor(() => {
+        expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
+      });
+
+      consoleSpy.mockRestore();
+    });
+  });
+
   describe('Component Integration', () => {
     it('should pass correct props to ReviewCard', async () => {
       render(<ReviewQueue disableAnimations />, { wrapper });
@@ -781,24 +1054,15 @@ describe('ReviewQueue', () => {
       });
     });
 
-    it('should pass correct slug to ActionsSection', async () => {
+    it('should pass correct callbacks to ActionsSection', async () => {
       render(<ReviewQueue disableAnimations />, { wrapper });
 
       // Wait for initial render
       await waitFor(() => {
-        expect(screen.getByText('Actions for two-sum')).toBeInTheDocument();
-      });
-
-      // Rate the card to see the next one
-      mockMutateAsync.mockResolvedValue({
-        card: mockCards[0],
-        shouldRequeue: false,
-      });
-
-      fireEvent.click(screen.getByRole('button', { name: 'Good' }));
-
-      await waitFor(() => {
-        expect(screen.getByText('Actions for add-two-numbers')).toBeInTheDocument();
+        expect(screen.getByTestId('actions-section')).toBeInTheDocument();
+        expect(screen.getByTestId('delete-button')).toBeInTheDocument();
+        expect(screen.getByTestId('delay-1-button')).toBeInTheDocument();
+        expect(screen.getByTestId('delay-5-button')).toBeInTheDocument();
       });
     });
 

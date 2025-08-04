@@ -50,15 +50,15 @@ export function ReviewCard({ card }: ReviewCardProps) {
         <span className={`text-xs px-2 py-1 rounded text-white ${difficultyColor}`}>{card.difficulty}</span>
       </div>
 
-      <div className="flex justify-center pb-3 -mt-1">
+      <div className="flex justify-center pb-3 -mt-1 text-center">
         <a
           href={`https://leetcode.com/problems/${card.slug}/description/`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-lg font-semibold text-primary flex items-center gap-1 hover:text-accent transition-colors"
+          className="text-lg font-semibold text-primary group"
         >
           {card.name}
-          <FaArrowUpRightFromSquare className="text-xs" />
+          <FaArrowUpRightFromSquare className="inline ml-1.5 text-xs opacity-60 group-hover:opacity-100 transition-opacity" />
         </a>
       </div>
 

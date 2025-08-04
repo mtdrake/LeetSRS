@@ -11,9 +11,10 @@ export const bounceEffect =
 
 /**
  * Bounce effect for disabled state - prevents effects when disabled
+ * Uses data-[disabled] for React Aria Components compatibility
  */
 export const bounceEffectDisabled =
-  'disabled:shadow-none disabled:hover:shadow-none disabled:active:translate-y-0 disabled:cursor-not-allowed';
+  'data-[disabled]:shadow-none data-[disabled]:hover:shadow-none data-[disabled]:active:translate-y-0 data-[disabled]:cursor-not-allowed';
 
 /**
  * Complete bounce button style including disabled states and cursor

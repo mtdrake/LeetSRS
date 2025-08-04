@@ -96,7 +96,7 @@ export function NotesSection({ cardId }: NotesSectionProps) {
             <div className="flex gap-2">
               {hasExistingNote && (
                 <Button
-                  className={`px-4 py-1.5 rounded text-sm ${deleteConfirm ? 'bg-ultra-danger' : 'bg-danger'} text-white hover:opacity-90 disabled:opacity-50 ${bounceButton}`}
+                  className={`px-4 py-1.5 rounded text-sm ${deleteConfirm ? 'bg-ultra-danger' : 'bg-danger'} text-white hover:opacity-90 data-[disabled]:opacity-50 ${bounceButton}`}
                   onPress={handleDelete}
                   isDisabled={deleteNoteMutation.isPending}
                 >
@@ -104,7 +104,7 @@ export function NotesSection({ cardId }: NotesSectionProps) {
                 </Button>
               )}
               <Button
-                className={`px-4 py-1.5 rounded text-sm bg-accent text-white hover:opacity-90 disabled:opacity-50 ${bounceButton}`}
+                className={`px-4 py-1.5 rounded text-sm bg-accent text-white hover:opacity-90 data-[disabled]:opacity-50 ${bounceButton}`}
                 onPress={handleSave}
                 isDisabled={!canSave || saveNoteMutation.isPending}
               >

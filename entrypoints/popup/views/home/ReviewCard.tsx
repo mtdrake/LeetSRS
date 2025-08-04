@@ -3,9 +3,16 @@ import { Difficulty, type Card } from '@/types';
 import { useRateCardMutation } from '@/hooks/useBackgroundQueries';
 import { Rating } from 'ts-fsrs';
 import type { Grade } from 'ts-fsrs';
+import { Button } from 'react-aria-components';
 
 type ReviewCardProps = {
   card: Pick<Card, 'slug' | 'leetcodeId' | 'name' | 'difficulty'>;
+};
+
+type RatingButtonConfig = {
+  rating: Grade;
+  label: string;
+  colorClass: string;
 };
 
 const difficultyColorMap: Record<Difficulty, string> = {
@@ -13,6 +20,13 @@ const difficultyColorMap: Record<Difficulty, string> = {
   Medium: 'bg-difficulty-medium',
   Hard: 'bg-difficulty-hard',
 };
+
+const ratingButtons: RatingButtonConfig[] = [
+  { rating: Rating.Again, label: 'Again', colorClass: 'bg-rating-again' },
+  { rating: Rating.Hard, label: 'Hard', colorClass: 'bg-rating-hard' },
+  { rating: Rating.Good, label: 'Good', colorClass: 'bg-rating-good' },
+  { rating: Rating.Easy, label: 'Easy', colorClass: 'bg-rating-easy' },
+];
 
 export function ReviewCard({ card }: ReviewCardProps) {
   const rateCardMutation = useRateCardMutation();
@@ -48,30 +62,15 @@ export function ReviewCard({ card }: ReviewCardProps) {
       </div>
 
       <div className="flex gap-2 justify-center">
-        <button
-          onClick={() => handleRating(Rating.Again)}
-          className="w-16 py-1.5 rounded text-sm bg-rating-again text-white hover:opacity-80 transition-opacity"
-        >
-          Again
-        </button>
-        <button
-          onClick={() => handleRating(Rating.Hard)}
-          className="w-16 py-1.5 rounded text-sm bg-rating-hard text-white hover:opacity-80 transition-opacity"
-        >
-          Hard
-        </button>
-        <button
-          onClick={() => handleRating(Rating.Good)}
-          className="w-16 py-1.5 rounded text-sm bg-rating-good text-white hover:opacity-80 transition-opacity"
-        >
-          Good
-        </button>
-        <button
-          onClick={() => handleRating(Rating.Easy)}
-          className="w-16 py-1.5 rounded text-sm bg-rating-easy text-white hover:opacity-80 transition-opacity"
-        >
-          Easy
-        </button>
+        {ratingButtons.map(({ rating, label, colorClass }) => (
+          <Button
+            key={label}
+            onPress={() => handleRating(rating)}
+            className={`w-16 py-1.5 rounded text-sm ${colorClass} text-white hover:opacity-80 transition-opacity cursor-pointer`}
+          >
+            {label}
+          </Button>
+        ))}
       </div>
     </div>
   );

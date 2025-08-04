@@ -67,7 +67,7 @@ export function ReviewCard({ card }: ReviewCardProps) {
           <Button
             key={label}
             onPress={() => handleRating(rating)}
-            className={`w-16 py-1.5 rounded text-sm ${colorClass} text-white hover:opacity-80 transition-opacity cursor-pointer`}
+            className={`w-16 py-1.5 rounded text-sm ${colorClass} text-white hover:opacity-90 transition-all cursor-pointer shadow-sm hover:shadow-md active:shadow-none active:translate-y-[1px]`}
           >
             {label}
           </Button>

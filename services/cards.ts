@@ -127,10 +127,31 @@ export async function rateCard(
   return card;
 }
 
+export function shouldReview(card: Card): boolean {
+  if (card.fsrs.state === FsrsState.New) {
+    return false;
+  }
+
+  const now = new Date();
+  const dueDate = new Date(card.fsrs.due);
+
+  // Compare dates in user's local timezone
+  const formatLocalDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = formatLocalDate(now);
+  const dueStr = formatLocalDate(dueDate);
+
+  return dueStr <= todayStr;
+}
+
 export async function getReviewQueue(): Promise<Card[]> {
   const allCards = await getAllCards();
-  const now = new Date();
-  const reviewCards = allCards.filter((card) => card.fsrs.state !== FsrsState.New && card.fsrs.due <= now);
+  const reviewCards = allCards.filter(shouldReview);
 
   // Get today's stats to determine how many new cards have already been done
   const todayStats = await getTodayStats();

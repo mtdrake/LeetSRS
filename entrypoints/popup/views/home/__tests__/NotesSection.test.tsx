@@ -328,7 +328,7 @@ describe('NotesSection', () => {
     });
   });
 
-  it('should call delete mutation when delete button is clicked', async () => {
+  it('should require confirmation before delete', async () => {
     const existingNote: Note = {
       text: 'Note to be deleted',
     };
@@ -347,7 +347,17 @@ describe('NotesSection', () => {
     });
 
     const deleteButton = screen.getByRole('button', { name: 'Delete' });
+
+    // First click should show confirmation
     fireEvent.click(deleteButton);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Confirm?' })).toBeInTheDocument();
+    });
+    expect(mockDeleteMutateAsync).not.toHaveBeenCalled();
+
+    // Second click should actually delete
+    const confirmButton = screen.getByRole('button', { name: 'Confirm?' });
+    fireEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(mockDeleteMutateAsync).toHaveBeenCalled();
@@ -375,6 +385,13 @@ describe('NotesSection', () => {
 
     const deleteButton = screen.getByRole('button', { name: 'Delete' });
     fireEvent.click(deleteButton);
+
+    // Click confirm
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Confirm?' })).toBeInTheDocument();
+    });
+    const confirmButton = screen.getByRole('button', { name: 'Confirm?' });
+    fireEvent.click(confirmButton);
 
     await waitFor(() => {
       const textarea = screen.getByPlaceholderText('Add your notes here...') as HTMLTextAreaElement;
@@ -431,6 +448,13 @@ describe('NotesSection', () => {
 
     const deleteButton = screen.getByRole('button', { name: 'Delete' });
     fireEvent.click(deleteButton);
+
+    // Click confirm
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Confirm?' })).toBeInTheDocument();
+    });
+    const confirmButton = screen.getByRole('button', { name: 'Confirm?' });
+    fireEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith('Failed to delete note:', expect.any(Error));

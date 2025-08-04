@@ -11,6 +11,7 @@ interface NotesSectionProps {
 export function NotesSection({ cardId }: NotesSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [noteText, setNoteText] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   const { data: note, isLoading, error } = useNoteQuery(cardId);
   const saveNoteMutation = useSaveNoteMutation(cardId);
@@ -20,6 +21,7 @@ export function NotesSection({ cardId }: NotesSectionProps) {
   useEffect(() => {
     const text = note?.text || '';
     setNoteText(text);
+    setDeleteConfirm(false);
   }, [note]);
 
   const handleSave = async () => {
@@ -33,11 +35,19 @@ export function NotesSection({ cardId }: NotesSectionProps) {
   };
 
   const handleDelete = async () => {
+    if (!deleteConfirm) {
+      setDeleteConfirm(true);
+      setTimeout(() => setDeleteConfirm(false), 3000);
+      return;
+    }
+
     try {
       await deleteNoteMutation.mutateAsync();
       setNoteText('');
     } catch (error) {
       console.error('Failed to delete note:', error);
+    } finally {
+      setDeleteConfirm(false);
     }
   };
 
@@ -86,11 +96,11 @@ export function NotesSection({ cardId }: NotesSectionProps) {
             <div className="flex gap-2">
               {hasExistingNote && (
                 <Button
-                  className={`px-4 py-1.5 rounded text-sm bg-danger text-white hover:opacity-90 disabled:opacity-50 ${bounceButton}`}
+                  className={`px-4 py-1.5 rounded text-sm ${deleteConfirm ? 'bg-ultra-danger' : 'bg-danger'} text-white hover:opacity-90 disabled:opacity-50 ${bounceButton}`}
                   onPress={handleDelete}
                   isDisabled={deleteNoteMutation.isPending}
                 >
-                  {deleteNoteMutation.isPending ? 'Deleting...' : 'Delete'}
+                  {deleteNoteMutation.isPending ? 'Deleting...' : deleteConfirm ? 'Confirm?' : 'Delete'}
                 </Button>
               )}
               <Button

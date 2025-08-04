@@ -103,7 +103,7 @@ export async function rateCard(
   rating: Grade,
   leetcodeId: string,
   difficulty: Difficulty
-): Promise<Card> {
+): Promise<{ card: Card; shouldRequeue: boolean }> {
   const cards = await getCards();
 
   let card: Card;
@@ -124,7 +124,9 @@ export async function rateCard(
   // Update stats tracking
   await updateStats(rating, isNewCard);
 
-  return card;
+  const shouldRequeue = shouldReview(card);
+
+  return { card, shouldRequeue };
 }
 
 export function shouldReview(card: Card): boolean {

@@ -411,12 +411,12 @@ describe('rateCard', () => {
   });
 
   it('should create a new card if it does not exist', async () => {
-    const card = await rateCard('new-problem', 'New Problem', Rating.Good, '9999', 'Medium');
+    const result = await rateCard('new-problem', 'New Problem', Rating.Good, '9999', 'Medium');
 
-    expect(card.slug).toBe('new-problem');
-    expect(card.name).toBe('New Problem');
-    expect(card.createdAt).toBeInstanceOf(Date);
-    expect(card.fsrs).toBeDefined();
+    expect(result.card.slug).toBe('new-problem');
+    expect(result.card.name).toBe('New Problem');
+    expect(result.card.createdAt).toBeInstanceOf(Date);
+    expect(result.card.fsrs).toBeDefined();
 
     // Verify the card was stored
     const cards = await storage.getItem<Record<string, StoredCard>>(STORAGE_KEYS.cards);
@@ -430,15 +430,15 @@ describe('rateCard', () => {
     const initialStability = initialCard.fsrs.stability;
 
     // Rate the card as Good
-    const ratedCard = await rateCard('two-sum', 'Two Sum', Rating.Good, '1', 'Easy');
+    const result = await rateCard('two-sum', 'Two Sum', Rating.Good, '1', 'Easy');
 
-    expect(ratedCard.slug).toBe('two-sum');
-    expect(ratedCard.name).toBe('Two Sum');
+    expect(result.card.slug).toBe('two-sum');
+    expect(result.card.name).toBe('Two Sum');
 
     // FSRS should update the card
-    expect(ratedCard.fsrs.reps).toBeGreaterThan(initialReps);
-    expect(ratedCard.fsrs.stability).not.toBe(initialStability);
-    expect(ratedCard.fsrs.last_review).toBeInstanceOf(Date);
+    expect(result.card.fsrs.reps).toBeGreaterThan(initialReps);
+    expect(result.card.fsrs.stability).not.toBe(initialStability);
+    expect(result.card.fsrs.last_review).toBeInstanceOf(Date);
   });
 
   it('should handle different grades correctly', async () => {
@@ -446,23 +446,23 @@ describe('rateCard', () => {
     await addCard('test-problem', 'Test Problem', '999', 'Medium');
 
     // Rate as Again (fail)
-    const failedCard = await rateCard('test-problem', 'Test Problem', Rating.Again, '999', 'Medium');
-    expect(failedCard.fsrs.reps).toBe(1);
-    expect(failedCard.fsrs.lapses).toBe(0);
+    const failedResult = await rateCard('test-problem', 'Test Problem', Rating.Again, '999', 'Medium');
+    expect(failedResult.card.fsrs.reps).toBe(1);
+    expect(failedResult.card.fsrs.lapses).toBe(0);
 
     // Rate as Easy
-    const easyCard = await rateCard('test-problem', 'Test Problem', Rating.Easy, '999', 'Medium');
-    expect(easyCard.fsrs.reps).toBeGreaterThan(0);
+    const easyResult = await rateCard('test-problem', 'Test Problem', Rating.Easy, '999', 'Medium');
+    expect(easyResult.card.fsrs.reps).toBeGreaterThan(0);
   });
 
   it('should update the due date after rating', async () => {
     const card = await addCard('merge-sort', 'Merge Sort', '88', 'Hard');
     const initialDue = card.fsrs.due;
 
-    const ratedCard = await rateCard('merge-sort', 'Merge Sort', Rating.Good, '88', 'Hard');
+    const result = await rateCard('merge-sort', 'Merge Sort', Rating.Good, '88', 'Hard');
 
-    expect(ratedCard.fsrs.due).toBeInstanceOf(Date);
-    expect(ratedCard.fsrs.due.getTime()).toBeGreaterThan(initialDue.getTime());
+    expect(result.card.fsrs.due).toBeInstanceOf(Date);
+    expect(result.card.fsrs.due.getTime()).toBeGreaterThan(initialDue.getTime());
   });
 
   it('should persist card updates to storage', async () => {
@@ -483,17 +483,17 @@ describe('rateCard', () => {
     const slug = 'dynamic-programming';
 
     // First rating (creates card)
-    const card1 = await rateCard(slug, 'Multi Rate', Rating.Again, '9998', 'Hard');
-    expect(card1.fsrs.reps).toBe(1);
-    expect(card1.fsrs.lapses).toBe(0);
+    const result1 = await rateCard(slug, 'Multi Rate', Rating.Again, '9998', 'Hard');
+    expect(result1.card.fsrs.reps).toBe(1);
+    expect(result1.card.fsrs.lapses).toBe(0);
 
     // Second rating
-    const card2 = await rateCard(slug, 'Multi Rate', Rating.Hard, '9998', 'Hard');
-    expect(card2.fsrs.reps).toBeGreaterThan(0);
+    const result2 = await rateCard(slug, 'Multi Rate', Rating.Hard, '9998', 'Hard');
+    expect(result2.card.fsrs.reps).toBeGreaterThan(0);
 
     // Third rating
-    const card3 = await rateCard(slug, 'Multi Rate', Rating.Good, '9998', 'Hard');
-    expect(card3.fsrs.reps).toBeGreaterThan(card2.fsrs.reps);
+    const result3 = await rateCard(slug, 'Multi Rate', Rating.Good, '9998', 'Hard');
+    expect(result3.card.fsrs.reps).toBeGreaterThan(result2.card.fsrs.reps);
 
     // Verify only one card exists in storage
     const allCards = await getAllCards();
@@ -514,6 +514,22 @@ describe('rateCard', () => {
     expect(todayStats?.newCards).toBe(1);
     expect(todayStats?.reviewedCards).toBe(0);
     expect(todayStats?.gradeBreakdown[Rating.Good]).toBe(1);
+  });
+
+  it('should return shouldRequeue based on whether card is still due today', async () => {
+    // Test with Rating.Again - card should still be due today
+    const againResult = await rateCard('test-again', 'Test Again', Rating.Again, '2001', 'Easy');
+    expect(againResult.shouldRequeue).toBe(true); // Again typically schedules for same day
+
+    // Test with Rating.Good on a new card - might schedule for tomorrow
+    const goodResult = await rateCard('test-good', 'Test Good', Rating.Good, '2002', 'Medium');
+    // New cards rated Good typically get scheduled for the next day or later
+    // The exact value depends on FSRS algorithm, but we can verify the field exists
+    expect(typeof goodResult.shouldRequeue).toBe('boolean');
+
+    // Test with Rating.Hard - often keeps cards due today
+    const hardResult = await rateCard('test-hard', 'Test Hard', Rating.Hard, '2003', 'Hard');
+    expect(typeof hardResult.shouldRequeue).toBe('boolean');
   });
 
   it('should update stats correctly for review cards vs new cards', async () => {

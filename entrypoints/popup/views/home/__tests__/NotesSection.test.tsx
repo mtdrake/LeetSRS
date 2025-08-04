@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { NotesSection } from '../NotesSection';
 import { createTestWrapper } from '@/test/utils/test-wrapper';
-import { useNoteQuery, useSaveNoteMutation } from '@/hooks/useBackgroundQueries';
+import { useNoteQuery, useSaveNoteMutation, useDeleteNoteMutation } from '@/hooks/useBackgroundQueries';
 import type { Note } from '@/shared/notes';
 import { createQueryMock, createMutationMock } from '@/test/utils/query-mocks';
 
@@ -13,12 +13,14 @@ import { createQueryMock, createMutationMock } from '@/test/utils/query-mocks';
 vi.mock('@/hooks/useBackgroundQueries', () => ({
   useNoteQuery: vi.fn(),
   useSaveNoteMutation: vi.fn(),
+  useDeleteNoteMutation: vi.fn(),
 }));
 
 describe('NotesSection', () => {
   const mockCardId = 'test-card-123';
   const { wrapper } = createTestWrapper();
   const mockMutateAsync = vi.fn();
+  const mockDeleteMutateAsync = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -32,6 +34,14 @@ describe('NotesSection', () => {
         mutateAsync: mockMutateAsync,
         isPending: false,
       }) as ReturnType<typeof useSaveNoteMutation>
+    );
+
+    // Default mock for delete mutation
+    vi.mocked(useDeleteNoteMutation).mockReturnValue(
+      createMutationMock({
+        mutateAsync: mockDeleteMutateAsync,
+        isPending: false,
+      }) as ReturnType<typeof useDeleteNoteMutation>
     );
   });
 
@@ -87,7 +97,7 @@ describe('NotesSection', () => {
 
     const charCount = screen.getByText('501/500');
     expect(charCount).toBeInTheDocument();
-    expect(charCount).toHaveClass('text-red-500');
+    expect(charCount).toHaveClass('text-danger');
   });
 
   it('should disable save button when no changes', async () => {
@@ -285,5 +295,151 @@ describe('NotesSection', () => {
 
     const saveButton = screen.getByRole('button', { name: 'Save' });
     expect(saveButton).toBeDisabled(); // Should be disabled for empty text
+  });
+
+  it('should not show delete button when no existing note', async () => {
+    render(<NotesSection cardId={mockCardId} />, { wrapper });
+
+    const expandButton = screen.getByRole('button', { expanded: false });
+    fireEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Add your notes here...')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+  });
+
+  it('should show delete button when there is an existing note', async () => {
+    const existingNote: Note = {
+      text: 'This is an existing note',
+    };
+
+    vi.mocked(useNoteQuery).mockReturnValue(createQueryMock(existingNote) as ReturnType<typeof useNoteQuery>);
+
+    const { rerender } = render(<NotesSection cardId={mockCardId} />, { wrapper });
+    rerender(<NotesSection cardId={mockCardId} />);
+
+    const expandButton = screen.getByRole('button', { expanded: false });
+    fireEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    });
+  });
+
+  it('should call delete mutation when delete button is clicked', async () => {
+    const existingNote: Note = {
+      text: 'Note to be deleted',
+    };
+
+    vi.mocked(useNoteQuery).mockReturnValue(createQueryMock(existingNote) as ReturnType<typeof useNoteQuery>);
+    mockDeleteMutateAsync.mockResolvedValue(undefined);
+
+    const { rerender } = render(<NotesSection cardId={mockCardId} />, { wrapper });
+    rerender(<NotesSection cardId={mockCardId} />);
+
+    const expandButton = screen.getByRole('button', { expanded: false });
+    fireEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(mockDeleteMutateAsync).toHaveBeenCalled();
+    });
+  });
+
+  it('should clear text area after successful delete', async () => {
+    const existingNote: Note = {
+      text: 'Note to be deleted',
+    };
+
+    vi.mocked(useNoteQuery).mockReturnValue(createQueryMock(existingNote) as ReturnType<typeof useNoteQuery>);
+    mockDeleteMutateAsync.mockResolvedValue(undefined);
+
+    const { rerender } = render(<NotesSection cardId={mockCardId} />, { wrapper });
+    rerender(<NotesSection cardId={mockCardId} />);
+
+    const expandButton = screen.getByRole('button', { expanded: false });
+    fireEvent.click(expandButton);
+
+    await waitFor(() => {
+      const textarea = screen.getByPlaceholderText('Add your notes here...') as HTMLTextAreaElement;
+      expect(textarea.value).toBe('Note to be deleted');
+    });
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      const textarea = screen.getByPlaceholderText('Add your notes here...') as HTMLTextAreaElement;
+      expect(textarea.value).toBe('');
+    });
+  });
+
+  it('should disable delete button while deletion is pending', async () => {
+    const existingNote: Note = {
+      text: 'Note being deleted',
+    };
+
+    vi.mocked(useNoteQuery).mockReturnValue(createQueryMock(existingNote) as ReturnType<typeof useNoteQuery>);
+
+    // Mock delete mutation as pending
+    vi.mocked(useDeleteNoteMutation).mockReturnValue(
+      createMutationMock({
+        mutateAsync: mockDeleteMutateAsync,
+        isPending: true,
+      }) as ReturnType<typeof useDeleteNoteMutation>
+    );
+
+    const { rerender } = render(<NotesSection cardId={mockCardId} />, { wrapper });
+    rerender(<NotesSection cardId={mockCardId} />);
+
+    const expandButton = screen.getByRole('button', { expanded: false });
+    fireEvent.click(expandButton);
+
+    await waitFor(() => {
+      const deleteButton = screen.getByRole('button', { name: 'Deleting...' });
+      expect(deleteButton).toBeDisabled();
+    });
+  });
+
+  it('should handle delete error gracefully', async () => {
+    const existingNote: Note = {
+      text: 'Note that fails to delete',
+    };
+
+    vi.mocked(useNoteQuery).mockReturnValue(createQueryMock(existingNote) as ReturnType<typeof useNoteQuery>);
+    mockDeleteMutateAsync.mockRejectedValue(new Error('Delete failed'));
+
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const { rerender } = render(<NotesSection cardId={mockCardId} />, { wrapper });
+    rerender(<NotesSection cardId={mockCardId} />);
+
+    const expandButton = screen.getByRole('button', { expanded: false });
+    fireEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to delete note:', expect.any(Error));
+    });
+
+    // Text should remain unchanged after delete error
+    const textarea = screen.getByPlaceholderText('Add your notes here...') as HTMLTextAreaElement;
+    expect(textarea.value).toBe('Note that fails to delete');
+
+    consoleSpy.mockRestore();
   });
 });

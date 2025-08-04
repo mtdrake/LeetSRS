@@ -114,3 +114,14 @@ export function useSaveNoteMutation(cardId: string) {
     },
   });
 }
+
+export function useDeleteNoteMutation(cardId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => sendMessage({ type: MessageType.DELETE_NOTE, cardId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.note(cardId) });
+    },
+  });
+}

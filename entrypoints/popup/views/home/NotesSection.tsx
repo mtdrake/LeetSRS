@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button, TextArea, TextField, Label } from 'react-aria-components';
-import { useNoteQuery, useSaveNoteMutation } from '@/hooks/useBackgroundQueries';
+import { useNoteQuery, useSaveNoteMutation, useDeleteNoteMutation } from '@/hooks/useBackgroundQueries';
 import { NOTES_MAX_LENGTH } from '@/shared/notes';
 import { bounceButton } from '@/shared/styles';
 
@@ -14,6 +14,7 @@ export function NotesSection({ cardId }: NotesSectionProps) {
 
   const { data: note, isLoading, error } = useNoteQuery(cardId);
   const saveNoteMutation = useSaveNoteMutation(cardId);
+  const deleteNoteMutation = useDeleteNoteMutation(cardId);
 
   // Sync fetched note with local state
   useEffect(() => {
@@ -31,11 +32,21 @@ export function NotesSection({ cardId }: NotesSectionProps) {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await deleteNoteMutation.mutateAsync();
+      setNoteText('');
+    } catch (error) {
+      console.error('Failed to delete note:', error);
+    }
+  };
+
   const originalText = note?.text || '';
   const characterCount = noteText.length;
   const isOverLimit = characterCount > NOTES_MAX_LENGTH;
   const hasChanges = noteText !== originalText;
   const canSave = hasChanges && !isOverLimit && noteText.length > 0;
+  const hasExistingNote = originalText.length > 0;
 
   if (error) {
     console.error('Failed to load note:', error);
@@ -69,16 +80,27 @@ export function NotesSection({ cardId }: NotesSectionProps) {
             />
           </TextField>
           <div className="mt-2 flex items-center justify-between">
-            <span className={`text-xs ${isOverLimit ? 'text-red-500' : 'text-secondary'}`}>
+            <span className={`text-xs ${isOverLimit ? 'text-danger' : 'text-secondary'}`}>
               {characterCount}/{NOTES_MAX_LENGTH}
             </span>
-            <Button
-              className={`px-4 py-1.5 rounded text-sm bg-accent text-white hover:opacity-90 disabled:opacity-50 ${bounceButton}`}
-              onPress={handleSave}
-              isDisabled={!canSave || saveNoteMutation.isPending}
-            >
-              {saveNoteMutation.isPending ? 'Saving...' : 'Save'}
-            </Button>
+            <div className="flex gap-2">
+              {hasExistingNote && (
+                <Button
+                  className={`px-4 py-1.5 rounded text-sm bg-danger text-white hover:opacity-90 disabled:opacity-50 ${bounceButton}`}
+                  onPress={handleDelete}
+                  isDisabled={deleteNoteMutation.isPending}
+                >
+                  {deleteNoteMutation.isPending ? 'Deleting...' : 'Delete'}
+                </Button>
+              )}
+              <Button
+                className={`px-4 py-1.5 rounded text-sm bg-accent text-white hover:opacity-90 disabled:opacity-50 ${bounceButton}`}
+                onPress={handleSave}
+                isDisabled={!canSave || saveNoteMutation.isPending}
+              >
+                {saveNoteMutation.isPending ? 'Saving...' : 'Save'}
+              </Button>
+            </div>
           </div>
         </div>
       )}

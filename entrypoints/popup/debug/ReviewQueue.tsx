@@ -7,24 +7,13 @@ interface ReviewQueueProps {
 }
 
 export function ReviewQueue({ style }: ReviewQueueProps) {
-  const { data: reviewQueue, isLoading, isFetching, error, refetch } = useReviewQueueQuery(true);
+  const { data: reviewQueue, isLoading, error } = useReviewQueueQuery(true);
 
   const queueList = reviewQueue ?? [];
 
   return (
     <div style={style}>
-      <h3 className="debug-panel-cards-header" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        Review Queue ({queueList.length})
-        {isFetching && !isLoading && <span style={{ fontSize: '0.8em', color: '#888' }}>Updating...</span>}
-        <button
-          onClick={() => refetch()}
-          className="debug-panel-button"
-          style={{ marginLeft: 'auto' }}
-          disabled={isFetching}
-        >
-          {isFetching ? 'Refreshing...' : '🔄 Refresh'}
-        </button>
-      </h3>
+      <h3 className="debug-panel-cards-header">Review Queue ({queueList.length})</h3>
       {isLoading ? (
         <p className="debug-panel-empty-state">Loading review queue...</p>
       ) : error ? (

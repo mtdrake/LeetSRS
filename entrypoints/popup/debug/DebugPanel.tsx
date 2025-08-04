@@ -4,6 +4,7 @@ import { type Difficulty } from '@/types';
 import { DebugCard } from './DebugCard';
 import { ReviewQueue } from './ReviewQueue';
 import { TodayStats } from './TodayStats';
+import { storage } from '#imports';
 import './DebugPanel.css';
 
 // Sample LeetCode problems with their actual IDs
@@ -127,6 +128,29 @@ export function DebugPanel() {
     }
   };
 
+  const handleWipeStorage = async () => {
+    if (
+      !confirm(
+        '⚠️ WARNING: This will delete ALL data including cards, stats, and settings. This cannot be undone.\n\nAre you absolutely sure?'
+      )
+    ) {
+      return;
+    }
+
+    try {
+      // Clear all storage areas
+      await storage.clear('local');
+      await storage.clear('sync');
+      await storage.clear('session');
+
+      // Force refresh the page to reset the UI
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to wipe storage:', error);
+      alert('Failed to wipe storage. Check console for details.');
+    }
+  };
+
   return (
     <div className="debug-panel">
       <h2 className="debug-panel-title">🔧 DEBUG PANEL</h2>
@@ -139,9 +163,8 @@ export function DebugPanel() {
           style={{
             width: '100%',
             backgroundColor: cardsList.length >= SAMPLE_PROBLEMS.length ? '#666' : '#4CAF50',
-            padding: '12px',
-            fontSize: '16px',
-            fontWeight: 'bold',
+            padding: '8px',
+            fontSize: '14px',
           }}
           title={
             cardsList.length >= SAMPLE_PROBLEMS.length ? 'All sample problems added' : 'Add a random LeetCode problem'
@@ -200,6 +223,29 @@ export function DebugPanel() {
       <ReviewQueue style={{ marginTop: '20px', borderTop: '1px solid #333', paddingTop: '20px' }} />
 
       <TodayStats style={{ marginTop: '20px', borderTop: '1px solid #333', paddingTop: '20px' }} />
+
+      <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '2px solid #ff0000' }}>
+        <h3 style={{ color: '#ff6b6b', marginBottom: '10px', fontSize: '14px' }}>⚠️ DANGER ZONE</h3>
+        <button
+          onClick={handleWipeStorage}
+          className="debug-panel-button"
+          style={{
+            width: '100%',
+            backgroundColor: '#8b0000',
+            color: '#fff',
+            padding: '12px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            border: '2px solid #ff0000',
+          }}
+          title="Completely wipe all extension storage"
+        >
+          ☠️ WIPE ALL STORAGE ☠️
+        </button>
+        <p style={{ fontSize: '11px', color: '#888', marginTop: '8px', textAlign: 'center' }}>
+          This will delete ALL data: cards, stats, settings, everything!
+        </p>
+      </div>
     </div>
   );
 }

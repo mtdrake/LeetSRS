@@ -97,6 +97,7 @@ export function useRateCardMutation() {
       sendMessage({ type: MessageType.RATE_CARD, slug, name, rating, leetcodeId, difficulty }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cards });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });
       queryClient.invalidateQueries({ queryKey: queryKeys.todayStats });
     },
   });

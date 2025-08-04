@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNoteQuery, useSaveNoteMutation } from '@/hooks/useBackgroundQueries';
 import { NOTES_MAX_LENGTH } from '@/shared/notes';
+import { bounceButton } from '@/shared/styles';
 
 interface NotesSectionProps {
   cardId: string;
@@ -68,7 +69,7 @@ export function NotesSection({ cardId }: NotesSectionProps) {
               {characterCount}/{NOTES_MAX_LENGTH}
             </span>
             <button
-              className="px-4 py-1.5 rounded text-sm bg-accent text-white hover:opacity-90 transition-all shadow-sm hover:shadow-md active:shadow-none active:translate-y-[1px] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:shadow-none disabled:active:translate-y-0"
+              className={`px-4 py-1.5 rounded text-sm bg-accent text-white hover:opacity-90 disabled:opacity-50 ${bounceButton}`}
               onClick={handleSave}
               disabled={!canSave || saveNoteMutation.isPending}
             >

@@ -4,10 +4,12 @@ import { bounceButton } from '@/shared/styles';
 
 interface ActionsSectionProps {
   slug: string;
+  onDelete?: () => void;
 }
 
-export function ActionsSection({ slug }: ActionsSectionProps) {
+export function ActionsSection({ slug: _slug, onDelete }: ActionsSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   return (
     <div className="border border-current rounded-lg bg-secondary overflow-hidden">
@@ -24,20 +26,41 @@ export function ActionsSection({ slug }: ActionsSectionProps) {
 
       {isExpanded && (
         <div className="px-4 pb-4 border-t border-current">
-          <div className="mt-3 space-y-2">
-            <p className="text-sm text-secondary mb-2">Delay card</p>
-            <div className="flex gap-2">
+          <div className="mt-3 space-y-3">
+            <div>
+              <p className="text-sm text-secondary mb-2">Delay card</p>
+              <div className="flex gap-2">
+                <Button
+                  className={`flex-1 px-4 py-2 rounded text-sm bg-tertiary text-primary hover:bg-accent hover:text-white transition-colors ${bounceButton}`}
+                  onPress={() => console.log('Delay 1 day')}
+                >
+                  1 day
+                </Button>
+                <Button
+                  className={`flex-1 px-4 py-2 rounded text-sm bg-tertiary text-primary hover:bg-accent hover:text-white transition-colors ${bounceButton}`}
+                  onPress={() => console.log('Delay 5 days')}
+                >
+                  5 days
+                </Button>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-current">
               <Button
-                className={`flex-1 px-4 py-2 rounded text-sm bg-tertiary text-primary hover:bg-accent hover:text-white transition-colors ${bounceButton}`}
-                onPress={() => console.log('Delay 1 day')}
+                className={`w-full px-4 py-2 rounded text-sm ${
+                  deleteConfirm ? 'bg-ultra-danger' : 'bg-danger'
+                } text-white hover:opacity-90 transition-colors ${bounceButton}`}
+                onPress={() => {
+                  if (!deleteConfirm) {
+                    setDeleteConfirm(true);
+                    setTimeout(() => setDeleteConfirm(false), 3000);
+                  } else {
+                    onDelete?.();
+                    setDeleteConfirm(false);
+                  }
+                }}
               >
-                1 day
-              </Button>
-              <Button
-                className={`flex-1 px-4 py-2 rounded text-sm bg-tertiary text-primary hover:bg-accent hover:text-white transition-colors ${bounceButton}`}
-                onPress={() => console.log('Delay 5 days')}
-              >
-                5 days
+                {deleteConfirm ? 'Confirm Delete?' : 'Delete Card'}
               </Button>
             </div>
           </div>

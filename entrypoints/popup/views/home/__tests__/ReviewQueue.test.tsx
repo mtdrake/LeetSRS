@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ReviewQueue } from '../ReviewQueue';
 import { createTestWrapper } from '@/test/utils/test-wrapper';
-import { useReviewQueueQuery, useRateCardMutation } from '@/hooks/useBackgroundQueries';
+import { useReviewQueueQuery, useRateCardMutation, useRemoveCardMutation } from '@/hooks/useBackgroundQueries';
 import { createQueryMock, createMutationMock } from '@/test/utils/query-mocks';
 import { createMockCard } from '@/test/utils/card-mocks';
 import { Rating, State } from 'ts-fsrs';
@@ -14,6 +14,7 @@ import { Rating, State } from 'ts-fsrs';
 vi.mock('@/hooks/useBackgroundQueries', () => ({
   useReviewQueueQuery: vi.fn(),
   useRateCardMutation: vi.fn(),
+  useRemoveCardMutation: vi.fn(),
   queryKeys: {
     reviewQueue: ['reviewQueue'],
     cards: ['cards'],
@@ -64,6 +65,17 @@ vi.mock('../NotesSection', () => ({
   NotesSection: ({ cardId }: { cardId: string }) => <div data-testid="notes-section">Notes for {cardId}</div>,
 }));
 
+vi.mock('../ActionsSection', () => ({
+  ActionsSection: ({ slug, onDelete }: { slug: string; onDelete?: () => void }) => (
+    <div data-testid="actions-section">
+      Actions for {slug}
+      <button onClick={onDelete} data-testid="delete-button">
+        Delete
+      </button>
+    </div>
+  ),
+}));
+
 describe('ReviewQueue', () => {
   const mockCards = [
     createMockCard(State.Learning, {
@@ -110,6 +122,14 @@ describe('ReviewQueue', () => {
         mutateAsync: mockMutateAsync,
         isPending: false,
       }) as ReturnType<typeof useRateCardMutation>
+    );
+
+    // Default mock for remove mutation
+    vi.mocked(useRemoveCardMutation).mockReturnValue(
+      createMutationMock({
+        mutateAsync: vi.fn(),
+        isPending: false,
+      }) as ReturnType<typeof useRemoveCardMutation>
     );
   });
 
@@ -533,6 +553,222 @@ describe('ReviewQueue', () => {
     });
   });
 
+  describe('Card Deletion', () => {
+    let mockRemoveMutateAsync: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      mockRemoveMutateAsync = vi.fn();
+      vi.mocked(useRemoveCardMutation).mockReturnValue(
+        createMutationMock({
+          mutateAsync: mockRemoveMutateAsync,
+          isPending: false,
+        }) as ReturnType<typeof useRemoveCardMutation>
+      );
+    });
+
+    it('should remove card from queue when delete button is clicked', async () => {
+      mockRemoveMutateAsync.mockResolvedValue(undefined);
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      // Click delete button
+      const deleteButton = screen.getByTestId('delete-button');
+      fireEvent.click(deleteButton);
+
+      // Wait for the deletion to complete and next card to appear
+      await waitFor(() => {
+        expect(screen.queryByText('Two Sum')).not.toBeInTheDocument();
+        expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
+      });
+
+      // Verify the mutation was called with correct slug
+      expect(mockRemoveMutateAsync).toHaveBeenCalledWith('two-sum');
+    });
+
+    it('should show empty state when last card is deleted', async () => {
+      // Start with only one card
+      vi.mocked(useReviewQueueQuery).mockReturnValue(
+        createQueryMock([mockCards[0]]) as ReturnType<typeof useReviewQueueQuery>
+      );
+
+      mockRemoveMutateAsync.mockResolvedValue(undefined);
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      // Click delete button
+      const deleteButton = screen.getByTestId('delete-button');
+      fireEvent.click(deleteButton);
+
+      // Should show empty state
+      await waitFor(() => {
+        expect(screen.getByText('No cards to review!')).toBeInTheDocument();
+        expect(screen.getByText('Check back tomorrow for more reviews.')).toBeInTheDocument();
+      });
+
+      expect(mockRemoveMutateAsync).toHaveBeenCalledWith('two-sum');
+    });
+
+    it('should handle delete errors gracefully', async () => {
+      mockRemoveMutateAsync.mockRejectedValue(new Error('Failed to delete card'));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByTestId('delete-button');
+      fireEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith('Failed to delete card:', expect.any(Error));
+      });
+
+      // Card should still be displayed (not removed from queue)
+      expect(screen.getByText('Two Sum')).toBeInTheDocument();
+
+      // Should be able to interact with card again after error
+      const goodButton = screen.getByRole('button', { name: 'Good' });
+      expect(goodButton).not.toBeDisabled();
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should disable all interactions while deleting', async () => {
+      // Make deletion never resolve
+      mockRemoveMutateAsync.mockImplementation(() => new Promise(() => {}));
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByTestId('delete-button');
+      const againButton = screen.getByRole('button', { name: 'Again' });
+      const hardButton = screen.getByRole('button', { name: 'Hard' });
+      const goodButton = screen.getByRole('button', { name: 'Good' });
+      const easyButton = screen.getByRole('button', { name: 'Easy' });
+
+      // All buttons should be enabled initially
+      expect(againButton).not.toBeDisabled();
+      expect(hardButton).not.toBeDisabled();
+      expect(goodButton).not.toBeDisabled();
+      expect(easyButton).not.toBeDisabled();
+
+      // Click delete button
+      fireEvent.click(deleteButton);
+
+      // All rating buttons should be disabled while processing
+      await waitFor(() => {
+        expect(againButton).toBeDisabled();
+        expect(hardButton).toBeDisabled();
+        expect(goodButton).toBeDisabled();
+        expect(easyButton).toBeDisabled();
+      });
+    });
+
+    it('should not crash when queue is empty and handleDelete is called', async () => {
+      vi.mocked(useReviewQueueQuery).mockReturnValue(createQueryMock([]) as ReturnType<typeof useReviewQueueQuery>);
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for empty state
+      await waitFor(() => {
+        expect(screen.getByText('No cards to review!')).toBeInTheDocument();
+      });
+
+      // Delete button shouldn't be visible when queue is empty
+      expect(screen.queryByTestId('delete-button')).not.toBeInTheDocument();
+
+      // Verify remove mutation is never called
+      expect(mockRemoveMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('should maintain queue state after failed deletion', async () => {
+      mockRemoveMutateAsync.mockRejectedValue(new Error('Network error'));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByTestId('delete-button');
+      fireEvent.click(deleteButton);
+
+      // Wait for error
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      // Card should still be the first card
+      expect(screen.getByText('Two Sum')).toBeInTheDocument();
+
+      // Now successfully rate the card
+      mockMutateAsync.mockResolvedValue({
+        card: mockCards[0],
+        shouldRequeue: false,
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Good' }));
+
+      // Should move to next card normally
+      await waitFor(() => {
+        expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle rapid delete clicks correctly', async () => {
+      // Make deletion take some time
+      mockRemoveMutateAsync.mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve(undefined), 100))
+      );
+
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByTestId('delete-button');
+
+      // Click delete multiple times rapidly
+      fireEvent.click(deleteButton);
+      fireEvent.click(deleteButton);
+      fireEvent.click(deleteButton);
+
+      // Should only have called remove mutation once
+      expect(mockRemoveMutateAsync).toHaveBeenCalledTimes(1);
+
+      // Wait for deletion to complete
+      await waitFor(() => {
+        expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
+      });
+
+      // Should still only have been called once
+      expect(mockRemoveMutateAsync).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('Component Integration', () => {
     it('should pass correct props to ReviewCard', async () => {
       render(<ReviewQueue disableAnimations />, { wrapper });
@@ -542,6 +778,27 @@ describe('ReviewQueue', () => {
         const reviewCard = screen.getByTestId('review-card');
         expect(reviewCard).toBeInTheDocument();
         expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      });
+    });
+
+    it('should pass correct slug to ActionsSection', async () => {
+      render(<ReviewQueue disableAnimations />, { wrapper });
+
+      // Wait for initial render
+      await waitFor(() => {
+        expect(screen.getByText('Actions for two-sum')).toBeInTheDocument();
+      });
+
+      // Rate the card to see the next one
+      mockMutateAsync.mockResolvedValue({
+        card: mockCards[0],
+        shouldRequeue: false,
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Good' }));
+
+      await waitFor(() => {
+        expect(screen.getByText('Actions for add-two-numbers')).toBeInTheDocument();
       });
     });
 

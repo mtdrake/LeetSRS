@@ -10,17 +10,11 @@ import { STORAGE_KEYS } from './storage-keys';
 import { storage } from '#imports';
 import { interleaveArrays } from './utils';
 import { updateStats, getTodayStats } from './stats';
+import { type Card } from '@/types';
 
 export const MAX_NEW_CARDS_PER_DAY = 3;
 const params = generatorParameters({ maximum_interval: 1000 });
 const fsrs = new FSRS(params);
-
-export interface Card {
-  slug: string;
-  name: string;
-  createdAt: Date;
-  fsrs: FsrsCard;
-}
 
 export interface StoredCard extends Omit<Card, 'createdAt' | 'fsrs'> {
   createdAt: number;

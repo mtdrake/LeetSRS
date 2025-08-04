@@ -10,9 +10,9 @@ import {
   rateCard,
   getReviewQueue,
   MAX_NEW_CARDS_PER_DAY,
-  type Card,
   type StoredCard,
 } from '../cards';
+import { type Card } from '@/types';
 import { STORAGE_KEYS } from '../storage-keys';
 import { createEmptyCard, Rating, State as FsrsState } from 'ts-fsrs';
 import type { DailyStats } from '../stats';

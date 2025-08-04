@@ -1,5 +1,5 @@
 import { browser } from 'wxt/browser';
-import type { Card } from './cards';
+import type { Card } from '@/types';
 import type { Grade } from 'ts-fsrs';
 import type { DailyStats } from './stats';
 

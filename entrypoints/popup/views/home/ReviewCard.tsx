@@ -1,9 +1,9 @@
 import { FaArrowUpRightFromSquare } from 'react-icons/fa6';
-import { type Card } from '@/services/cards';
+import { type Card } from '@/types';
 
 type ReviewCardProps = {
-  card: Pick<Card, 'slug'>
-}
+  card: Pick<Card, 'slug'>;
+};
 
 export function ReviewCard({ card }: ReviewCardProps) {
   return (

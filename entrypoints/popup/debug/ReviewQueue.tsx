@@ -1,4 +1,4 @@
-import type { Card } from '@/services/cards';
+import type { Card } from '@/types';
 import { useReviewQueueQuery } from '@/hooks/useBackgroundQueries';
 import { State as FsrsState } from 'ts-fsrs';
 

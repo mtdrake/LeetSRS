@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { ReviewCard } from './ReviewCard';
 import { NotesSection } from './NotesSection';
-import { useReviewQueueQuery, useRateCardMutation, queryKeys } from '@/hooks/useBackgroundQueries';
+import { useReviewQueueQuery, useRateCardMutation } from '@/hooks/useBackgroundQueries';
 import type { Card } from '@/shared/cards';
 import type { Grade } from 'ts-fsrs';
 
 export function ReviewQueue() {
-  const queryClient = useQueryClient();
   const { data: initialQueue, isLoading, error } = useReviewQueueQuery();
   const rateCardMutation = useRateCardMutation();
   const [queue, setQueue] = useState<Card[]>([]);
@@ -21,13 +19,6 @@ export function ReviewQueue() {
       setHasInitialized(true);
     }
   }, [initialQueue, hasInitialized]);
-
-  // Invalidate the review queue when component unmounts
-  useEffect(() => {
-    return () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });
-    };
-  }, [queryClient]);
 
   const handleRating = async (rating: Grade) => {
     if (queue.length === 0 || isProcessing) return;

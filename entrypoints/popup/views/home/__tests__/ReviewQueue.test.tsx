@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ReviewQueue } from '../ReviewQueue';
 import { createTestWrapper } from '@/test/utils/test-wrapper';
-import { useReviewQueueQuery, useRateCardMutation, queryKeys } from '@/hooks/useBackgroundQueries';
+import { useReviewQueueQuery, useRateCardMutation } from '@/hooks/useBackgroundQueries';
 import { createQueryMock, createMutationMock } from '@/test/utils/query-mocks';
 import { createMockCard } from '@/test/utils/card-mocks';
 import { Rating, State } from 'ts-fsrs';
@@ -530,26 +530,6 @@ describe('ReviewQueue', () => {
       // Should still show the second card (local state), not reset to first
       expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
       expect(screen.queryByText('Two Sum')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Cleanup on Unmount', () => {
-    it('should invalidate review queue when component unmounts', async () => {
-      const { unmount } = render(<ReviewQueue />, { wrapper });
-
-      // Wait for initial render
-      await waitFor(() => {
-        expect(screen.getByText('Two Sum')).toBeInTheDocument();
-      });
-
-      // Clear any calls that might have happened during render
-      mockInvalidateQueries.mockClear();
-
-      // Unmount the component
-      unmount();
-
-      // Should have called invalidateQueries with the review queue key
-      expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: queryKeys.reviewQueue });
     });
   });
 

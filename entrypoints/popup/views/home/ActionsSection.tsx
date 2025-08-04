@@ -3,10 +3,10 @@ import { Button } from 'react-aria-components';
 import { bounceButton } from '@/shared/styles';
 
 interface ActionsSectionProps {
-  cardId: string;
+  slug: string;
 }
 
-export function ActionsSection({ cardId: _cardId }: ActionsSectionProps) {
+export function ActionsSection({ slug }: ActionsSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (

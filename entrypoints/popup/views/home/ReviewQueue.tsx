@@ -119,7 +119,7 @@ export function ReviewQueue({ disableAnimations = false }: ReviewQueueProps) {
         <ReviewCard key={currentCard.id} card={currentCard} onRate={handleRating} isProcessing={isProcessing} />
       </div>
       <NotesSection cardId={currentCard.id} />
-      <ActionsSection cardId={currentCard.id} />
+      <ActionsSection slug={currentCard.slug} />
     </div>
   );
 }

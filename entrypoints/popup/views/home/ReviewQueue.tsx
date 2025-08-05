@@ -33,106 +33,77 @@ export function ReviewQueue({ disableAnimations = false }: ReviewQueueProps) {
     }
   }, [initialQueue, hasInitialized]);
 
-  const handleRating = async (rating: Grade) => {
+  const handleCardAction = async <T,>(
+    action: () => Promise<T>,
+    options: {
+      getSlideDirection?: (result: T) => 'left' | 'right' | null;
+      updateQueue: (result: T, restOfQueue: Card[]) => Card[];
+      errorMessage: string;
+    }
+  ) => {
     if (queue.length === 0 || isProcessing) return;
 
     setIsProcessing(true);
-
-    const currentCard = queue[0];
     const restOfQueue = queue.slice(1);
 
     try {
-      const result = await rateCardMutation.mutateAsync({
-        slug: currentCard.slug,
-        name: currentCard.name,
-        rating,
-        leetcodeId: currentCard.leetcodeId,
-        difficulty: currentCard.difficulty,
-      });
+      const result = await action();
 
-      // Set slide direction based on actual outcome, not rating
-      if (!disableAnimations) {
-        if (result.shouldRequeue) {
-          setSlideDirection('left'); // Card will be seen again today (back of queue)
-        } else {
-          setSlideDirection('right'); // Card is done for today (removed from queue)
-        }
+      if (!disableAnimations && options.getSlideDirection) {
+        const direction = options.getSlideDirection(result);
+        if (direction) setSlideDirection(direction);
       }
 
-      // Wait for animation to complete, then update queue
       const animationDelay = disableAnimations ? 0 : 400;
       setTimeout(() => {
-        if (result.shouldRequeue) {
-          const updatedCard = result.card;
-          const newQueue = [...restOfQueue, updatedCard];
-          setQueue(newQueue);
-        } else {
-          setQueue([...restOfQueue]);
-        }
+        setQueue(options.updateQueue(result, restOfQueue));
         setSlideDirection(null);
         setIsProcessing(false);
       }, animationDelay);
     } catch (error) {
-      console.error('Failed to rate card:', error);
+      console.error(options.errorMessage, error);
       setSlideDirection(null);
       setIsProcessing(false);
     }
+  };
+
+  const handleRating = async (rating: Grade) => {
+    const currentCard = queue[0];
+    await handleCardAction(
+      () =>
+        rateCardMutation.mutateAsync({
+          slug: currentCard.slug,
+          name: currentCard.name,
+          rating,
+          leetcodeId: currentCard.leetcodeId,
+          difficulty: currentCard.difficulty,
+        }),
+      {
+        getSlideDirection: (result) => (result.shouldRequeue ? 'left' : 'right'),
+        updateQueue: (result, restOfQueue) => {
+          return result.shouldRequeue ? [...restOfQueue, result.card] : restOfQueue;
+        },
+        errorMessage: 'Failed to rate card:',
+      }
+    );
   };
 
   const handleDelete = async () => {
-    if (queue.length === 0 || isProcessing) return;
-
-    setIsProcessing(true);
     const currentCard = queue[0];
-    const restOfQueue = queue.slice(1);
-
-    try {
-      await removeCardMutation.mutateAsync(currentCard.slug);
-
-      if (!disableAnimations) {
-        setSlideDirection('left');
-      }
-
-      // Wait for animation to complete, then update queue
-      const animationDelay = disableAnimations ? 0 : 400;
-      setTimeout(() => {
-        setQueue([...restOfQueue]);
-        setSlideDirection(null);
-        setIsProcessing(false);
-      }, animationDelay);
-    } catch (error) {
-      console.error('Failed to delete card:', error);
-      setSlideDirection(null);
-      setIsProcessing(false);
-    }
+    await handleCardAction(() => removeCardMutation.mutateAsync(currentCard.slug), {
+      getSlideDirection: () => 'left',
+      updateQueue: (_, restOfQueue) => restOfQueue,
+      errorMessage: 'Failed to delete card:',
+    });
   };
 
   const handleDelay = async (days: number) => {
-    if (queue.length === 0 || isProcessing) return;
-
-    setIsProcessing(true);
     const currentCard = queue[0];
-    const restOfQueue = queue.slice(1);
-
-    try {
-      await delayCardMutation.mutateAsync({ slug: currentCard.slug, days });
-
-      if (!disableAnimations) {
-        setSlideDirection('right');
-      }
-
-      // Wait for animation to complete, then update queue
-      const animationDelay = disableAnimations ? 0 : 400;
-      setTimeout(() => {
-        setQueue([...restOfQueue]);
-        setSlideDirection(null);
-        setIsProcessing(false);
-      }, animationDelay);
-    } catch (error) {
-      console.error('Failed to delay card:', error);
-      setSlideDirection(null);
-      setIsProcessing(false);
-    }
+    await handleCardAction(() => delayCardMutation.mutateAsync({ slug: currentCard.slug, days }), {
+      getSlideDirection: () => 'right',
+      updateQueue: (_, restOfQueue) => restOfQueue,
+      errorMessage: 'Failed to delay card:',
+    });
   };
 
   if (isLoading) {

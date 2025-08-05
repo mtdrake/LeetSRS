@@ -170,12 +170,12 @@ export async function rateCard(
   // Update stats tracking
   await updateStats(rating, isNewCard);
 
-  const shouldRequeue = shouldReview(card);
+  const shouldRequeue = isDueToday(card);
 
   return { card, shouldRequeue };
 }
 
-export function shouldReview(card: Card): boolean {
+export function isDueToday(card: Card): boolean {
   const now = new Date();
   const dueDate = new Date(card.fsrs.due);
 
@@ -196,7 +196,7 @@ export function shouldReview(card: Card): boolean {
 export async function getReviewQueue(): Promise<Card[]> {
   const allCards = await getAllCards();
   // Filter out paused cards and cards not due yet
-  const dueCards = allCards.filter((card) => !card.paused && shouldReview(card));
+  const dueCards = allCards.filter((card) => !card.paused && isDueToday(card));
 
   // Separate into review cards and new cards
   const reviewCards = dueCards.filter((card) => card.fsrs.state !== FsrsState.New);

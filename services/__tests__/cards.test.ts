@@ -13,7 +13,7 @@ import {
   deserializeCard,
   rateCard,
   getReviewQueue,
-  shouldReview,
+  isDueToday,
   MAX_NEW_CARDS_PER_DAY,
   type StoredCard,
 } from '../cards';
@@ -804,7 +804,7 @@ describe('rateCard', () => {
   });
 });
 
-describe('shouldReview', () => {
+describe('isDueToday', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     // Set a specific local time for testing
@@ -827,7 +827,7 @@ describe('shouldReview', () => {
       paused: false,
     };
 
-    expect(shouldReview(newCard)).toBe(true);
+    expect(isDueToday(newCard)).toBe(true);
   });
 
   it('should return true for cards due today (earlier time)', () => {
@@ -849,7 +849,7 @@ describe('shouldReview', () => {
       paused: false,
     };
 
-    expect(shouldReview(card)).toBe(true);
+    expect(isDueToday(card)).toBe(true);
   });
 
   it('should return true for cards due today (later time)', () => {
@@ -871,7 +871,7 @@ describe('shouldReview', () => {
       paused: false,
     };
 
-    expect(shouldReview(card)).toBe(true);
+    expect(isDueToday(card)).toBe(true);
   });
 
   it('should return true for cards due in the past', () => {
@@ -893,7 +893,7 @@ describe('shouldReview', () => {
       paused: false,
     };
 
-    expect(shouldReview(card)).toBe(true);
+    expect(isDueToday(card)).toBe(true);
   });
 
   it('should return false for cards due tomorrow', () => {
@@ -915,7 +915,7 @@ describe('shouldReview', () => {
       paused: false,
     };
 
-    expect(shouldReview(card)).toBe(false);
+    expect(isDueToday(card)).toBe(false);
   });
 
   it('should return false for cards due in the future', () => {
@@ -937,7 +937,7 @@ describe('shouldReview', () => {
       paused: false,
     };
 
-    expect(shouldReview(card)).toBe(false);
+    expect(isDueToday(card)).toBe(false);
   });
 
   it('should handle cards due at exactly midnight today', () => {
@@ -959,7 +959,7 @@ describe('shouldReview', () => {
       paused: false,
     };
 
-    expect(shouldReview(card)).toBe(true);
+    expect(isDueToday(card)).toBe(true);
   });
 
   it('should handle cards due at 23:59:59 today', () => {
@@ -981,7 +981,7 @@ describe('shouldReview', () => {
       paused: false,
     };
 
-    expect(shouldReview(card)).toBe(true);
+    expect(isDueToday(card)).toBe(true);
   });
 
   it('should correctly handle date comparison in local timezone', () => {
@@ -1013,7 +1013,7 @@ describe('shouldReview', () => {
         paused: false,
       };
 
-      expect(shouldReview(cardDueToday)).toBe(true);
+      expect(isDueToday(cardDueToday)).toBe(true);
     });
   });
 
@@ -1039,7 +1039,7 @@ describe('shouldReview', () => {
       paused: false,
     };
 
-    expect(shouldReview(cardDueToday)).toBe(true);
+    expect(isDueToday(cardDueToday)).toBe(true);
 
     // Card due tomorrow should not be included
     const cardDueTomorrow: Card = {
@@ -1050,7 +1050,7 @@ describe('shouldReview', () => {
       },
     };
 
-    expect(shouldReview(cardDueTomorrow)).toBe(false);
+    expect(isDueToday(cardDueTomorrow)).toBe(false);
   });
 });
 

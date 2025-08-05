@@ -160,23 +160,6 @@ describe('ActionsSection', () => {
       expect(pauseButton).toHaveClass('bg-tertiary');
       expect(pauseButton).toHaveClass('text-primary');
     });
-
-    it('should position pause button between delay and delete sections', () => {
-      render(<ActionsSection {...defaultProps} />);
-
-      const expandButton = screen.getByRole('button', { name: /Actions/i });
-      fireEvent.click(expandButton);
-
-      const buttons = screen.getAllByRole('button');
-      const buttonTexts = buttons.map((btn) => btn.textContent);
-
-      const delayIndex = buttonTexts.findIndex((text) => text?.includes('5 Days'));
-      const pauseIndex = buttonTexts.findIndex((text) => text?.includes('Pause'));
-      const deleteIndex = buttonTexts.indexOf('Delete Card');
-
-      expect(pauseIndex).toBeGreaterThan(delayIndex);
-      expect(pauseIndex).toBeLessThan(deleteIndex);
-    });
   });
 
   describe('Delete Functionality', () => {

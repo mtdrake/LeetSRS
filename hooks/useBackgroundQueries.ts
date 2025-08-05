@@ -273,3 +273,34 @@ export function useSetThemeMutation() {
     },
   });
 }
+
+// Import/Export mutations
+export function useExportDataMutation() {
+  return useMutation({
+    mutationFn: () => sendMessage({ type: MessageType.EXPORT_DATA }),
+  });
+}
+
+export function useImportDataMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (jsonData: string) => sendMessage({ type: MessageType.IMPORT_DATA, jsonData }),
+    onSuccess: () => {
+      // Invalidate all queries to refresh data
+      queryClient.invalidateQueries();
+    },
+  });
+}
+
+export function useResetAllDataMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => sendMessage({ type: MessageType.RESET_ALL_DATA }),
+    onSuccess: () => {
+      // Invalidate all queries to refresh data
+      queryClient.invalidateQueries();
+    },
+  });
+}

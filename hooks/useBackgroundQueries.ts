@@ -10,6 +10,7 @@ export const queryKeys = {
   todayStats: ['todayStats'] as const,
   note: (cardId: string) => ['note', cardId] as const,
   maxNewCardsPerDay: ['maxNewCardsPerDay'] as const,
+  animationsEnabled: ['animationsEnabled'] as const,
 } as const;
 
 // Queries
@@ -179,6 +180,24 @@ export function useSetMaxNewCardsPerDayMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.maxNewCardsPerDay });
       queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });
+    },
+  });
+}
+
+export function useAnimationsEnabledQuery() {
+  return useQuery({
+    queryKey: queryKeys.animationsEnabled,
+    queryFn: () => sendMessage({ type: MessageType.GET_ANIMATIONS_ENABLED }),
+  });
+}
+
+export function useSetAnimationsEnabledMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (value: boolean) => sendMessage({ type: MessageType.SET_ANIMATIONS_ENABLED, value }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.animationsEnabled });
     },
   });
 }

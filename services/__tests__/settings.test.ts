@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { fakeBrowser } from 'wxt/testing';
 import { storage } from 'wxt/utils/storage';
-import { getMaxNewCardsPerDay, setMaxNewCardsPerDay } from '../settings';
+import { getMaxNewCardsPerDay, setMaxNewCardsPerDay, getAnimationsEnabled, setAnimationsEnabled } from '../settings';
 import { STORAGE_KEYS } from '../storage-keys';
 import { DEFAULT_MAX_NEW_CARDS_PER_DAY, MIN_NEW_CARDS_PER_DAY, MAX_NEW_CARDS_PER_DAY } from '@/shared/settings';
 
@@ -128,6 +128,72 @@ describe('Settings Service', () => {
 
       await setMaxNewCardsPerDay(20);
       expect(await getMaxNewCardsPerDay()).toBe(20);
+    });
+  });
+
+  describe('getAnimationsEnabled', () => {
+    it('should return the stored value when it exists', async () => {
+      await storage.setItem(STORAGE_KEYS.animationsEnabled, false);
+
+      const result = await getAnimationsEnabled();
+      expect(result).toBe(false);
+    });
+
+    it('should return true (default) when no stored value exists', async () => {
+      const result = await getAnimationsEnabled();
+      expect(result).toBe(true);
+    });
+
+    it('should handle true value correctly', async () => {
+      await storage.setItem(STORAGE_KEYS.animationsEnabled, true);
+
+      const result = await getAnimationsEnabled();
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('setAnimationsEnabled', () => {
+    it('should store true value correctly', async () => {
+      await setAnimationsEnabled(true);
+
+      const storedValue = await storage.getItem(STORAGE_KEYS.animationsEnabled);
+      expect(storedValue).toBe(true);
+    });
+
+    it('should store false value correctly', async () => {
+      await setAnimationsEnabled(false);
+
+      const storedValue = await storage.getItem(STORAGE_KEYS.animationsEnabled);
+      expect(storedValue).toBe(false);
+    });
+
+    it('should handle multiple toggles correctly', async () => {
+      await setAnimationsEnabled(true);
+      expect(await getAnimationsEnabled()).toBe(true);
+
+      await setAnimationsEnabled(false);
+      expect(await getAnimationsEnabled()).toBe(false);
+
+      await setAnimationsEnabled(true);
+      expect(await getAnimationsEnabled()).toBe(true);
+    });
+  });
+
+  describe('Integration tests for animations', () => {
+    it('should work correctly when setting and then getting animations enabled', async () => {
+      // Initially should return default (true)
+      let value = await getAnimationsEnabled();
+      expect(value).toBe(true);
+
+      // Set to false
+      await setAnimationsEnabled(false);
+      value = await getAnimationsEnabled();
+      expect(value).toBe(false);
+
+      // Set back to true
+      await setAnimationsEnabled(true);
+      value = await getAnimationsEnabled();
+      expect(value).toBe(true);
     });
   });
 });

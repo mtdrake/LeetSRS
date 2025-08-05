@@ -3,6 +3,7 @@ export const STORAGE_KEYS = {
   stats: 'local:leetsrs:stats',
   notes: 'local:leetsrs:notes',
   maxNewCardsPerDay: 'sync:leetsrs:maxNewCardsPerDay',
+  animationsEnabled: 'sync:leetsrs:animationsEnabled',
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

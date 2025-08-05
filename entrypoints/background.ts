@@ -9,7 +9,12 @@ import {
 } from '@/services/cards';
 import { getTodayStats } from '@/services/stats';
 import { getNote, saveNote, deleteNote } from '@/services/notes';
-import { getMaxNewCardsPerDay, setMaxNewCardsPerDay } from '@/services/settings';
+import {
+  getMaxNewCardsPerDay,
+  setMaxNewCardsPerDay,
+  getAnimationsEnabled,
+  setAnimationsEnabled,
+} from '@/services/settings';
 import { browser } from 'wxt/browser';
 import { MessageType, type MessageRequest } from '@/services/messages';
 
@@ -54,6 +59,12 @@ export default defineBackground(() => {
 
       case MessageType.SET_MAX_NEW_CARDS_PER_DAY:
         return await setMaxNewCardsPerDay(request.value);
+
+      case MessageType.GET_ANIMATIONS_ENABLED:
+        return await getAnimationsEnabled();
+
+      case MessageType.SET_ANIMATIONS_ENABLED:
+        return await setAnimationsEnabled(request.value);
 
       default: {
         // This should never happen with proper typing - exhaustive check

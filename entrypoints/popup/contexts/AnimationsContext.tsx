@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, ReactNode } from 'react';
+import { useAnimationsEnabledQuery, useSetAnimationsEnabledMutation } from '@/hooks/useBackgroundQueries';
 
 interface AnimationsContextType {
   animationsEnabled: boolean;
@@ -8,15 +9,11 @@ interface AnimationsContextType {
 const AnimationsContext = createContext<AnimationsContextType | undefined>(undefined);
 
 export function AnimationsProvider({ children }: { children: ReactNode }) {
-  const [animationsEnabled, setAnimationsEnabled] = useState(() => {
-    const saved = localStorage.getItem('animationsEnabled');
-    return saved !== null ? saved === 'true' : true; // Default to enabled
-  });
+  const { data: animationsEnabled = true } = useAnimationsEnabledQuery();
+  const setAnimationsEnabledMutation = useSetAnimationsEnabledMutation();
 
   useEffect(() => {
-    localStorage.setItem('animationsEnabled', String(animationsEnabled));
-
-    // Apply class to root element
+    // Apply class to root element based on the setting
     if (!animationsEnabled) {
       document.documentElement.classList.add('animations-disabled');
     } else {
@@ -25,7 +22,7 @@ export function AnimationsProvider({ children }: { children: ReactNode }) {
   }, [animationsEnabled]);
 
   const toggleAnimations = () => {
-    setAnimationsEnabled((prev) => !prev);
+    setAnimationsEnabledMutation.mutate(!animationsEnabled);
   };
 
   return (

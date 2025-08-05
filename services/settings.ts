@@ -16,3 +16,12 @@ export async function setMaxNewCardsPerDay(value: number): Promise<void> {
   }
   await storage.setItem(STORAGE_KEYS.maxNewCardsPerDay, value);
 }
+
+export async function getAnimationsEnabled(): Promise<boolean> {
+  const value = await storage.getItem<boolean>(STORAGE_KEYS.animationsEnabled);
+  return value ?? true;
+}
+
+export async function setAnimationsEnabled(value: boolean): Promise<void> {
+  await storage.setItem(STORAGE_KEYS.animationsEnabled, value);
+}

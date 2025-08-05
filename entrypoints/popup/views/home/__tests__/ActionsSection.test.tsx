@@ -8,6 +8,7 @@ import { ActionsSection } from '../ActionsSection';
 describe('ActionsSection', () => {
   const mockOnDelete = vi.fn();
   const mockOnDelay = vi.fn();
+  const mockOnPause = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -18,9 +19,15 @@ describe('ActionsSection', () => {
     vi.useRealTimers();
   });
 
+  const defaultProps = {
+    onDelete: mockOnDelete,
+    onDelay: mockOnDelay,
+    onPause: mockOnPause,
+  };
+
   describe('Expand/Collapse', () => {
     it('should render with collapsed state by default', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       expect(screen.getByText('Actions')).toBeInTheDocument();
       expect(screen.getByText('▶')).toBeInTheDocument();
@@ -29,7 +36,7 @@ describe('ActionsSection', () => {
     });
 
     it('should expand when header is clicked', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
@@ -41,7 +48,7 @@ describe('ActionsSection', () => {
     });
 
     it('should collapse when header is clicked again', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const expandButton = screen.getByRole('button', { name: /Actions/i });
 
@@ -55,7 +62,7 @@ describe('ActionsSection', () => {
     });
 
     it('should rotate arrow icon when expanded', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const arrow = screen.getByText('▶');
       expect(arrow).not.toHaveClass('rotate-90');
@@ -67,7 +74,7 @@ describe('ActionsSection', () => {
     });
 
     it('should set aria-expanded attribute correctly', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       expect(expandButton).toHaveAttribute('aria-expanded', 'false');
@@ -82,7 +89,7 @@ describe('ActionsSection', () => {
 
   describe('Delay Functionality', () => {
     it('should call onDelay with 1 when 1 day button is clicked', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       // Expand first
       const expandButton = screen.getByRole('button', { name: /Actions/i });
@@ -96,7 +103,7 @@ describe('ActionsSection', () => {
     });
 
     it('should call onDelay with 5 when 5 days button is clicked', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       // Expand first
       const expandButton = screen.getByRole('button', { name: /Actions/i });
@@ -110,7 +117,7 @@ describe('ActionsSection', () => {
     });
 
     it('should display delay card section with both delay options', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
@@ -121,9 +128,59 @@ describe('ActionsSection', () => {
     });
   });
 
+  describe('Pause Functionality', () => {
+    it('should display pause button when expanded', () => {
+      render(<ActionsSection {...defaultProps} />);
+
+      const expandButton = screen.getByRole('button', { name: /Actions/i });
+      fireEvent.click(expandButton);
+
+      expect(screen.getByRole('button', { name: 'Pause Card' })).toBeInTheDocument();
+    });
+
+    it('should call onPause when pause button is clicked', () => {
+      render(<ActionsSection {...defaultProps} />);
+
+      const expandButton = screen.getByRole('button', { name: /Actions/i });
+      fireEvent.click(expandButton);
+
+      const pauseButton = screen.getByRole('button', { name: 'Pause Card' });
+      fireEvent.click(pauseButton);
+
+      expect(mockOnPause).toHaveBeenCalledTimes(1);
+    });
+
+    it('should apply warning color to pause button', () => {
+      render(<ActionsSection {...defaultProps} />);
+
+      const expandButton = screen.getByRole('button', { name: /Actions/i });
+      fireEvent.click(expandButton);
+
+      const pauseButton = screen.getByRole('button', { name: 'Pause Card' });
+      expect(pauseButton).toHaveClass('bg-warning');
+    });
+
+    it('should position pause button between delay and delete sections', () => {
+      render(<ActionsSection {...defaultProps} />);
+
+      const expandButton = screen.getByRole('button', { name: /Actions/i });
+      fireEvent.click(expandButton);
+
+      const buttons = screen.getAllByRole('button');
+      const buttonTexts = buttons.map((btn) => btn.textContent);
+
+      const delayIndex = buttonTexts.indexOf('5 days');
+      const pauseIndex = buttonTexts.indexOf('Pause Card');
+      const deleteIndex = buttonTexts.indexOf('Delete Card');
+
+      expect(pauseIndex).toBeGreaterThan(delayIndex);
+      expect(pauseIndex).toBeLessThan(deleteIndex);
+    });
+  });
+
   describe('Delete Functionality', () => {
     it('should show confirmation when delete button is first clicked', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       // Expand first
       const expandButton = screen.getByRole('button', { name: /Actions/i });
@@ -137,7 +194,7 @@ describe('ActionsSection', () => {
     });
 
     it('should call onDelete when confirmation is clicked', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       // Expand first
       const expandButton = screen.getByRole('button', { name: /Actions/i });
@@ -159,7 +216,7 @@ describe('ActionsSection', () => {
     // and React's async state updates.
 
     it('should reset confirmation immediately after delete', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       // Expand first
       const expandButton = screen.getByRole('button', { name: /Actions/i });
@@ -180,7 +237,7 @@ describe('ActionsSection', () => {
     });
 
     it('should apply different styles for delete and confirm states', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       // Expand first
       const expandButton = screen.getByRole('button', { name: /Actions/i });
@@ -200,37 +257,39 @@ describe('ActionsSection', () => {
 
   describe('Visual Styling', () => {
     it('should apply correct styles to container', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const container = screen.getByText('Actions').closest('.border');
       expect(container).toHaveClass('border', 'border-current', 'rounded-lg', 'bg-secondary', 'overflow-hidden');
     });
 
     it('should apply hover styles to expand button', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       expect(expandButton).toHaveClass('hover:bg-tertiary', 'transition-colors');
     });
 
     it('should apply bounce animation class to action buttons', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
       const delay1Button = screen.getByRole('button', { name: '1 day' });
       const delay5Button = screen.getByRole('button', { name: '5 days' });
+      const pauseButton = screen.getByRole('button', { name: 'Pause Card' });
       const deleteButton = screen.getByRole('button', { name: 'Delete Card' });
 
       // Check for bounceButton class effects (from imported styles)
       expect(delay1Button.className).toMatch(/active:translate-y-\[1px\]/);
       expect(delay5Button.className).toMatch(/active:translate-y-\[1px\]/);
+      expect(pauseButton.className).toMatch(/active:translate-y-\[1px\]/);
       expect(deleteButton.className).toMatch(/active:translate-y-\[1px\]/);
     });
 
     it('should have proper spacing between sections', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
@@ -245,7 +304,7 @@ describe('ActionsSection', () => {
 
   describe('Edge Cases', () => {
     it('should handle rapid clicks on expand button', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const expandButton = screen.getByRole('button', { name: /Actions/i });
 
@@ -259,7 +318,7 @@ describe('ActionsSection', () => {
     });
 
     it('should handle rapid clicks on delay buttons', () => {
-      render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      render(<ActionsSection {...defaultProps} />);
 
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
@@ -276,7 +335,7 @@ describe('ActionsSection', () => {
     });
 
     it('should clear timeout on unmount to prevent memory leaks', () => {
-      const { unmount } = render(<ActionsSection onDelete={mockOnDelete} onDelay={mockOnDelay} />);
+      const { unmount } = render(<ActionsSection {...defaultProps} />);
 
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);

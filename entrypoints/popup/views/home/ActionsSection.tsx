@@ -5,9 +5,10 @@ import { bounceButton } from '@/shared/styles';
 interface ActionsSectionProps {
   onDelete: () => void;
   onDelay: (days: number) => void;
+  onPause: () => void;
 }
 
-export function ActionsSection({ onDelete, onDelay }: ActionsSectionProps) {
+export function ActionsSection({ onDelete, onDelay, onPause }: ActionsSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
@@ -43,6 +44,15 @@ export function ActionsSection({ onDelete, onDelay }: ActionsSectionProps) {
                   5 days
                 </Button>
               </div>
+            </div>
+
+            <div className="pt-2 border-t border-current">
+              <Button
+                className={`w-full px-4 py-2 rounded text-sm bg-warning text-white hover:opacity-90 transition-colors ${bounceButton}`}
+                onPress={onPause}
+              >
+                Pause Card
+              </Button>
             </div>
 
             <div className="pt-2 border-t border-current">

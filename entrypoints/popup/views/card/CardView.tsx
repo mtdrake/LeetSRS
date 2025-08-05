@@ -5,6 +5,7 @@ import { useCardsQuery } from '@/hooks/useBackgroundQueries';
 import { Button } from 'react-aria-components';
 import { State as FsrsState } from 'ts-fsrs';
 import type { Card } from '@/shared/cards';
+import { FaCirclePause } from 'react-icons/fa6';
 
 // Utility functions
 const getStateLabel = (state: FsrsState) => {
@@ -53,9 +54,9 @@ function CardHeader({ card, isExpanded }: CardHeaderProps) {
   return (
     <>
       <div className="flex items-center gap-2">
+        {card.paused && <FaCirclePause className="text-warning" title="Card is paused" />}
         <span className="text-xs text-secondary">#{card.leetcodeId}</span>
         <span className="text-sm">{card.name}</span>
-        {card.paused && <span className="text-xs bg-warning text-white px-2 py-0.5 rounded">Paused</span>}
       </div>
       <div className="flex items-center gap-2">
         <span className={`text-xs ${getDifficultyColor(card.difficulty)}`}>{card.difficulty}</span>

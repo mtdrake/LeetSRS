@@ -64,6 +64,7 @@ function createCard(slug: string, name: string, leetcodeId: string, difficulty: 
     difficulty,
     createdAt: new Date(),
     fsrs: createEmptyCard(),
+    paused: false,
   };
 }
 
@@ -117,6 +118,29 @@ export async function delayCard(slug: string, days: number): Promise<Card> {
   await storage.setItem(STORAGE_KEYS.cards, cards);
 
   return card;
+}
+
+export async function setPauseStatus(slug: string, paused: boolean): Promise<Card> {
+  const cards = await getCards();
+
+  if (!(slug in cards)) {
+    throw new Error(`Card with slug "${slug}" not found`);
+  }
+
+  const card = deserializeCard(cards[slug]);
+  card.paused = paused;
+  cards[slug] = serializeCard(card);
+  await storage.setItem(STORAGE_KEYS.cards, cards);
+
+  return card;
+}
+
+export async function pauseCard(slug: string): Promise<Card> {
+  return setPauseStatus(slug, true);
+}
+
+export async function unpauseCard(slug: string): Promise<Card> {
+  return setPauseStatus(slug, false);
 }
 
 export async function rateCard(
@@ -175,13 +199,15 @@ export function shouldReview(card: Card): boolean {
 
 export async function getReviewQueue(): Promise<Card[]> {
   const allCards = await getAllCards();
-  const reviewCards = allCards.filter(shouldReview);
+  // Filter out paused cards first
+  const activeCards = allCards.filter((card) => !card.paused);
+  const reviewCards = activeCards.filter(shouldReview);
 
   // Get today's stats to determine how many new cards have already been done
   const todayStats = await getTodayStats();
   const newCardsCompletedToday = todayStats?.newCards ?? 0;
   const remainingNewCards = Math.max(0, MAX_NEW_CARDS_PER_DAY - newCardsCompletedToday);
 
-  const newCards = allCards.filter((card) => card.fsrs.state === FsrsState.New).slice(0, remainingNewCards);
+  const newCards = activeCards.filter((card) => card.fsrs.state === FsrsState.New).slice(0, remainingNewCards);
   return interleaveArrays(reviewCards, newCards);
 }

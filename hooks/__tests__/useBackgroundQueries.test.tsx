@@ -42,6 +42,7 @@ describe('useRateCardMutation', () => {
       difficulty: mockCard.difficulty,
       createdAt: new Date(),
       fsrs: createEmptyCard(),
+      paused: false,
     };
 
     vi.mocked(sendMessage).mockResolvedValue(mockResponse);

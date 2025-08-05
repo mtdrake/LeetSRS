@@ -11,7 +11,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Check localStorage or system preference
     const stored = localStorage.getItem('leetsrs-theme');
     if (stored === 'light' || stored === 'dark') return stored;
 
@@ -19,7 +18,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark';
     }
-    return 'light';
+    return 'dark';
   });
 
   useEffect(() => {

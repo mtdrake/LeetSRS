@@ -2,10 +2,12 @@ import { Button, TextField, Label, Input, Switch } from 'react-aria-components';
 import { FaSun, FaMoon } from 'react-icons/fa6';
 import { ViewLayout } from '../../components/ViewLayout';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAnimations } from '../../contexts/AnimationsContext';
 import { bounceButton } from '@/shared/styles';
 
 export function SettingsView() {
   const { theme, toggleTheme } = useTheme();
+  const { animationsEnabled, toggleAnimations } = useAnimations();
 
   return (
     <ViewLayout>
@@ -16,23 +18,63 @@ export function SettingsView() {
 
         <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
           <h3 className="text-lg font-semibold mb-4">Appearance</h3>
-          <div className="flex items-center justify-between">
-            <span>Theme</span>
-            <Switch
-              isSelected={theme === 'dark'}
-              onChange={toggleTheme}
-              className="group inline-flex touch-none items-center gap-2"
-            >
-              <FaSun
-                className={`text-sm transition-colors ${theme === 'light' ? 'text-accent' : 'text-tertiary opacity-50'}`}
-              />
-              <span className="group-data-[selected]:bg-accent group-data-[focus-visible]:ring-2 h-6 w-11 cursor-pointer rounded-full border border-current bg-tertiary ring-offset-2 ring-offset-primary transition-colors">
-                <span className="group-data-[selected]:ml-5 group-data-[selected]:group-data-[pressed]:ml-4 group-data-[pressed]:w-6 block h-5 w-5 origin-right rounded-full bg-white shadow-sm transition-all" />
-              </span>
-              <FaMoon
-                className={`text-sm transition-colors ${theme === 'dark' ? 'text-accent' : 'text-tertiary opacity-50'}`}
-              />
-            </Switch>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span>Theme</span>
+              </div>
+              <Switch
+                isSelected={theme === 'dark'}
+                onChange={toggleTheme}
+                className="group inline-flex touch-none items-center gap-2"
+              >
+                {({ isSelected }) => (
+                  <>
+                    <FaSun
+                      className={`text-sm transition-colors ${!isSelected ? 'text-accent' : 'text-tertiary opacity-50'}`}
+                    />
+                    <span
+                      className={`relative flex items-center h-6 w-11 cursor-pointer rounded-full transition-colors ${
+                        isSelected ? 'bg-accent' : 'bg-tertiary border border-current'
+                      } group-data-[focus-visible]:ring-2 ring-offset-2 ring-offset-primary`}
+                    >
+                      <span
+                        className={`block h-5 w-5 mx-0.5 rounded-full bg-white shadow-sm transition-all ${
+                          isSelected ? 'translate-x-5' : ''
+                        } group-data-[pressed]:scale-95`}
+                      />
+                    </span>
+                    <FaMoon
+                      className={`text-sm transition-colors ${isSelected ? 'text-accent' : 'text-tertiary opacity-50'}`}
+                    />
+                  </>
+                )}
+              </Switch>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span>Enable animations</span>
+              </div>
+              <Switch
+                isSelected={animationsEnabled}
+                onChange={toggleAnimations}
+                className="group inline-flex touch-none items-center"
+              >
+                {({ isSelected }) => (
+                  <span
+                    className={`relative flex items-center h-6 w-11 cursor-pointer rounded-full transition-colors ${
+                      isSelected ? 'bg-accent' : 'bg-tertiary border border-current'
+                    } group-data-[focus-visible]:ring-2 ring-offset-2 ring-offset-primary`}
+                  >
+                    <span
+                      className={`block h-5 w-5 mx-0.5 rounded-full bg-white shadow-sm transition-all ${
+                        isSelected ? 'translate-x-5' : ''
+                      } group-data-[pressed]:scale-95`}
+                    />
+                  </span>
+                )}
+              </Switch>
+            </div>
           </div>
         </div>
 

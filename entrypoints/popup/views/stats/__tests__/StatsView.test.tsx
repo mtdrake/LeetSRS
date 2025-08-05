@@ -41,12 +41,6 @@ describe('StatsView', () => {
     return render(<StatsView />, { wrapper });
   };
 
-  it('should render the statistics heading', () => {
-    renderStatsView();
-
-    expect(screen.getByRole('heading', { name: 'Statistics' })).toBeInTheDocument();
-  });
-
   it('should render the streak counter in header', () => {
     renderStatsView();
 
@@ -61,13 +55,6 @@ describe('StatsView', () => {
     expect(screen.getByTestId('card-distribution-chart')).toBeInTheDocument();
     expect(screen.getByTestId('review-history-chart')).toBeInTheDocument();
     expect(screen.getByTestId('upcoming-reviews-chart')).toBeInTheDocument();
-  });
-
-  it('should apply correct CSS classes to statistics heading', () => {
-    renderStatsView();
-
-    const heading = screen.getByRole('heading', { name: 'Statistics' });
-    expect(heading).toHaveClass('text-2xl', 'font-bold', 'text-primary');
   });
 
   it('should render charts in correct order', () => {

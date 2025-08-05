@@ -2,19 +2,19 @@ import { useState, useEffect } from 'react';
 import { ReviewCard } from './ReviewCard';
 import { NotesSection } from './NotesSection';
 import { ActionsSection } from './ActionsSection';
-import { useAnimations } from '../../contexts/AnimationsContext';
 import {
   useReviewQueueQuery,
   useRateCardMutation,
   useRemoveCardMutation,
   useDelayCardMutation,
   usePauseCardMutation,
+  useAnimationsEnabledQuery,
 } from '@/hooks/useBackgroundQueries';
 import type { Card } from '@/shared/cards';
 import type { Grade } from 'ts-fsrs';
 
 export function ReviewQueue() {
-  const { animationsEnabled } = useAnimations();
+  const { data: animationsEnabled = true } = useAnimationsEnabledQuery();
   const { data: initialQueue, isLoading, error } = useReviewQueueQuery();
   const rateCardMutation = useRateCardMutation();
   const removeCardMutation = useRemoveCardMutation();

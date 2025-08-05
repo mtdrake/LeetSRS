@@ -2,15 +2,24 @@ import { Button, TextField, Label, Input, Switch } from 'react-aria-components';
 import { FaSun, FaMoon } from 'react-icons/fa6';
 import { ViewLayout } from '../../components/ViewLayout';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useAnimations } from '../../contexts/AnimationsContext';
 import { bounceButton } from '@/shared/styles';
-import { useMaxNewCardsPerDayQuery, useSetMaxNewCardsPerDayMutation } from '@/hooks/useBackgroundQueries';
+import {
+  useMaxNewCardsPerDayQuery,
+  useSetMaxNewCardsPerDayMutation,
+  useAnimationsEnabledQuery,
+  useSetAnimationsEnabledMutation,
+} from '@/hooks/useBackgroundQueries';
 import { DEFAULT_MAX_NEW_CARDS_PER_DAY, MIN_NEW_CARDS_PER_DAY, MAX_NEW_CARDS_PER_DAY } from '@/shared/settings';
 import { useState, useEffect } from 'react';
 
 function AppearanceSection() {
   const { theme, toggleTheme } = useTheme();
-  const { animationsEnabled, toggleAnimations } = useAnimations();
+  const { data: animationsEnabled = true } = useAnimationsEnabledQuery();
+  const setAnimationsEnabledMutation = useSetAnimationsEnabledMutation();
+
+  const toggleAnimations = () => {
+    setAnimationsEnabledMutation.mutate(!animationsEnabled);
+  };
 
   return (
     <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">

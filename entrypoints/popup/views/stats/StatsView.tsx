@@ -1,5 +1,5 @@
 import { ViewLayout } from '../../components/ViewLayout';
-import { Pie } from 'react-chartjs-2';
+import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { useCardStateStatsQuery } from '@/hooks/useBackgroundQueries';
 import { State as FsrsState } from 'ts-fsrs';
@@ -9,7 +9,7 @@ ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tool
 export function StatsView() {
   const { data: cardStateStats } = useCardStateStatsQuery();
 
-  const pieData = {
+  const doughnutData = {
     labels: ['New', 'Learning', 'Review', 'Relearning'],
     datasets: [
       {
@@ -48,7 +48,7 @@ export function StatsView() {
         <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
           <h3 className="text-lg font-semibold mb-4">Card Distribution</h3>
           <div style={{ height: '200px' }}>
-            <Pie data={pieData} options={chartOptions} />
+            <Doughnut data={doughnutData} options={chartOptions} />
           </div>
         </div>
       </div>

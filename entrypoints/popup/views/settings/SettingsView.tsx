@@ -13,7 +13,6 @@ import {
   useImportDataMutation,
   useResetAllDataMutation,
 } from '@/hooks/useBackgroundQueries';
-import { useQueryClient } from '@tanstack/react-query';
 import {
   DEFAULT_MAX_NEW_CARDS_PER_DAY,
   MIN_NEW_CARDS_PER_DAY,
@@ -146,7 +145,6 @@ function ReviewSettingsSection() {
 }
 
 function DataSection() {
-  const queryClient = useQueryClient();
   const exportDataMutation = useExportDataMutation();
   const importDataMutation = useImportDataMutation();
   const resetAllDataMutation = useResetAllDataMutation();
@@ -191,7 +189,6 @@ function DataSection() {
     try {
       const text = await file.text();
       await importDataMutation.mutateAsync(text);
-      queryClient.clear();
       alert('Data imported successfully!');
     } catch (error) {
       console.error('Import failed:', error);
@@ -224,7 +221,6 @@ function DataSection() {
 
     try {
       await resetAllDataMutation.mutateAsync();
-      queryClient.clear();
       alert('All data has been reset');
       setResetConfirmation(false);
     } catch (error) {

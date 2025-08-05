@@ -287,14 +287,20 @@ export function useImportDataMutation() {
   return useMutation({
     mutationFn: (jsonData: string) => sendMessage({ type: MessageType.IMPORT_DATA, jsonData }),
     onSuccess: () => {
-      // Invalidate all queries to refresh data
-      queryClient.invalidateQueries();
+      // Clear all queries to refresh data after import
+      queryClient.clear();
     },
   });
 }
 
 export function useResetAllDataMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: () => sendMessage({ type: MessageType.RESET_ALL_DATA }),
+    onSuccess: () => {
+      // Clear all queries to refresh data after reset
+      queryClient.clear();
+    },
   });
 }

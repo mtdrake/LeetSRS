@@ -14,6 +14,7 @@ import {
 } from 'chart.js';
 import { useCardStateStatsQuery, useLastNDaysStatsQuery, useNextNDaysStatsQuery } from '@/hooks/useBackgroundQueries';
 import { State as FsrsState, Rating } from 'ts-fsrs';
+import { StreakCounter } from '../../components/StreakCounter';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -152,7 +153,7 @@ export function StatsView() {
   };
 
   return (
-    <ViewLayout>
+    <ViewLayout headerContent={<StreakCounter />}>
       <div>
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-primary">Statistics</h1>

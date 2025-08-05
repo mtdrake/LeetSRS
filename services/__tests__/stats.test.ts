@@ -252,6 +252,73 @@ describe('Stats management', () => {
       expect(todayStats?.gradeBreakdown[Rating.Easy]).toBe(1);
       expect(todayStats?.totalReviews).toBe(4);
     });
+
+    it('should maintain streak across multiple consecutive days', async () => {
+      // Day 1
+      vi.setSystemTime(new Date('2024-03-10T10:00:00'));
+      await updateStats(Rating.Good, false);
+
+      // Day 2
+      vi.setSystemTime(new Date('2024-03-11T10:00:00'));
+      await updateStats(Rating.Easy, false);
+
+      // Day 3
+      vi.setSystemTime(new Date('2024-03-12T10:00:00'));
+      await updateStats(Rating.Good, false);
+
+      // Day 4
+      vi.setSystemTime(new Date('2024-03-13T10:00:00'));
+      await updateStats(Rating.Hard, false);
+
+      // Day 5
+      vi.setSystemTime(new Date('2024-03-14T10:00:00'));
+      await updateStats(Rating.Good, false);
+
+      const stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
+
+      expect(stats?.['2024-03-10']?.streak).toBe(1);
+      expect(stats?.['2024-03-11']?.streak).toBe(2);
+      expect(stats?.['2024-03-12']?.streak).toBe(3);
+      expect(stats?.['2024-03-13']?.streak).toBe(4);
+      expect(stats?.['2024-03-14']?.streak).toBe(5);
+    });
+
+    it('should not increment streak for multiple reviews on same day', async () => {
+      await updateStats(Rating.Good, false);
+      await updateStats(Rating.Easy, false);
+      await updateStats(Rating.Hard, false);
+
+      const stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
+      expect(stats?.['2024-03-15']?.streak).toBe(1);
+      expect(stats?.['2024-03-15']?.totalReviews).toBe(3);
+    });
+
+    it('should handle streak reset after multiple day gap', async () => {
+      // Create a 3-day streak
+      vi.setSystemTime(new Date('2024-03-10T10:00:00'));
+      await updateStats(Rating.Good, false);
+
+      vi.setSystemTime(new Date('2024-03-11T10:00:00'));
+      await updateStats(Rating.Good, false);
+
+      vi.setSystemTime(new Date('2024-03-12T10:00:00'));
+      await updateStats(Rating.Good, false);
+
+      // Skip 2 days
+      vi.setSystemTime(new Date('2024-03-15T10:00:00'));
+      await updateStats(Rating.Good, false);
+
+      const stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
+      expect(stats?.['2024-03-12']?.streak).toBe(3);
+      expect(stats?.['2024-03-15']?.streak).toBe(1); // Reset to 1
+    });
+
+    it('should start streak at 1 for first ever review', async () => {
+      await updateStats(Rating.Good, false);
+
+      const stats = await storage.getItem<Record<string, DailyStats>>(STORAGE_KEYS.stats);
+      expect(stats?.['2024-03-15']?.streak).toBe(1);
+    });
   });
 
   describe('getStatsForDate', () => {

@@ -15,6 +15,14 @@ import type { UseQueryResult } from '@tanstack/react-query';
 vi.mock('@/hooks/useBackgroundQueries', () => ({
   useCardsQuery: vi.fn(),
   useTodayStatsQuery: vi.fn(() => ({ data: { streak: 5 } })),
+  usePauseCardMutation: vi.fn(() => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+  })),
+  useRemoveCardMutation: vi.fn(() => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+  })),
 }));
 
 import { useCardsQuery } from '@/hooks/useBackgroundQueries';

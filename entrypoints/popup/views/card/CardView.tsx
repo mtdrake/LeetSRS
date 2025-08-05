@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { ViewLayout } from '../../components/ViewLayout';
 import { StreakCounter } from '../../components/StreakCounter';
-import { useCardsQuery } from '@/hooks/useBackgroundQueries';
+import { useCardsQuery, usePauseCardMutation, useRemoveCardMutation } from '@/hooks/useBackgroundQueries';
 import { Button } from 'react-aria-components';
 import { State as FsrsState } from 'ts-fsrs';
 import type { Card } from '@/shared/cards';
-import { FaCirclePause } from 'react-icons/fa6';
+import { FaCirclePause, FaPlay, FaTrash } from 'react-icons/fa6';
+import { bounceButton } from '@/shared/styles';
 
 // Utility functions
 const getStateLabel = (state: FsrsState) => {
@@ -54,9 +55,9 @@ function CardHeader({ card, isExpanded }: CardHeaderProps) {
   return (
     <>
       <div className="flex items-center gap-2">
-        {card.paused && <FaCirclePause className="text-warning" title="Card is paused" />}
+        {card.paused && <FaCirclePause className="text-warning text-base" title="Card is paused" />}
         <span className="text-xs text-secondary">#{card.leetcodeId}</span>
-        <span className="text-sm">{card.name}</span>
+        <span className={`text-sm ${card.paused ? 'opacity-60' : ''}`}>{card.name}</span>
       </div>
       <div className="flex items-center gap-2">
         <span className={`text-xs ${getDifficultyColor(card.difficulty)}`}>{card.difficulty}</span>
@@ -84,9 +85,25 @@ function StatRow({ label, value }: StatRowProps) {
 
 interface CardStatsProps {
   card: Card;
+  onPauseToggle: () => void;
+  onDelete: () => void;
+  isPauseProcessing: boolean;
+  isDeleteProcessing: boolean;
 }
 
-function CardStats({ card }: CardStatsProps) {
+function CardStats({ card, onPauseToggle, onDelete, isPauseProcessing, isDeleteProcessing }: CardStatsProps) {
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+
+  const handleDelete = () => {
+    if (!deleteConfirm) {
+      setDeleteConfirm(true);
+      setTimeout(() => setDeleteConfirm(false), 3000);
+    } else {
+      onDelete();
+      setDeleteConfirm(false);
+    }
+  };
+
   return (
     <div className="px-4 pb-3 border-t border-current">
       <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
@@ -99,6 +116,28 @@ function CardStats({ card }: CardStatsProps) {
         {card.fsrs.last_review && <StatRow label="Last" value={formatDate(card.fsrs.last_review)} />}
         <StatRow label="Added" value={formatDate(card.createdAt)} />
       </div>
+
+      <div className="mt-3 pt-3 border-t border-current flex gap-2">
+        <Button
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs bg-tertiary text-primary hover:bg-quaternary transition-colors ${bounceButton} disabled:opacity-50`}
+          onPress={onPauseToggle}
+          isDisabled={isPauseProcessing}
+        >
+          {card.paused ? <FaPlay className="text-sm" /> : <FaCirclePause className="text-sm" />}
+          <span>{card.paused ? 'Resume' : 'Pause'}</span>
+        </Button>
+
+        <Button
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs ${
+            deleteConfirm ? 'bg-ultra-danger' : 'bg-danger'
+          } text-white hover:opacity-90 transition-colors ${bounceButton} disabled:opacity-50`}
+          onPress={handleDelete}
+          isDisabled={isDeleteProcessing}
+        >
+          <FaTrash className="text-sm" />
+          <span>{deleteConfirm ? 'Confirm?' : 'Delete'}</span>
+        </Button>
+      </div>
     </div>
   );
 }
@@ -107,9 +146,21 @@ interface CardItemProps {
   card: Card;
   isExpanded: boolean;
   onToggle: () => void;
+  onPauseToggle: () => void;
+  onDelete: () => void;
+  isPauseProcessing: boolean;
+  isDeleteProcessing: boolean;
 }
 
-function CardItem({ card, isExpanded, onToggle }: CardItemProps) {
+function CardItem({
+  card,
+  isExpanded,
+  onToggle,
+  onPauseToggle,
+  onDelete,
+  isPauseProcessing,
+  isDeleteProcessing,
+}: CardItemProps) {
   return (
     <div className="bg-secondary rounded-lg border border-current overflow-hidden">
       <Button
@@ -119,14 +170,25 @@ function CardItem({ card, isExpanded, onToggle }: CardItemProps) {
       >
         <CardHeader card={card} isExpanded={isExpanded} />
       </Button>
-      {isExpanded && <CardStats card={card} />}
+      {isExpanded && (
+        <CardStats
+          card={card}
+          onPauseToggle={onPauseToggle}
+          onDelete={onDelete}
+          isPauseProcessing={isPauseProcessing}
+          isDeleteProcessing={isDeleteProcessing}
+        />
+      )}
     </div>
   );
 }
 
 export function CardView() {
   const { data: cards = [], isLoading } = useCardsQuery();
+  const pauseCardMutation = usePauseCardMutation();
+  const removeCardMutation = useRemoveCardMutation();
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [processingCards, setProcessingCards] = useState<Set<string>>(new Set());
 
   const sortedCards = [...cards].sort((a, b) => {
     const aId = parseInt(a.leetcodeId);
@@ -146,6 +208,42 @@ export function CardView() {
     });
   };
 
+  const handlePauseToggle = async (card: Card) => {
+    setProcessingCards((prev) => new Set(prev).add(card.id));
+    try {
+      await pauseCardMutation.mutateAsync({ slug: card.slug, paused: !card.paused });
+    } catch (error) {
+      console.error('Failed to toggle pause status:', error);
+    } finally {
+      setProcessingCards((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(card.id);
+        return newSet;
+      });
+    }
+  };
+
+  const handleDelete = async (card: Card) => {
+    setProcessingCards((prev) => new Set(prev).add(card.id));
+    try {
+      await removeCardMutation.mutateAsync(card.slug);
+      // Remove from expanded cards if it was expanded
+      setExpandedCards((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(card.id);
+        return newSet;
+      });
+    } catch (error) {
+      console.error('Failed to delete card:', error);
+    } finally {
+      setProcessingCards((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(card.id);
+        return newSet;
+      });
+    }
+  };
+
   return (
     <ViewLayout title="Cards" headerContent={<StreakCounter />}>
       <div className="flex flex-col gap-4">
@@ -161,6 +259,10 @@ export function CardView() {
                 card={card}
                 isExpanded={expandedCards.has(card.id)}
                 onToggle={() => toggleCard(card.id)}
+                onPauseToggle={() => handlePauseToggle(card)}
+                onDelete={() => handleDelete(card)}
+                isPauseProcessing={processingCards.has(card.id) && pauseCardMutation.isPending}
+                isDeleteProcessing={processingCards.has(card.id) && removeCardMutation.isPending}
               />
             ))}
           </div>

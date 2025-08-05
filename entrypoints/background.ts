@@ -14,6 +14,8 @@ import {
   setMaxNewCardsPerDay,
   getAnimationsEnabled,
   setAnimationsEnabled,
+  getTheme,
+  setTheme,
 } from '@/services/settings';
 import { browser } from 'wxt/browser';
 import { MessageType, type MessageRequest } from '@/services/messages';
@@ -65,6 +67,12 @@ export default defineBackground(() => {
 
       case MessageType.SET_ANIMATIONS_ENABLED:
         return await setAnimationsEnabled(request.value);
+
+      case MessageType.GET_THEME:
+        return await getTheme();
+
+      case MessageType.SET_THEME:
+        return await setTheme(request.value);
 
       default: {
         // This should never happen with proper typing - exhaustive check

@@ -1,21 +1,32 @@
 import { Button, TextField, Label, Input, Switch } from 'react-aria-components';
 import { FaSun, FaMoon } from 'react-icons/fa6';
 import { ViewLayout } from '../../components/ViewLayout';
-import { useTheme } from '../../contexts/ThemeContext';
 import { bounceButton } from '@/shared/styles';
 import {
   useMaxNewCardsPerDayQuery,
   useSetMaxNewCardsPerDayMutation,
   useAnimationsEnabledQuery,
   useSetAnimationsEnabledMutation,
+  useThemeQuery,
+  useSetThemeMutation,
 } from '@/hooks/useBackgroundQueries';
-import { DEFAULT_MAX_NEW_CARDS_PER_DAY, MIN_NEW_CARDS_PER_DAY, MAX_NEW_CARDS_PER_DAY } from '@/shared/settings';
+import {
+  DEFAULT_MAX_NEW_CARDS_PER_DAY,
+  MIN_NEW_CARDS_PER_DAY,
+  MAX_NEW_CARDS_PER_DAY,
+  DEFAULT_THEME,
+} from '@/shared/settings';
 import { useState, useEffect } from 'react';
 
 function AppearanceSection() {
-  const { theme, toggleTheme } = useTheme();
+  const { data: theme = DEFAULT_THEME } = useThemeQuery();
+  const setThemeMutation = useSetThemeMutation();
   const { data: animationsEnabled = true } = useAnimationsEnabledQuery();
   const setAnimationsEnabledMutation = useSetAnimationsEnabledMutation();
+
+  const toggleTheme = () => {
+    setThemeMutation.mutate(theme === 'light' ? 'dark' : 'light');
+  };
 
   const toggleAnimations = () => {
     setAnimationsEnabledMutation.mutate(!animationsEnabled);

@@ -39,6 +39,8 @@ vi.mock('@/hooks/useBackgroundQueries', () => ({
   usePauseCardMutation: vi.fn(),
   useAnimationsEnabledQuery: vi.fn(() => ({ data: false })),
   useSetAnimationsEnabledMutation: vi.fn(() => ({ mutate: vi.fn() })),
+  useThemeQuery: vi.fn(() => ({ data: 'dark' })),
+  useSetThemeMutation: vi.fn(() => ({ mutate: vi.fn() })),
   queryKeys: {
     reviewQueue: ['reviewQueue'],
     cards: ['cards'],

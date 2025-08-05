@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sendMessage, MessageType } from '@/services/messages';
 import type { Grade } from 'ts-fsrs';
 import type { Difficulty, Card } from '@/shared/cards';
+import type { Theme } from '@/shared/settings';
 
 // Query Keys
 export const queryKeys = {
@@ -11,6 +12,7 @@ export const queryKeys = {
   note: (cardId: string) => ['note', cardId] as const,
   maxNewCardsPerDay: ['maxNewCardsPerDay'] as const,
   animationsEnabled: ['animationsEnabled'] as const,
+  theme: ['theme'] as const,
 } as const;
 
 // Queries
@@ -198,6 +200,24 @@ export function useSetAnimationsEnabledMutation() {
     mutationFn: (value: boolean) => sendMessage({ type: MessageType.SET_ANIMATIONS_ENABLED, value }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.animationsEnabled });
+    },
+  });
+}
+
+export function useThemeQuery() {
+  return useQuery({
+    queryKey: queryKeys.theme,
+    queryFn: () => sendMessage({ type: MessageType.GET_THEME }),
+  });
+}
+
+export function useSetThemeMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (value: Theme) => sendMessage({ type: MessageType.SET_THEME, value }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.theme });
     },
   });
 }

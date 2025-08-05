@@ -1,6 +1,12 @@
 import { storage } from '#imports';
 import { STORAGE_KEYS } from './storage-keys';
-import { DEFAULT_MAX_NEW_CARDS_PER_DAY, MIN_NEW_CARDS_PER_DAY, MAX_NEW_CARDS_PER_DAY } from '@/shared/settings';
+import {
+  DEFAULT_MAX_NEW_CARDS_PER_DAY,
+  MIN_NEW_CARDS_PER_DAY,
+  MAX_NEW_CARDS_PER_DAY,
+  Theme,
+  DEFAULT_THEME,
+} from '@/shared/settings';
 
 export async function getMaxNewCardsPerDay(): Promise<number> {
   const value = await storage.getItem<number>(STORAGE_KEYS.maxNewCardsPerDay);
@@ -24,4 +30,16 @@ export async function getAnimationsEnabled(): Promise<boolean> {
 
 export async function setAnimationsEnabled(value: boolean): Promise<void> {
   await storage.setItem(STORAGE_KEYS.animationsEnabled, value);
+}
+
+export async function getTheme(): Promise<Theme> {
+  const value = await storage.getItem<Theme>(STORAGE_KEYS.theme);
+  return value ?? DEFAULT_THEME;
+}
+
+export async function setTheme(value: Theme): Promise<void> {
+  if (value !== 'light' && value !== 'dark') {
+    throw new Error('Theme must be either "light" or "dark"');
+  }
+  await storage.setItem(STORAGE_KEYS.theme, value);
 }

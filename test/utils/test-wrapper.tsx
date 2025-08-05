@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AnimationsProvider } from '@/entrypoints/popup/contexts/AnimationsContext';
 import type { ReactNode } from 'react';
 
 /**
@@ -30,7 +31,11 @@ export function createWrapper() {
   const testQueryClient = createTestQueryClient();
 
   return function Wrapper({ children }: { children: ReactNode }) {
-    return <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>;
+    return (
+      <QueryClientProvider client={testQueryClient}>
+        <AnimationsProvider>{children}</AnimationsProvider>
+      </QueryClientProvider>
+    );
   };
 }
 
@@ -42,7 +47,9 @@ export function createTestWrapper() {
   const queryClient = createTestQueryClient();
 
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <AnimationsProvider>{children}</AnimationsProvider>
+    </QueryClientProvider>
   );
 
   return { wrapper, queryClient };

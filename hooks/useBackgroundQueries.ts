@@ -23,6 +23,7 @@ export const queryKeys = {
     allTime: ['stats', 'allTime'] as const,
     cardState: ['stats', 'cardState'] as const,
     lastNDays: (days: number) => ['stats', 'lastNDays', days] as const,
+    nextNDays: (days: number) => ['stats', 'nextNDays', days] as const,
   },
   // Settings related queries
   settings: {
@@ -76,6 +77,13 @@ export function useLastNDaysStatsQuery(days: number) {
   return useQuery({
     queryKey: queryKeys.stats.lastNDays(days),
     queryFn: () => sendMessage({ type: MessageType.GET_LAST_N_DAYS_STATS, days }),
+  });
+}
+
+export function useNextNDaysStatsQuery(days: number) {
+  return useQuery({
+    queryKey: queryKeys.stats.nextNDays(days),
+    queryFn: () => sendMessage({ type: MessageType.GET_NEXT_N_DAYS_STATS, days }),
   });
 }
 

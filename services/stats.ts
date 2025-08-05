@@ -1,7 +1,7 @@
 import { type Grade, Rating, State as FsrsState } from 'ts-fsrs';
 import { STORAGE_KEYS } from './storage-keys';
 import { storage } from '#imports';
-import { getAllCards } from './cards';
+import { getAllCards, isDueByDate, formatLocalDate } from './cards';
 
 export interface DailyStats {
   date: string; // YYYY-MM-DD format
@@ -138,6 +138,44 @@ export async function getLastNDaysStats(days: number): Promise<DailyStats[]> {
         reviewedCards: 0,
         streak: 0,
       });
+    }
+  }
+
+  return result;
+}
+
+export interface UpcomingReviewStats {
+  date: string; // YYYY-MM-DD format
+  count: number;
+}
+
+export async function getNextNDaysStats(days: number): Promise<UpcomingReviewStats[]> {
+  const cards = await getAllCards();
+  const result: UpcomingReviewStats[] = [];
+  const today = new Date();
+
+  // Initialize result array with dates
+  for (let i = 0; i < days; i++) {
+    const date = new Date(today);
+    date.setDate(date.getDate() + i);
+    result.push({
+      date: formatLocalDate(date),
+      count: 0,
+    });
+  }
+
+  // Count cards due on each day
+  for (const card of cards) {
+    if (card.paused) continue;
+
+    for (let i = 0; i < days; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(checkDate.getDate() + i);
+
+      if (isDueByDate(card, checkDate)) {
+        result[i].count++;
+        break;
+      }
     }
   }
 

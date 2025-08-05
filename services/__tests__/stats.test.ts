@@ -10,12 +10,14 @@ import {
   getAllStats,
   getCardStateStats,
   getLastNDaysStats,
+  getNextNDaysStats,
   type DailyStats,
 } from '../stats';
 import { Rating, State as FsrsState } from 'ts-fsrs';
 import { STORAGE_KEYS } from '../storage-keys';
 import { addCard } from '../cards';
 import type { Difficulty } from '@/shared/cards';
+import type { StoredCard } from '../cards';
 
 describe('Date key generation', () => {
   beforeEach(() => {
@@ -644,6 +646,110 @@ describe('Stats management', () => {
         expect(typeof stats[state]).toBe('number');
         expect(stats[state]).toBeGreaterThanOrEqual(0);
       });
+    });
+  });
+
+  describe('getNextNDaysStats', () => {
+    beforeEach(() => {
+      fakeBrowser.reset();
+      vi.setSystemTime(new Date('2024-03-15T10:00:00'));
+    });
+
+    it('should return empty counts when no cards exist', async () => {
+      const stats = await getNextNDaysStats(7);
+
+      expect(stats).toHaveLength(7);
+      expect(stats[0].date).toBe('2024-03-15');
+      expect(stats[6].date).toBe('2024-03-21');
+      stats.forEach((stat) => {
+        expect(stat.count).toBe(0);
+      });
+    });
+
+    it('should count cards due today', async () => {
+      // Add a card that's due today
+      await addCard('problem-1', 'Problem 1', '1', 'Easy' as Difficulty);
+      const cards = (await storage.getItem(STORAGE_KEYS.cards)) as Record<string, StoredCard>;
+
+      // Manually set the card to be due today
+      cards['problem-1'].fsrs.due = new Date('2024-03-15T12:00:00').getTime();
+      await storage.setItem(STORAGE_KEYS.cards, cards);
+
+      const stats = await getNextNDaysStats(7);
+
+      expect(stats[0].date).toBe('2024-03-15');
+      expect(stats[0].count).toBe(1);
+      expect(stats[1].count).toBe(0); // Not counted again tomorrow
+    });
+
+    it('should count cards due in the future', async () => {
+      // Add cards with different due dates
+      await addCard('problem-1', 'Problem 1', '1', 'Easy' as Difficulty);
+      await addCard('problem-2', 'Problem 2', '2', 'Medium' as Difficulty);
+      await addCard('problem-3', 'Problem 3', '3', 'Hard' as Difficulty);
+
+      const cards = (await storage.getItem(STORAGE_KEYS.cards)) as Record<string, StoredCard>;
+
+      // Set different due dates
+      cards['problem-1'].fsrs.due = new Date('2024-03-15T12:00:00').getTime(); // Today
+      cards['problem-2'].fsrs.due = new Date('2024-03-17T12:00:00').getTime(); // In 2 days
+      cards['problem-3'].fsrs.due = new Date('2024-03-20T12:00:00').getTime(); // In 5 days
+      await storage.setItem(STORAGE_KEYS.cards, cards);
+
+      const stats = await getNextNDaysStats(7);
+
+      expect(stats[0].count).toBe(1); // problem-1 due today
+      expect(stats[1].count).toBe(0);
+      expect(stats[2].count).toBe(1); // problem-2 due in 2 days
+      expect(stats[3].count).toBe(0);
+      expect(stats[4].count).toBe(0);
+      expect(stats[5].count).toBe(1); // problem-3 due in 5 days
+      expect(stats[6].count).toBe(0);
+    });
+
+    it('should not count paused cards', async () => {
+      // Add cards
+      await addCard('problem-1', 'Problem 1', '1', 'Easy' as Difficulty);
+      await addCard('problem-2', 'Problem 2', '2', 'Medium' as Difficulty);
+
+      const cards = (await storage.getItem(STORAGE_KEYS.cards)) as Record<string, StoredCard>;
+
+      // Both due today, but one is paused
+      cards['problem-1'].fsrs.due = new Date('2024-03-15T12:00:00').getTime();
+      cards['problem-1'].paused = true;
+      cards['problem-2'].fsrs.due = new Date('2024-03-15T12:00:00').getTime();
+      cards['problem-2'].paused = false;
+      await storage.setItem(STORAGE_KEYS.cards, cards);
+
+      const stats = await getNextNDaysStats(7);
+
+      expect(stats[0].count).toBe(1); // Only the non-paused card
+    });
+
+    it('should handle cards due in the past', async () => {
+      // Add cards due in the past
+      await addCard('problem-1', 'Problem 1', '1', 'Easy' as Difficulty);
+      await addCard('problem-2', 'Problem 2', '2', 'Medium' as Difficulty);
+
+      const cards = (await storage.getItem(STORAGE_KEYS.cards)) as Record<string, StoredCard>;
+
+      cards['problem-1'].fsrs.due = new Date('2024-03-10T12:00:00').getTime(); // 5 days ago
+      cards['problem-2'].fsrs.due = new Date('2024-03-14T12:00:00').getTime(); // Yesterday
+      await storage.setItem(STORAGE_KEYS.cards, cards);
+
+      const stats = await getNextNDaysStats(7);
+
+      // Both cards are overdue, so they should be counted on the first day (today)
+      expect(stats[0].count).toBe(2);
+      expect(stats[1].count).toBe(0);
+    });
+
+    it('should handle large number of days', async () => {
+      const stats = await getNextNDaysStats(30);
+
+      expect(stats).toHaveLength(30);
+      expect(stats[0].date).toBe('2024-03-15');
+      expect(stats[29].date).toBe('2024-04-13');
     });
   });
 });

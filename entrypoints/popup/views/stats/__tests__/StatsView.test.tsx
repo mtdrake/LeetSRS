@@ -7,9 +7,9 @@ import { StatsView } from '../StatsView';
 import { State as FsrsState, Rating } from 'ts-fsrs';
 import { createTestWrapper } from '@/test/utils/test-wrapper';
 import { createQueryMock } from '@/test/utils/query-mocks';
-import { useCardStateStatsQuery, useLastNDaysStatsQuery } from '@/hooks/useBackgroundQueries';
+import { useCardStateStatsQuery, useLastNDaysStatsQuery, useNextNDaysStatsQuery } from '@/hooks/useBackgroundQueries';
 import type { UseQueryResult } from '@tanstack/react-query';
-import type { DailyStats } from '@/services/stats';
+import type { DailyStats, UpcomingReviewStats } from '@/services/stats';
 
 // Mock react-chartjs-2
 vi.mock('react-chartjs-2', () => ({
@@ -27,6 +27,11 @@ vi.mock('react-chartjs-2', () => ({
       Bar Chart
     </div>
   ),
+  Line: ({ data, options }: { data: unknown; options: unknown }) => (
+    <div data-testid="line-chart" data-chart-data={JSON.stringify(data)} data-chart-options={JSON.stringify(options)}>
+      Line Chart
+    </div>
+  ),
 }));
 
 // Mock the ViewLayout component
@@ -38,6 +43,7 @@ vi.mock('../../../components/ViewLayout', () => ({
 vi.mock('@/hooks/useBackgroundQueries', () => ({
   useCardStateStatsQuery: vi.fn(),
   useLastNDaysStatsQuery: vi.fn(),
+  useNextNDaysStatsQuery: vi.fn(),
 }));
 
 describe('StatsView', () => {
@@ -80,6 +86,21 @@ describe('StatsView', () => {
     },
   ];
 
+  const mockNext14DaysStats: UpcomingReviewStats[] = [
+    {
+      date: '2024-05-15',
+      count: 5,
+    },
+    {
+      date: '2024-05-16',
+      count: 3,
+    },
+    {
+      date: '2024-05-17',
+      count: 8,
+    },
+  ];
+
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -90,6 +111,10 @@ describe('StatsView', () => {
 
     vi.mocked(useLastNDaysStatsQuery).mockReturnValue(
       createQueryMock(mockLast30DaysStats) as UseQueryResult<DailyStats[]>
+    );
+
+    vi.mocked(useNextNDaysStatsQuery).mockReturnValue(
+      createQueryMock(mockNext14DaysStats) as UseQueryResult<UpcomingReviewStats[]>
     );
   });
 
@@ -342,6 +367,9 @@ describe('StatsView', () => {
     it('should handle empty data gracefully', () => {
       vi.mocked(useLastNDaysStatsQuery).mockReturnValue(
         createQueryMock<DailyStats[] | undefined>(undefined) as UseQueryResult<DailyStats[]>
+      );
+      vi.mocked(useNextNDaysStatsQuery).mockReturnValue(
+        createQueryMock<UpcomingReviewStats[] | undefined>(undefined) as UseQueryResult<UpcomingReviewStats[]>
       );
 
       renderStatsView();

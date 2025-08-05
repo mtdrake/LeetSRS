@@ -1,7 +1,7 @@
 /**
  * @vitest-environment happy-dom
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ReviewQueue } from '../ReviewQueue';
 import { createTestWrapper } from '@/test/utils/test-wrapper';
@@ -15,6 +15,20 @@ import {
 import { createQueryMock, createMutationMock } from '@/test/utils/query-mocks';
 import { createMockCard } from '@/test/utils/card-mocks';
 import { Rating, State } from 'ts-fsrs';
+
+// Mock localStorage to disable animations in tests
+const originalLocalStorage = window.localStorage;
+const mockLocalStorage = {
+  getItem: (key: string) => {
+    if (key === 'animationsEnabled') return 'false';
+    return null;
+  },
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+  length: 0,
+  key: () => null,
+};
 
 // Mock the hooks
 vi.mock('@/hooks/useBackgroundQueries', () => ({
@@ -129,6 +143,13 @@ describe('ReviewQueue', () => {
   let wrapper: React.ComponentType<{ children: React.ReactNode }>;
 
   beforeEach(() => {
+    // Set up localStorage mock
+    Object.defineProperty(window, 'localStorage', {
+      value: mockLocalStorage,
+      writable: true,
+      configurable: true,
+    });
+
     vi.clearAllMocks();
     mockInvalidateQueries.mockClear();
 
@@ -173,7 +194,20 @@ describe('ReviewQueue', () => {
     );
   });
 
+  afterEach(() => {
+    Object.defineProperty(window, 'localStorage', {
+      value: originalLocalStorage,
+      writable: true,
+      configurable: true,
+    });
+  });
+
   describe('Empty Queue', () => {
+    it('should have animations disabled in tests', () => {
+      // Verify that localStorage mock returns false for animationsEnabled
+      expect(window.localStorage.getItem('animationsEnabled')).toBe('false');
+    });
+
     it('should show empty state when no cards to review', async () => {
       vi.mocked(useReviewQueueQuery).mockReturnValue(createQueryMock([]) as ReturnType<typeof useReviewQueueQuery>);
 

@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { ViewLayout } from '../../components/ViewLayout';
 import { StreakCounter } from '../../components/StreakCounter';
 import { useCardsQuery, usePauseCardMutation, useRemoveCardMutation } from '@/hooks/useBackgroundQueries';
-import { Button } from 'react-aria-components';
+import { Button, TextField, Input, Label } from 'react-aria-components';
 import { State as FsrsState } from 'ts-fsrs';
 import type { Card } from '@/shared/cards';
-import { FaCirclePause, FaPlay, FaTrash } from 'react-icons/fa6';
+import { FaCirclePause, FaPlay, FaTrash, FaXmark, FaMagnifyingGlass } from 'react-icons/fa6';
 import { bounceButton } from '@/shared/styles';
 
 // Utility functions
@@ -189,8 +189,15 @@ export function CardView() {
   const removeCardMutation = useRemoveCardMutation();
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [processingCards, setProcessingCards] = useState<Set<string>>(new Set());
+  const [filterText, setFilterText] = useState('');
 
-  const sortedCards = [...cards].sort((a, b) => {
+  const filteredCards = cards.filter((card) => {
+    if (!filterText) return true;
+    const searchLower = filterText.toLowerCase();
+    return card.name.toLowerCase().includes(searchLower) || card.leetcodeId.includes(filterText);
+  });
+
+  const sortedCards = [...filteredCards].sort((a, b) => {
     const aId = parseInt(a.leetcodeId);
     const bId = parseInt(b.leetcodeId);
     return aId - bId;
@@ -247,10 +254,34 @@ export function CardView() {
   return (
     <ViewLayout title="Cards" headerContent={<StreakCounter />}>
       <div className="flex flex-col gap-4">
+        {!isLoading && cards.length > 0 && (
+          <TextField className="relative" value={filterText} onChange={setFilterText}>
+            <Label className="sr-only">Filter cards</Label>
+            <div className="relative">
+              <FaMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-sm" />
+              <Input
+                className="w-full pl-9 pr-9 py-2 bg-secondary rounded-lg border border-current text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                placeholder="Filter by name or ID..."
+              />
+              {filterText && (
+                <Button
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-tertiary transition-colors"
+                  onPress={() => setFilterText('')}
+                  aria-label="Clear filter"
+                >
+                  <FaXmark className="text-secondary text-sm" />
+                </Button>
+              )}
+            </div>
+          </TextField>
+        )}
+
         {isLoading ? (
           <p className="text-secondary">Loading cards...</p>
-        ) : sortedCards.length === 0 ? (
+        ) : cards.length === 0 ? (
           <p className="text-secondary">No cards added yet.</p>
+        ) : sortedCards.length === 0 ? (
+          <p className="text-secondary">No cards match your filter.</p>
         ) : (
           <div className="space-y-2">
             {sortedCards.map((card) => (

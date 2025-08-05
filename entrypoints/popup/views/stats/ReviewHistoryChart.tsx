@@ -58,17 +58,29 @@ export function ReviewHistoryChart() {
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          boxWidth: 12,
+          padding: 10,
+        },
+        title: {
+          padding: 0,
+        },
       },
       tooltip: {
         mode: 'index' as const,
         intersect: false,
       },
     },
+    layout: {
+      padding: {
+        top: 5,
+      },
+    },
   };
 
   return (
     <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
-      <h3 className="text-lg font-semibold mb-4">Last 30 Days Review History</h3>
+      <h3 className="text-lg font-semibold">Last 30 Days Review History</h3>
       <div style={{ height: '250px' }}>
         <Bar data={chartData} options={chartOptions} />
       </div>

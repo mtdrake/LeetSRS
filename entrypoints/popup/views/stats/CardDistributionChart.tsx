@@ -33,13 +33,21 @@ export function CardDistributionChart() {
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          boxWidth: 12,
+        },
+      },
+    },
+    layout: {
+      padding: {
+        bottom: 5,
       },
     },
   };
 
   return (
     <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
-      <h3 className="text-lg font-semibold mb-4">Card Distribution</h3>
+      <h3 className="text-lg font-semibold">Card Distribution</h3>
       <div style={{ height: '200px' }}>
         <Doughnut data={chartData} options={chartOptions} />
       </div>

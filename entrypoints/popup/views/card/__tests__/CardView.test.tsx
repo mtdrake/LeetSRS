@@ -242,4 +242,146 @@ describe('CardView', () => {
     expect(screen.getByText('Review Card')).toBeInTheDocument();
     expect(screen.getByText('Relearning Card')).toBeInTheDocument();
   });
+
+  describe('filter functionality', () => {
+    it('should filter cards by name', () => {
+      const cards = [
+        createMockCard(State.New, { name: 'Two Sum', leetcodeId: '1' }),
+        createMockCard(State.New, { name: 'Add Two Numbers', leetcodeId: '2' }),
+        createMockCard(State.New, { name: 'Longest Substring', leetcodeId: '3' }),
+      ];
+
+      mockedUseCardsQuery.mockReturnValue(createQueryMock(cards) as UseQueryResult<Card[]>);
+
+      renderWithQueryClient(<CardView />);
+
+      // All cards should be visible initially
+      expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
+      expect(screen.getByText('Longest Substring')).toBeInTheDocument();
+
+      // Type in filter
+      const filterInput = screen.getByPlaceholderText('Filter by name or ID...');
+      fireEvent.change(filterInput, { target: { value: 'two' } });
+
+      // Only cards with "two" in name should be visible
+      expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
+      expect(screen.queryByText('Longest Substring')).not.toBeInTheDocument();
+    });
+
+    it('should filter cards by ID', () => {
+      const cards = [
+        createMockCard(State.New, { name: 'Problem A', leetcodeId: '123' }),
+        createMockCard(State.New, { name: 'Problem B', leetcodeId: '456' }),
+        createMockCard(State.New, { name: 'Problem C', leetcodeId: '789' }),
+      ];
+
+      mockedUseCardsQuery.mockReturnValue(createQueryMock(cards) as UseQueryResult<Card[]>);
+
+      renderWithQueryClient(<CardView />);
+
+      const filterInput = screen.getByPlaceholderText('Filter by name or ID...');
+      fireEvent.change(filterInput, { target: { value: '45' } });
+
+      // Only card with "45" in ID should be visible
+      expect(screen.queryByText('Problem A')).not.toBeInTheDocument();
+      expect(screen.getByText('Problem B')).toBeInTheDocument();
+      expect(screen.queryByText('Problem C')).not.toBeInTheDocument();
+    });
+
+    it('should show "No cards match your filter" when filter returns no results', () => {
+      const cards = [
+        createMockCard(State.New, { name: 'Two Sum', leetcodeId: '1' }),
+        createMockCard(State.New, { name: 'Add Two Numbers', leetcodeId: '2' }),
+      ];
+
+      mockedUseCardsQuery.mockReturnValue(createQueryMock(cards) as UseQueryResult<Card[]>);
+
+      renderWithQueryClient(<CardView />);
+
+      const filterInput = screen.getByPlaceholderText('Filter by name or ID...');
+      fireEvent.change(filterInput, { target: { value: 'xyz' } });
+
+      expect(screen.getByText('No cards match your filter.')).toBeInTheDocument();
+      expect(screen.queryByText('Two Sum')).not.toBeInTheDocument();
+      expect(screen.queryByText('Add Two Numbers')).not.toBeInTheDocument();
+    });
+
+    it('should clear filter when clear button is clicked', () => {
+      const cards = [
+        createMockCard(State.New, { name: 'Two Sum', leetcodeId: '1' }),
+        createMockCard(State.New, { name: 'Add Two Numbers', leetcodeId: '2' }),
+        createMockCard(State.New, { name: 'Longest Substring', leetcodeId: '3' }),
+      ];
+
+      mockedUseCardsQuery.mockReturnValue(createQueryMock(cards) as UseQueryResult<Card[]>);
+
+      renderWithQueryClient(<CardView />);
+
+      const filterInput = screen.getByPlaceholderText('Filter by name or ID...');
+
+      // Filter to show only some cards
+      fireEvent.change(filterInput, { target: { value: 'two' } });
+      expect(screen.queryByText('Longest Substring')).not.toBeInTheDocument();
+
+      // Clear button should be visible when there's text
+      const clearButton = screen.getByLabelText('Clear filter');
+      fireEvent.click(clearButton);
+
+      // All cards should be visible again
+      expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      expect(screen.getByText('Add Two Numbers')).toBeInTheDocument();
+      expect(screen.getByText('Longest Substring')).toBeInTheDocument();
+
+      // Filter input should be empty
+      expect(filterInput).toHaveValue('');
+    });
+
+    it('should perform case-insensitive filtering', () => {
+      const cards = [
+        createMockCard(State.New, { name: 'Two Sum', leetcodeId: '1' }),
+        createMockCard(State.New, { name: 'ADD TWO NUMBERS', leetcodeId: '2' }),
+        createMockCard(State.New, { name: 'Longest Substring', leetcodeId: '3' }),
+      ];
+
+      mockedUseCardsQuery.mockReturnValue(createQueryMock(cards) as UseQueryResult<Card[]>);
+
+      renderWithQueryClient(<CardView />);
+
+      const filterInput = screen.getByPlaceholderText('Filter by name or ID...');
+      fireEvent.change(filterInput, { target: { value: 'TWO' } });
+
+      // Both cards with "two" (case-insensitive) should be visible
+      expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      expect(screen.getByText('ADD TWO NUMBERS')).toBeInTheDocument();
+      expect(screen.queryByText('Longest Substring')).not.toBeInTheDocument();
+    });
+
+    it('should not show filter input when there are no cards', () => {
+      mockedUseCardsQuery.mockReturnValue(createQueryMock([]) as UseQueryResult<Card[]>);
+
+      renderWithQueryClient(<CardView />);
+
+      expect(screen.queryByPlaceholderText('Filter by name or ID...')).not.toBeInTheDocument();
+      expect(screen.getByText('No cards added yet.')).toBeInTheDocument();
+    });
+
+    it('should not show filter input during loading', () => {
+      mockedUseCardsQuery.mockReturnValue(
+        createQueryMock<Card[] | undefined>(undefined, {
+          isLoading: true,
+          isSuccess: false,
+          isPending: true,
+          status: 'pending',
+          fetchStatus: 'fetching',
+        }) as UseQueryResult<Card[]>
+      );
+
+      renderWithQueryClient(<CardView />);
+
+      expect(screen.queryByPlaceholderText('Filter by name or ID...')).not.toBeInTheDocument();
+      expect(screen.getByText('Loading cards...')).toBeInTheDocument();
+    });
+  });
 });

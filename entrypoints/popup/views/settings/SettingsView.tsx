@@ -9,7 +9,6 @@ export function SettingsView() {
       <div>
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-primary">Settings</h1>
-          <span className="text-sm text-secondary">Configure your preferences</span>
         </div>
 
         <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
@@ -30,47 +29,12 @@ export function SettingsView() {
           <h3 className="text-lg font-semibold mb-4">Review Settings</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label htmlFor="daily-review-goal">Daily Review Goal</label>
-              <input
-                id="daily-review-goal"
-                type="number"
-                placeholder="10"
-                className="w-20 px-2 py-1 rounded border bg-tertiary text-primary border-current"
-              />
-            </div>
-            <div className="flex items-center justify-between">
               <label htmlFor="new-cards-per-day">New Cards Per Day</label>
               <input
                 id="new-cards-per-day"
                 type="number"
                 placeholder="5"
                 className="w-20 px-2 py-1 rounded border bg-tertiary text-primary border-current"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <label htmlFor="review-order">Review Order</label>
-              <select id="review-order" className="px-2 py-1 rounded border bg-tertiary text-primary border-current">
-                <option>Random</option>
-                <option>Due Date</option>
-                <option>Difficulty</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
-          <h3 className="text-lg font-semibold mb-4">Notifications</h3>
-          <div className="space-y-3">
-            <div className="flex items-center">
-              <input type="checkbox" id="enable-reminders" className="mr-2" />
-              <label htmlFor="enable-reminders">Enable Daily Reminders</label>
-            </div>
-            <div className="flex items-center justify-between">
-              <label htmlFor="reminder-time">Reminder Time</label>
-              <input
-                id="reminder-time"
-                type="time"
-                className="px-2 py-1 rounded border bg-tertiary text-primary border-current"
               />
             </div>
           </div>

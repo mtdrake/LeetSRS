@@ -231,7 +231,6 @@ export function useSetMaxNewCardsPerDayMutation() {
     mutationFn: (value: number) => sendMessage({ type: MessageType.SET_MAX_NEW_CARDS_PER_DAY, value }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.settings.maxNewCardsPerDay });
-      // Also invalidate review queue as it depends on this setting
       queryClient.invalidateQueries({ queryKey: queryKeys.cards.reviewQueue });
     },
   });

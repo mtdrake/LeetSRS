@@ -26,6 +26,7 @@ export const MessageType = {
   SET_THEME: 'SET_THEME',
   GET_CARD_STATE_STATS: 'GET_CARD_STATE_STATS',
   GET_ALL_STATS: 'GET_ALL_STATS',
+  GET_LAST_N_DAYS_STATS: 'GET_LAST_N_DAYS_STATS',
 } as const;
 
 // Message request types as discriminated union
@@ -55,7 +56,8 @@ export type MessageRequest =
   | { type: typeof MessageType.GET_THEME }
   | { type: typeof MessageType.SET_THEME; value: Theme }
   | { type: typeof MessageType.GET_CARD_STATE_STATS }
-  | { type: typeof MessageType.GET_ALL_STATS };
+  | { type: typeof MessageType.GET_ALL_STATS }
+  | { type: typeof MessageType.GET_LAST_N_DAYS_STATS; days: number };
 
 // Type mapping for request to response
 export type MessageResponseMap = {
@@ -78,6 +80,7 @@ export type MessageResponseMap = {
   [MessageType.SET_THEME]: void;
   [MessageType.GET_CARD_STATE_STATS]: Record<FsrsState, number>;
   [MessageType.GET_ALL_STATS]: DailyStats[];
+  [MessageType.GET_LAST_N_DAYS_STATS]: DailyStats[];
 };
 
 /**

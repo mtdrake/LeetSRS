@@ -107,3 +107,39 @@ export async function getCardStateStats(): Promise<Record<FsrsState, number>> {
 
   return stateStats;
 }
+
+export async function getLastNDaysStats(days: number): Promise<DailyStats[]> {
+  const stats = await getStats();
+  const result: DailyStats[] = [];
+  const today = new Date();
+
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateKey = `${year}-${month}-${day}`;
+
+    if (stats[dateKey]) {
+      result.push(stats[dateKey]);
+    } else {
+      // Include empty days for continuity in the chart
+      result.push({
+        date: dateKey,
+        totalReviews: 0,
+        gradeBreakdown: {
+          [Rating.Again]: 0,
+          [Rating.Hard]: 0,
+          [Rating.Good]: 0,
+          [Rating.Easy]: 0,
+        },
+        newCards: 0,
+        reviewedCards: 0,
+        streak: 0,
+      });
+    }
+  }
+
+  return result;
+}

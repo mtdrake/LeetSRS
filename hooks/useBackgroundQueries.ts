@@ -15,6 +15,7 @@ export const queryKeys = {
   theme: ['theme'] as const,
   cardStateStats: ['cardStateStats'] as const,
   allStats: ['allStats'] as const,
+  lastNDaysStats: (days: number) => ['lastNDaysStats', days] as const,
 } as const;
 
 // Queries
@@ -55,6 +56,14 @@ export function useAllStatsQuery() {
     queryFn: () => sendMessage({ type: MessageType.GET_ALL_STATS }),
   });
 }
+
+export function useLastNDaysStatsQuery(days: number) {
+  return useQuery({
+    queryKey: queryKeys.lastNDaysStats(days),
+    queryFn: () => sendMessage({ type: MessageType.GET_LAST_N_DAYS_STATS, days }),
+  });
+}
+
 export function useNoteQuery(cardId: string) {
   return useQuery({
     queryKey: queryKeys.note(cardId),
@@ -119,6 +128,8 @@ export function useRateCardMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.cards });
       queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });
       queryClient.invalidateQueries({ queryKey: queryKeys.todayStats });
+      queryClient.invalidateQueries({ queryKey: queryKeys.allStats });
+      queryClient.invalidateQueries({ queryKey: queryKeys.lastNDaysStats(30) });
     },
   });
 }

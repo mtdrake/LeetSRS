@@ -7,7 +7,7 @@ import {
   rateCard,
   getReviewQueue,
 } from '@/services/cards';
-import { getTodayStats, getCardStateStats, getAllStats } from '@/services/stats';
+import { getTodayStats, getCardStateStats, getAllStats, getLastNDaysStats } from '@/services/stats';
 import { getNote, saveNote, deleteNote } from '@/services/notes';
 import {
   getMaxNewCardsPerDay,
@@ -85,6 +85,9 @@ export default defineBackground(async () => {
 
       case MessageType.GET_ALL_STATS:
         return await getAllStats();
+
+      case MessageType.GET_LAST_N_DAYS_STATS:
+        return await getLastNDaysStats(request.days);
 
       default: {
         // This should never happen with proper typing - exhaustive check

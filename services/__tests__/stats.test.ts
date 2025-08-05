@@ -9,6 +9,7 @@ import {
   getTodayStats,
   getAllStats,
   getCardStateStats,
+  getLastNDaysStats,
   type DailyStats,
 } from '../stats';
 import { Rating, State as FsrsState } from 'ts-fsrs';
@@ -394,6 +395,88 @@ describe('Stats management', () => {
       expect(allStats[0].date).toBe('2024-02-15');
       expect(allStats[1].date).toBe('2024-01-01');
       expect(allStats[2].date).toBe('2023-12-31');
+    });
+  });
+
+  describe('getLastNDaysStats', () => {
+    it('should return empty days when no stats exist', async () => {
+      const stats = await getLastNDaysStats(7);
+
+      expect(stats).toHaveLength(7);
+      stats.forEach((stat) => {
+        expect(stat.totalReviews).toBe(0);
+        expect(stat.newCards).toBe(0);
+        expect(stat.reviewedCards).toBe(0);
+        expect(stat.gradeBreakdown[Rating.Again]).toBe(0);
+        expect(stat.gradeBreakdown[Rating.Hard]).toBe(0);
+        expect(stat.gradeBreakdown[Rating.Good]).toBe(0);
+        expect(stat.gradeBreakdown[Rating.Easy]).toBe(0);
+      });
+    });
+
+    it('should return last N days in chronological order', async () => {
+      // Create stats for specific days
+      vi.setSystemTime(new Date('2024-03-10T10:00:00'));
+      await updateStats(Rating.Good, false);
+
+      vi.setSystemTime(new Date('2024-03-12T10:00:00'));
+      await updateStats(Rating.Easy, false);
+
+      vi.setSystemTime(new Date('2024-03-15T10:00:00'));
+      await updateStats(Rating.Hard, false);
+
+      // Request last 7 days from March 15
+      const stats = await getLastNDaysStats(7);
+
+      expect(stats).toHaveLength(7);
+      expect(stats[0].date).toBe('2024-03-09'); // 6 days ago
+      expect(stats[1].date).toBe('2024-03-10'); // 5 days ago (has data)
+      expect(stats[2].date).toBe('2024-03-11'); // 4 days ago
+      expect(stats[3].date).toBe('2024-03-12'); // 3 days ago (has data)
+      expect(stats[4].date).toBe('2024-03-13'); // 2 days ago
+      expect(stats[5].date).toBe('2024-03-14'); // 1 day ago
+      expect(stats[6].date).toBe('2024-03-15'); // today (has data)
+
+      // Check that days with data have correct values
+      expect(stats[1].totalReviews).toBe(1);
+      expect(stats[1].gradeBreakdown[Rating.Good]).toBe(1);
+
+      expect(stats[3].totalReviews).toBe(1);
+      expect(stats[3].gradeBreakdown[Rating.Easy]).toBe(1);
+
+      expect(stats[6].totalReviews).toBe(1);
+      expect(stats[6].gradeBreakdown[Rating.Hard]).toBe(1);
+    });
+
+    it('should handle large number of days', async () => {
+      const stats = await getLastNDaysStats(45);
+
+      expect(stats).toHaveLength(45);
+
+      // Check first and last dates
+      const firstDate = new Date('2024-03-15');
+      firstDate.setDate(firstDate.getDate() - 44);
+      expect(stats[0].date).toBe('2024-01-31');
+      expect(stats[44].date).toBe('2024-03-15');
+    });
+
+    it('should include all grade breakdowns for each day', async () => {
+      vi.setSystemTime(new Date('2024-03-15T10:00:00'));
+      await updateStats(Rating.Again, false);
+      await updateStats(Rating.Hard, false);
+      await updateStats(Rating.Good, false);
+      await updateStats(Rating.Easy, false);
+
+      const stats = await getLastNDaysStats(1);
+
+      expect(stats).toHaveLength(1);
+      const todayStats = stats[0];
+      expect(todayStats.date).toBe('2024-03-15');
+      expect(todayStats.totalReviews).toBe(4);
+      expect(todayStats.gradeBreakdown[Rating.Again]).toBe(1);
+      expect(todayStats.gradeBreakdown[Rating.Hard]).toBe(1);
+      expect(todayStats.gradeBreakdown[Rating.Good]).toBe(1);
+      expect(todayStats.gradeBreakdown[Rating.Easy]).toBe(1);
     });
   });
 

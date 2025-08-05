@@ -17,6 +17,8 @@ export const MessageType = {
   GET_NOTE: 'GET_NOTE',
   SAVE_NOTE: 'SAVE_NOTE',
   DELETE_NOTE: 'DELETE_NOTE',
+  GET_MAX_NEW_CARDS_PER_DAY: 'GET_MAX_NEW_CARDS_PER_DAY',
+  SET_MAX_NEW_CARDS_PER_DAY: 'SET_MAX_NEW_CARDS_PER_DAY',
 } as const;
 
 // Message request types as discriminated union
@@ -38,7 +40,9 @@ export type MessageRequest =
   | { type: typeof MessageType.GET_TODAY_STATS }
   | { type: typeof MessageType.GET_NOTE; cardId: string }
   | { type: typeof MessageType.SAVE_NOTE; cardId: string; text: string }
-  | { type: typeof MessageType.DELETE_NOTE; cardId: string };
+  | { type: typeof MessageType.DELETE_NOTE; cardId: string }
+  | { type: typeof MessageType.GET_MAX_NEW_CARDS_PER_DAY }
+  | { type: typeof MessageType.SET_MAX_NEW_CARDS_PER_DAY; value: number };
 
 // Type mapping for request to response
 export type MessageResponseMap = {
@@ -53,6 +57,8 @@ export type MessageResponseMap = {
   [MessageType.GET_NOTE]: Note | null;
   [MessageType.SAVE_NOTE]: void;
   [MessageType.DELETE_NOTE]: void;
+  [MessageType.GET_MAX_NEW_CARDS_PER_DAY]: number;
+  [MessageType.SET_MAX_NEW_CARDS_PER_DAY]: void;
 };
 
 /**

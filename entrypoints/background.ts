@@ -9,6 +9,7 @@ import {
 } from '@/services/cards';
 import { getTodayStats } from '@/services/stats';
 import { getNote, saveNote, deleteNote } from '@/services/notes';
+import { getMaxNewCardsPerDay, setMaxNewCardsPerDay } from '@/services/settings';
 import { browser } from 'wxt/browser';
 import { MessageType, type MessageRequest } from '@/services/messages';
 
@@ -47,6 +48,12 @@ export default defineBackground(() => {
 
       case MessageType.DELETE_NOTE:
         return await deleteNote(request.cardId);
+
+      case MessageType.GET_MAX_NEW_CARDS_PER_DAY:
+        return await getMaxNewCardsPerDay();
+
+      case MessageType.SET_MAX_NEW_CARDS_PER_DAY:
+        return await setMaxNewCardsPerDay(request.value);
 
       default: {
         // This should never happen with proper typing - exhaustive check

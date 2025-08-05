@@ -9,6 +9,7 @@ export const queryKeys = {
   reviewQueue: ['reviewQueue'] as const,
   todayStats: ['todayStats'] as const,
   note: (cardId: string) => ['note', cardId] as const,
+  maxNewCardsPerDay: ['maxNewCardsPerDay'] as const,
 } as const;
 
 // Queries
@@ -158,6 +159,25 @@ export function usePauseCardMutation() {
     mutationFn: ({ slug, paused }) => sendMessage({ type: MessageType.SET_PAUSE_STATUS, slug, paused }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cards });
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });
+    },
+  });
+}
+
+export function useMaxNewCardsPerDayQuery() {
+  return useQuery({
+    queryKey: queryKeys.maxNewCardsPerDay,
+    queryFn: () => sendMessage({ type: MessageType.GET_MAX_NEW_CARDS_PER_DAY }),
+  });
+}
+
+export function useSetMaxNewCardsPerDayMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (value: number) => sendMessage({ type: MessageType.SET_MAX_NEW_CARDS_PER_DAY, value }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.maxNewCardsPerDay });
       queryClient.invalidateQueries({ queryKey: queryKeys.reviewQueue });
     },
   });

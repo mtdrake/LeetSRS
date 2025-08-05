@@ -42,13 +42,15 @@ export function useCardsQuery() {
   });
 }
 
-export function useReviewQueueQuery(enabled = true) {
+export function useReviewQueueQuery(options?: { enabled?: boolean; refetchOnWindowFocus?: boolean }) {
+  const { enabled = true, refetchOnWindowFocus = false } = options || {};
   return useQuery({
     queryKey: queryKeys.cards.reviewQueue,
     queryFn: () => sendMessage({ type: MessageType.GET_REVIEW_QUEUE }),
     enabled,
     staleTime: 1000 * 30,
     refetchOnMount: 'always',
+    refetchOnWindowFocus,
   });
 }
 

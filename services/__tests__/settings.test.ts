@@ -1,9 +1,21 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { fakeBrowser } from 'wxt/testing';
 import { storage } from 'wxt/utils/storage';
-import { getMaxNewCardsPerDay, setMaxNewCardsPerDay, getAnimationsEnabled, setAnimationsEnabled } from '../settings';
+import {
+  getMaxNewCardsPerDay,
+  setMaxNewCardsPerDay,
+  getAnimationsEnabled,
+  setAnimationsEnabled,
+  getTheme,
+  setTheme,
+} from '../settings';
 import { STORAGE_KEYS } from '../storage-keys';
-import { DEFAULT_MAX_NEW_CARDS_PER_DAY, MIN_NEW_CARDS_PER_DAY, MAX_NEW_CARDS_PER_DAY } from '@/shared/settings';
+import {
+  DEFAULT_MAX_NEW_CARDS_PER_DAY,
+  MIN_NEW_CARDS_PER_DAY,
+  MAX_NEW_CARDS_PER_DAY,
+  DEFAULT_THEME,
+} from '@/shared/settings';
 
 describe('Settings Service', () => {
   beforeEach(() => {
@@ -194,6 +206,120 @@ describe('Settings Service', () => {
       await setAnimationsEnabled(true);
       value = await getAnimationsEnabled();
       expect(value).toBe(true);
+    });
+  });
+
+  describe('getTheme', () => {
+    it('should return the stored theme when it exists', async () => {
+      await storage.setItem(STORAGE_KEYS.theme, 'light');
+
+      const result = await getTheme();
+      expect(result).toBe('light');
+    });
+
+    it('should return the default theme when no stored value exists', async () => {
+      const result = await getTheme();
+      expect(result).toBe(DEFAULT_THEME);
+    });
+
+    it('should handle dark theme correctly', async () => {
+      await storage.setItem(STORAGE_KEYS.theme, 'dark');
+
+      const result = await getTheme();
+      expect(result).toBe('dark');
+    });
+  });
+
+  describe('setTheme', () => {
+    it('should store light theme correctly', async () => {
+      await setTheme('light');
+
+      const storedValue = await storage.getItem(STORAGE_KEYS.theme);
+      expect(storedValue).toBe('light');
+    });
+
+    it('should store dark theme correctly', async () => {
+      await setTheme('dark');
+
+      const storedValue = await storage.getItem(STORAGE_KEYS.theme);
+      expect(storedValue).toBe('dark');
+    });
+
+    it('should throw an error for invalid theme values', async () => {
+      // @ts-expect-error Testing invalid input
+      await expect(setTheme('invalid')).rejects.toThrow('Theme must be either "light" or "dark"');
+
+      // @ts-expect-error Testing invalid input
+      await expect(setTheme('')).rejects.toThrow('Theme must be either "light" or "dark"');
+
+      // @ts-expect-error Testing invalid input
+      await expect(setTheme(null)).rejects.toThrow('Theme must be either "light" or "dark"');
+
+      // @ts-expect-error Testing invalid input
+      await expect(setTheme(undefined)).rejects.toThrow('Theme must be either "light" or "dark"');
+
+      // @ts-expect-error Testing invalid input
+      await expect(setTheme(123)).rejects.toThrow('Theme must be either "light" or "dark"');
+    });
+
+    it('should not modify storage when validation fails', async () => {
+      // Set an initial valid value
+      await setTheme('light');
+
+      // Try to set an invalid value
+      // @ts-expect-error Testing invalid input
+      await expect(setTheme('invalid')).rejects.toThrow();
+
+      // Verify the original value is still there
+      const storedValue = await storage.getItem(STORAGE_KEYS.theme);
+      expect(storedValue).toBe('light');
+    });
+
+    it('should handle theme toggling correctly', async () => {
+      await setTheme('light');
+      expect(await getTheme()).toBe('light');
+
+      await setTheme('dark');
+      expect(await getTheme()).toBe('dark');
+
+      await setTheme('light');
+      expect(await getTheme()).toBe('light');
+    });
+  });
+
+  describe('Integration tests for theme', () => {
+    it('should work correctly when setting and then getting theme', async () => {
+      // Initially should return default
+      let value = await getTheme();
+      expect(value).toBe(DEFAULT_THEME);
+
+      // Set to light
+      await setTheme('light');
+      value = await getTheme();
+      expect(value).toBe('light');
+
+      // Set to dark
+      await setTheme('dark');
+      value = await getTheme();
+      expect(value).toBe('dark');
+    });
+
+    it('should handle multiple theme updates correctly', async () => {
+      // Start with default
+      expect(await getTheme()).toBe(DEFAULT_THEME);
+
+      // Toggle through themes multiple times
+      await setTheme('light');
+      expect(await getTheme()).toBe('light');
+
+      await setTheme('dark');
+      expect(await getTheme()).toBe('dark');
+
+      await setTheme('light');
+      expect(await getTheme()).toBe('light');
+
+      await setTheme('dark');
+      expect(await getTheme()).toBe('dark');
     });
   });
 });

@@ -42,8 +42,8 @@ describe('ActionsSection', () => {
       fireEvent.click(expandButton);
 
       expect(screen.getByText('1 Day')).toBeInTheDocument();
-      expect(screen.getByText('1 Day')).toBeInTheDocument();
       expect(screen.getByText('5 Days')).toBeInTheDocument();
+      expect(screen.getByText('Pause')).toBeInTheDocument();
       expect(screen.getByText('Delete Card')).toBeInTheDocument();
     });
 

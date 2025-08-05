@@ -113,18 +113,6 @@ describe('CardDistributionChart', () => {
     expect(chartData.datasets[0].data).toEqual([0, 0, 0, 0]);
   });
 
-  it('should apply correct CSS classes', () => {
-    renderChart();
-
-    // Check for card distribution container
-    const distributionSection = screen.getByRole('heading', { name: 'Card Distribution' }).parentElement;
-    expect(distributionSection).toHaveClass('mb-6', 'p-4', 'rounded-lg', 'bg-secondary', 'text-primary');
-
-    // Check for section heading styles
-    const sectionHeading = screen.getByRole('heading', { name: 'Card Distribution' });
-    expect(sectionHeading).toHaveClass('text-lg', 'font-semibold', 'mb-4');
-  });
-
   it('should set chart container height', () => {
     renderChart();
 

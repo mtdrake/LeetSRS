@@ -110,6 +110,28 @@ describe('migrations', () => {
       expect(await getCurrentSchemaVersion()).toBe(0);
     });
 
+    it('should throw error for duplicate migration versions', async () => {
+      const migrations: Migration[] = [
+        {
+          version: 1,
+          description: 'First migration',
+          migrate: async () => {},
+        },
+        {
+          version: 2,
+          description: 'Second migration',
+          migrate: async () => {},
+        },
+        {
+          version: 1,
+          description: 'Duplicate version',
+          migrate: async () => {},
+        },
+      ];
+
+      await expect(runMigrations(migrations)).rejects.toThrow('Duplicate migration version detected: 1');
+    });
+
     it('should stop and throw error if migration fails', async () => {
       const executionOrder: number[] = [];
 

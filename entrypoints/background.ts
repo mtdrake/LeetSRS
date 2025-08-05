@@ -21,9 +21,9 @@ import { browser } from 'wxt/browser';
 import { MessageType, type MessageRequest } from '@/services/messages';
 import { runMigrations, migrations } from '@/services/migrations';
 
-export default defineBackground(() => {
+export default defineBackground(async () => {
   // Run migrations on startup
-  runMigrations(migrations).catch((error) => {
+  await runMigrations(migrations).catch((error) => {
     console.error('Failed to run migrations:', error);
   });
 

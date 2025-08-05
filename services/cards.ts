@@ -143,14 +143,6 @@ export async function setPauseStatus(slug: string, paused: boolean): Promise<Car
   return card;
 }
 
-export async function pauseCard(slug: string): Promise<Card> {
-  return setPauseStatus(slug, true);
-}
-
-export async function unpauseCard(slug: string): Promise<Card> {
-  return setPauseStatus(slug, false);
-}
-
 export async function rateCard(
   slug: string,
   name: string,

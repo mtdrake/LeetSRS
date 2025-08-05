@@ -6,8 +6,6 @@ import {
   getAllCards,
   removeCard,
   delayCard,
-  pauseCard,
-  unpauseCard,
   setPauseStatus,
   serializeCard,
   deserializeCard,
@@ -574,7 +572,7 @@ describe('setPauseStatus', () => {
   });
 });
 
-describe('pauseCard', () => {
+describe('setPauseStatus - pausing', () => {
   beforeEach(() => {
     fakeBrowser.reset();
   });
@@ -582,7 +580,7 @@ describe('pauseCard', () => {
   it('should pause an existing card', async () => {
     await addCard('pause-test', 'Pause Test', '5000', 'Easy');
 
-    const pausedCard = await pauseCard('pause-test');
+    const pausedCard = await setPauseStatus('pause-test', true);
 
     expect(pausedCard.paused).toBe(true);
     expect(pausedCard.slug).toBe('pause-test');
@@ -594,31 +592,31 @@ describe('pauseCard', () => {
   });
 
   it('should throw error when pausing non-existent card', async () => {
-    await expect(pauseCard('non-existent')).rejects.toThrow('Card with slug "non-existent" not found');
+    await expect(setPauseStatus('non-existent', true)).rejects.toThrow('Card with slug "non-existent" not found');
   });
 
   it('should handle pausing already paused card', async () => {
     await addCard('already-paused', 'Already Paused', '5001', 'Medium');
 
     // Pause once
-    await pauseCard('already-paused');
+    await setPauseStatus('already-paused', true);
 
     // Pause again
-    const stillPausedCard = await pauseCard('already-paused');
+    const stillPausedCard = await setPauseStatus('already-paused', true);
     expect(stillPausedCard.paused).toBe(true);
   });
 });
 
-describe('unpauseCard', () => {
+describe('setPauseStatus - unpausing', () => {
   beforeEach(() => {
     fakeBrowser.reset();
   });
 
   it('should unpause a paused card', async () => {
     await addCard('unpause-test', 'Unpause Test', '5002', 'Hard');
-    await pauseCard('unpause-test');
+    await setPauseStatus('unpause-test', true);
 
-    const unpausedCard = await unpauseCard('unpause-test');
+    const unpausedCard = await setPauseStatus('unpause-test', false);
 
     expect(unpausedCard.paused).toBe(false);
     expect(unpausedCard.slug).toBe('unpause-test');
@@ -630,14 +628,14 @@ describe('unpauseCard', () => {
   });
 
   it('should throw error when unpausing non-existent card', async () => {
-    await expect(unpauseCard('non-existent')).rejects.toThrow('Card with slug "non-existent" not found');
+    await expect(setPauseStatus('non-existent', false)).rejects.toThrow('Card with slug "non-existent" not found');
   });
 
   it('should handle unpausing already unpaused card', async () => {
     await addCard('already-unpaused', 'Already Unpaused', '5003', 'Easy');
 
     // Card starts unpaused, unpause it anyway
-    const unpausedCard = await unpauseCard('already-unpaused');
+    const unpausedCard = await setPauseStatus('already-unpaused', false);
     expect(unpausedCard.paused).toBe(false);
   });
 });
@@ -1460,9 +1458,9 @@ describe('getReviewQueue', () => {
     await rateCard('review2', 'Review 2', Rating.Hard, '2002', 'Medium');
 
     // Pause some cards
-    await pauseCard('new2'); // Pause a new card
-    await pauseCard('new4'); // Pause another new card
-    await pauseCard('review1'); // Pause a review card
+    await setPauseStatus('new2', true); // Pause a new card
+    await setPauseStatus('new4', true); // Pause another new card
+    await setPauseStatus('review1', true); // Pause a review card
 
     const queue = await getReviewQueue();
 
@@ -1485,8 +1483,8 @@ describe('getReviewQueue', () => {
     // Create and pause all cards
     await addCard('paused1', 'Paused 1', '3001', 'Easy');
     await addCard('paused2', 'Paused 2', '3002', 'Medium');
-    await pauseCard('paused1');
-    await pauseCard('paused2');
+    await setPauseStatus('paused1', true);
+    await setPauseStatus('paused2', true);
 
     const queue = await getReviewQueue();
 

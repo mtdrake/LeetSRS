@@ -1,44 +1,55 @@
 import { ViewLayout } from '../../components/ViewLayout';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { useCardStateStatsQuery } from '@/hooks/useBackgroundQueries';
+import { State as FsrsState } from 'ts-fsrs';
+
+ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export function StatsView() {
+  const { data: cardStateStats } = useCardStateStatsQuery();
+
+  const pieData = {
+    labels: ['New', 'Learning', 'Review', 'Relearning'],
+    datasets: [
+      {
+        data: cardStateStats
+          ? [
+              cardStateStats[FsrsState.New],
+              cardStateStats[FsrsState.Learning],
+              cardStateStats[FsrsState.Review],
+              cardStateStats[FsrsState.Relearning],
+            ]
+          : [0, 0, 0, 0],
+        backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444'],
+        borderColor: ['#2563eb', '#d97706', '#059669', '#dc2626'],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+    },
+  };
+
   return (
     <ViewLayout>
-      <div className="stats-view">
-        <div className="view-header">
-          <h1>Statistics</h1>
-          <span className="subtitle">Your progress overview</span>
+      <div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-primary">Statistics</h1>
         </div>
 
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-value">0</div>
-            <div className="stat-label">Total Reviews</div>
+        <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
+          <h3 className="text-lg font-semibold mb-4">Card Distribution</h3>
+          <div style={{ height: '200px' }}>
+            <Pie data={pieData} options={chartOptions} />
           </div>
-
-          <div className="stat-card">
-            <div className="stat-value">0</div>
-            <div className="stat-label">Cards Learned</div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-value">0%</div>
-            <div className="stat-label">Success Rate</div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-value">0</div>
-            <div className="stat-label">Day Streak</div>
-          </div>
-        </div>
-
-        <div className="chart-placeholder">
-          <h3>Weekly Activity</h3>
-          <p>Chart will appear here</p>
-        </div>
-
-        <div className="chart-placeholder">
-          <h3>Difficulty Distribution</h3>
-          <p>Chart will appear here</p>
         </div>
       </div>
     </ViewLayout>

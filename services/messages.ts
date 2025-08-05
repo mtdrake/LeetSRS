@@ -1,6 +1,6 @@
 import { browser } from 'wxt/browser';
 import type { Card, Difficulty } from '@/shared/cards';
-import type { Grade } from 'ts-fsrs';
+import type { Grade, State as FsrsState } from 'ts-fsrs';
 import type { DailyStats } from './stats';
 import type { Note } from '@/shared/notes';
 import type { Theme } from '@/shared/settings';
@@ -24,6 +24,8 @@ export const MessageType = {
   SET_ANIMATIONS_ENABLED: 'SET_ANIMATIONS_ENABLED',
   GET_THEME: 'GET_THEME',
   SET_THEME: 'SET_THEME',
+  GET_CARD_STATE_STATS: 'GET_CARD_STATE_STATS',
+  GET_ALL_STATS: 'GET_ALL_STATS',
 } as const;
 
 // Message request types as discriminated union
@@ -51,7 +53,9 @@ export type MessageRequest =
   | { type: typeof MessageType.GET_ANIMATIONS_ENABLED }
   | { type: typeof MessageType.SET_ANIMATIONS_ENABLED; value: boolean }
   | { type: typeof MessageType.GET_THEME }
-  | { type: typeof MessageType.SET_THEME; value: Theme };
+  | { type: typeof MessageType.SET_THEME; value: Theme }
+  | { type: typeof MessageType.GET_CARD_STATE_STATS }
+  | { type: typeof MessageType.GET_ALL_STATS };
 
 // Type mapping for request to response
 export type MessageResponseMap = {
@@ -72,6 +76,8 @@ export type MessageResponseMap = {
   [MessageType.SET_ANIMATIONS_ENABLED]: void;
   [MessageType.GET_THEME]: Theme;
   [MessageType.SET_THEME]: void;
+  [MessageType.GET_CARD_STATE_STATS]: Record<FsrsState, number>;
+  [MessageType.GET_ALL_STATS]: DailyStats[];
 };
 
 /**

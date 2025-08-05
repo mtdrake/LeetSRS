@@ -1,6 +1,7 @@
-import { type Grade, Rating } from 'ts-fsrs';
+import { type Grade, Rating, State as FsrsState } from 'ts-fsrs';
 import { STORAGE_KEYS } from './storage-keys';
 import { storage } from '#imports';
+import { getAllCards } from './cards';
 
 export interface DailyStats {
   date: string; // YYYY-MM-DD format
@@ -87,4 +88,22 @@ export async function getTodayStats(): Promise<DailyStats | null> {
 export async function getAllStats(): Promise<DailyStats[]> {
   const stats = await getStats();
   return Object.values(stats).sort((a, b) => b.date.localeCompare(a.date));
+}
+
+export async function getCardStateStats(): Promise<Record<FsrsState, number>> {
+  const cards = await getAllCards();
+
+  const stateStats: Record<FsrsState, number> = {
+    [FsrsState.New]: 0,
+    [FsrsState.Learning]: 0,
+    [FsrsState.Review]: 0,
+    [FsrsState.Relearning]: 0,
+  };
+
+  for (const card of cards) {
+    const state = card.fsrs.state;
+    stateStats[state]++;
+  }
+
+  return stateStats;
 }

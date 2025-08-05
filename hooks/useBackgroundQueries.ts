@@ -13,6 +13,8 @@ export const queryKeys = {
   maxNewCardsPerDay: ['maxNewCardsPerDay'] as const,
   animationsEnabled: ['animationsEnabled'] as const,
   theme: ['theme'] as const,
+  cardStateStats: ['cardStateStats'] as const,
+  allStats: ['allStats'] as const,
 } as const;
 
 // Queries
@@ -37,6 +39,20 @@ export function useTodayStatsQuery() {
   return useQuery({
     queryKey: queryKeys.todayStats,
     queryFn: () => sendMessage({ type: MessageType.GET_TODAY_STATS }),
+  });
+}
+
+export function useCardStateStatsQuery() {
+  return useQuery({
+    queryKey: queryKeys.cardStateStats,
+    queryFn: () => sendMessage({ type: MessageType.GET_CARD_STATE_STATS }),
+  });
+}
+
+export function useAllStatsQuery() {
+  return useQuery({
+    queryKey: queryKeys.allStats,
+    queryFn: () => sendMessage({ type: MessageType.GET_ALL_STATS }),
   });
 }
 export function useNoteQuery(cardId: string) {

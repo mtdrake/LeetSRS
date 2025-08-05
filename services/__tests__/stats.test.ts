@@ -8,10 +8,13 @@ import {
   getStatsForDate,
   getTodayStats,
   getAllStats,
+  getCardStateStats,
   type DailyStats,
 } from '../stats';
-import { Rating } from 'ts-fsrs';
+import { Rating, State as FsrsState } from 'ts-fsrs';
 import { STORAGE_KEYS } from '../storage-keys';
+import { addCard } from '../cards';
+import type { Difficulty } from '@/shared/cards';
 
 describe('Date key generation', () => {
   beforeEach(() => {
@@ -391,6 +394,173 @@ describe('Stats management', () => {
       expect(allStats[0].date).toBe('2024-02-15');
       expect(allStats[1].date).toBe('2024-01-01');
       expect(allStats[2].date).toBe('2023-12-31');
+    });
+  });
+
+  describe('getCardStateStats', () => {
+    beforeEach(() => {
+      fakeBrowser.reset();
+    });
+
+    it('should return all zeros when no cards exist', async () => {
+      const stats = await getCardStateStats();
+
+      expect(stats[FsrsState.New]).toBe(0);
+      expect(stats[FsrsState.Learning]).toBe(0);
+      expect(stats[FsrsState.Review]).toBe(0);
+      expect(stats[FsrsState.Relearning]).toBe(0);
+    });
+
+    it('should count cards by state correctly', async () => {
+      // Add some cards - new cards start in New state
+      await addCard('two-sum', 'Two Sum', '1', 'Easy' as Difficulty);
+      await addCard('add-two-numbers', 'Add Two Numbers', '2', 'Medium' as Difficulty);
+      await addCard('longest-substring', 'Longest Substring', '3', 'Medium' as Difficulty);
+
+      const stats = await getCardStateStats();
+
+      expect(stats[FsrsState.New]).toBe(3);
+      expect(stats[FsrsState.Learning]).toBe(0);
+      expect(stats[FsrsState.Review]).toBe(0);
+      expect(stats[FsrsState.Relearning]).toBe(0);
+    });
+
+    it('should count all fsrs states correctly', async () => {
+      // Add cards with different states by manipulating storage directly
+      const cards = [
+        {
+          id: '1',
+          slug: 'problem-1',
+          name: 'Problem 1',
+          leetcodeId: '1',
+          difficulty: 'Easy' as Difficulty,
+          createdAt: Date.now(),
+          paused: false,
+          fsrs: {
+            due: Date.now(),
+            last_review: null,
+            state: FsrsState.New,
+            stability: 0,
+            difficulty: 0,
+            elapsed_days: 0,
+            scheduled_days: 0,
+            reps: 0,
+            lapses: 0,
+          },
+        },
+        {
+          id: '2',
+          slug: 'problem-2',
+          name: 'Problem 2',
+          leetcodeId: '2',
+          difficulty: 'Medium' as Difficulty,
+          createdAt: Date.now(),
+          paused: false,
+          fsrs: {
+            due: Date.now(),
+            last_review: Date.now(),
+            state: FsrsState.Learning,
+            stability: 1,
+            difficulty: 5,
+            elapsed_days: 1,
+            scheduled_days: 1,
+            reps: 1,
+            lapses: 0,
+          },
+        },
+        {
+          id: '3',
+          slug: 'problem-3',
+          name: 'Problem 3',
+          leetcodeId: '3',
+          difficulty: 'Hard' as Difficulty,
+          createdAt: Date.now(),
+          paused: false,
+          fsrs: {
+            due: Date.now(),
+            last_review: Date.now(),
+            state: FsrsState.Review,
+            stability: 10,
+            difficulty: 5,
+            elapsed_days: 5,
+            scheduled_days: 10,
+            reps: 5,
+            lapses: 0,
+          },
+        },
+        {
+          id: '4',
+          slug: 'problem-4',
+          name: 'Problem 4',
+          leetcodeId: '4',
+          difficulty: 'Hard' as Difficulty,
+          createdAt: Date.now(),
+          paused: false,
+          fsrs: {
+            due: Date.now(),
+            last_review: Date.now(),
+            state: FsrsState.Review,
+            stability: 20,
+            difficulty: 6,
+            elapsed_days: 10,
+            scheduled_days: 20,
+            reps: 10,
+            lapses: 0,
+          },
+        },
+        {
+          id: '5',
+          slug: 'problem-5',
+          name: 'Problem 5',
+          leetcodeId: '5',
+          difficulty: 'Medium' as Difficulty,
+          createdAt: Date.now(),
+          paused: false,
+          fsrs: {
+            due: Date.now(),
+            last_review: Date.now(),
+            state: FsrsState.Relearning,
+            stability: 2,
+            difficulty: 7,
+            elapsed_days: 15,
+            scheduled_days: 2,
+            reps: 15,
+            lapses: 2,
+          },
+        },
+      ];
+
+      await storage.setItem(STORAGE_KEYS.cards, cards);
+
+      const stats = await getCardStateStats();
+
+      expect(stats[FsrsState.New]).toBe(1);
+      expect(stats[FsrsState.Learning]).toBe(1);
+      expect(stats[FsrsState.Review]).toBe(2);
+      expect(stats[FsrsState.Relearning]).toBe(1);
+    });
+
+    it('should handle empty card array', async () => {
+      await storage.setItem(STORAGE_KEYS.cards, []);
+
+      const stats = await getCardStateStats();
+
+      expect(stats[FsrsState.New]).toBe(0);
+      expect(stats[FsrsState.Learning]).toBe(0);
+      expect(stats[FsrsState.Review]).toBe(0);
+      expect(stats[FsrsState.Relearning]).toBe(0);
+    });
+
+    it('should return type-safe Record<FsrsState, number>', async () => {
+      const stats = await getCardStateStats();
+
+      // TypeScript should enforce that stats has all FsrsState keys
+      const states: FsrsState[] = [FsrsState.New, FsrsState.Learning, FsrsState.Review, FsrsState.Relearning];
+
+      states.forEach((state) => {
+        expect(typeof stats[state]).toBe('number');
+        expect(stats[state]).toBeGreaterThanOrEqual(0);
+      });
     });
   });
 });

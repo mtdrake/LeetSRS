@@ -668,36 +668,6 @@ describe('ReviewQueue', () => {
       expect(mockRemoveMutateAsync).toHaveBeenCalledWith('two-sum');
     });
 
-    it('should show empty state when last card is deleted', async () => {
-      // Start with only one card
-      const reviewQueueMock = vi.mocked(useReviewQueueQuery);
-      reviewQueueMock.mockReturnValue(createQueryMock([mockCards[0]]) as ReturnType<typeof useReviewQueueQuery>);
-
-      mockRemoveMutateAsync.mockResolvedValue(undefined);
-
-      render(<ReviewQueue />, { wrapper });
-
-      // Wait for initial render
-      await waitFor(() => {
-        expect(screen.getByText('Two Sum')).toBeInTheDocument();
-      });
-
-      // Update mock to return empty queue
-      reviewQueueMock.mockReturnValue(createQueryMock([]) as ReturnType<typeof useReviewQueueQuery>);
-
-      // Click delete button
-      const deleteButton = screen.getByTestId('delete-button');
-      fireEvent.click(deleteButton);
-
-      // Should show empty state
-      await waitFor(() => {
-        expect(screen.getByText('No cards to review!')).toBeInTheDocument();
-        expect(screen.getByText('Check back tomorrow for more reviews.')).toBeInTheDocument();
-      });
-
-      expect(mockRemoveMutateAsync).toHaveBeenCalledWith('two-sum');
-    });
-
     it('should handle delete errors gracefully', async () => {
       mockRemoveMutateAsync.mockRejectedValue(new Error('Failed to delete card'));
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

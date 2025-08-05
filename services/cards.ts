@@ -176,10 +176,6 @@ export async function rateCard(
 }
 
 export function shouldReview(card: Card): boolean {
-  if (card.fsrs.state === FsrsState.New) {
-    return false;
-  }
-
   const now = new Date();
   const dueDate = new Date(card.fsrs.due);
 
@@ -199,15 +195,20 @@ export function shouldReview(card: Card): boolean {
 
 export async function getReviewQueue(): Promise<Card[]> {
   const allCards = await getAllCards();
-  // Filter out paused cards first
-  const activeCards = allCards.filter((card) => !card.paused);
-  const reviewCards = activeCards.filter(shouldReview);
+  // Filter out paused cards and cards not due yet
+  const dueCards = allCards.filter((card) => !card.paused && shouldReview(card));
+
+  // Separate into review cards and new cards
+  const reviewCards = dueCards.filter((card) => card.fsrs.state !== FsrsState.New);
+  const newCards = dueCards.filter((card) => card.fsrs.state === FsrsState.New);
 
   // Get today's stats to determine how many new cards have already been done
   const todayStats = await getTodayStats();
   const newCardsCompletedToday = todayStats?.newCards ?? 0;
   const remainingNewCards = Math.max(0, MAX_NEW_CARDS_PER_DAY - newCardsCompletedToday);
 
-  const newCards = activeCards.filter((card) => card.fsrs.state === FsrsState.New).slice(0, remainingNewCards);
-  return interleaveArrays(reviewCards, newCards);
+  // Limit new cards to the remaining daily allowance
+  const limitedNewCards = newCards.slice(0, remainingNewCards);
+
+  return interleaveArrays(reviewCards, limitedNewCards);
 }

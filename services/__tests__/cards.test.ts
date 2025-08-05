@@ -815,7 +815,7 @@ describe('shouldReview', () => {
     vi.useRealTimers();
   });
 
-  it('should return false for new cards', () => {
+  it('should return true for new cards with due date today', () => {
     const newCard: Card = {
       id: 'test-id',
       slug: 'test-problem',
@@ -823,11 +823,11 @@ describe('shouldReview', () => {
       leetcodeId: '1',
       difficulty: 'Easy',
       createdAt: new Date(),
-      fsrs: createEmptyCard(),
+      fsrs: createEmptyCard(), // createEmptyCard sets due date to now
       paused: false,
     };
 
-    expect(shouldReview(newCard)).toBe(false);
+    expect(shouldReview(newCard)).toBe(true);
   });
 
   it('should return true for cards due today (earlier time)', () => {

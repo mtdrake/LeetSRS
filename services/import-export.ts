@@ -51,9 +51,9 @@ export async function exportData(): Promise<string> {
       stats,
       notes,
       settings: {
-        ...(maxNewCardsPerDay !== undefined && maxNewCardsPerDay !== null && { maxNewCardsPerDay }),
-        ...(animationsEnabled !== undefined && animationsEnabled !== null && { animationsEnabled }),
-        ...(theme !== undefined && theme !== null && { theme }),
+        ...(maxNewCardsPerDay != null && { maxNewCardsPerDay }),
+        ...(animationsEnabled != null && { animationsEnabled }),
+        ...(theme != null && { theme }),
       },
     },
   };
@@ -109,13 +109,13 @@ export async function importData(jsonData: string): Promise<void> {
 
   // Import settings
   if (data.data.settings) {
-    if (data.data.settings.maxNewCardsPerDay !== undefined) {
+    if (data.data.settings.maxNewCardsPerDay != null) {
       await storage.setItem(STORAGE_KEYS.maxNewCardsPerDay, data.data.settings.maxNewCardsPerDay);
     }
-    if (data.data.settings.animationsEnabled !== undefined) {
+    if (data.data.settings.animationsEnabled != null) {
       await storage.setItem(STORAGE_KEYS.animationsEnabled, data.data.settings.animationsEnabled);
     }
-    if (data.data.settings.theme !== undefined) {
+    if (data.data.settings.theme != null) {
       await storage.setItem(STORAGE_KEYS.theme, data.data.settings.theme);
     }
   }

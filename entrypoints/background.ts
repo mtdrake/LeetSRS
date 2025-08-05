@@ -19,8 +19,14 @@ import {
 } from '@/services/settings';
 import { browser } from 'wxt/browser';
 import { MessageType, type MessageRequest } from '@/services/messages';
+import { runMigrations, migrations } from '@/services/migrations';
 
 export default defineBackground(() => {
+  // Run migrations on startup
+  runMigrations(migrations).catch((error) => {
+    console.error('Failed to run migrations:', error);
+  });
+
   async function handleMessage(request: MessageRequest) {
     switch (request.type) {
       case MessageType.ADD_CARD:

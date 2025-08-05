@@ -13,6 +13,7 @@ import {
   useImportDataMutation,
   useResetAllDataMutation,
 } from '@/hooks/useBackgroundQueries';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   DEFAULT_MAX_NEW_CARDS_PER_DAY,
   MIN_NEW_CARDS_PER_DAY,
@@ -145,6 +146,7 @@ function ReviewSettingsSection() {
 }
 
 function DataSection() {
+  const queryClient = useQueryClient();
   const exportDataMutation = useExportDataMutation();
   const importDataMutation = useImportDataMutation();
   const resetAllDataMutation = useResetAllDataMutation();
@@ -195,8 +197,20 @@ function DataSection() {
       return;
     }
 
+    // Browser confirmation dialog
+    const confirmed = window.confirm(
+      'Are you absolutely sure you want to delete all data? This action cannot be undone.\n\n' +
+        'All your cards, review history, statistics, and notes will be permanently deleted.'
+    );
+
+    if (!confirmed) {
+      setResetConfirmation(false);
+      return;
+    }
+
     try {
       await resetAllDataMutation.mutateAsync();
+      queryClient.clear();
       alert('All data has been reset');
       setResetConfirmation(false);
     } catch (error) {

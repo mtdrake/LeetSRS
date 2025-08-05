@@ -294,13 +294,7 @@ export function useImportDataMutation() {
 }
 
 export function useResetAllDataMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: () => sendMessage({ type: MessageType.RESET_ALL_DATA }),
-    onSuccess: () => {
-      // Invalidate all queries to refresh data
-      queryClient.invalidateQueries();
-    },
   });
 }

@@ -1,4 +1,5 @@
-import { Button, TextField, Label, Input } from 'react-aria-components';
+import { Button, TextField, Label, Input, Switch } from 'react-aria-components';
+import { FaSun, FaMoon } from 'react-icons/fa6';
 import { ViewLayout } from '../../components/ViewLayout';
 import { useTheme } from '../../contexts/ThemeContext';
 import { bounceButton } from '@/shared/styles';
@@ -17,12 +18,21 @@ export function SettingsView() {
           <h3 className="text-lg font-semibold mb-4">Appearance</h3>
           <div className="flex items-center justify-between">
             <span>Theme</span>
-            <Button
-              onPress={toggleTheme}
-              className={`px-4 py-2 rounded-md transition-all hover:opacity-80 bg-accent text-white ${bounceButton}`}
+            <Switch
+              isSelected={theme === 'dark'}
+              onChange={toggleTheme}
+              className="group inline-flex touch-none items-center gap-2"
             >
-              {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
-            </Button>
+              <FaSun
+                className={`text-sm transition-colors ${theme === 'light' ? 'text-accent' : 'text-tertiary opacity-50'}`}
+              />
+              <span className="group-data-[selected]:bg-accent group-data-[focus-visible]:ring-2 h-6 w-11 cursor-pointer rounded-full border border-current bg-tertiary ring-offset-2 ring-offset-primary transition-colors">
+                <span className="group-data-[selected]:ml-5 group-data-[selected]:group-data-[pressed]:ml-4 group-data-[pressed]:w-6 block h-5 w-5 origin-right rounded-full bg-white shadow-sm transition-all" />
+              </span>
+              <FaMoon
+                className={`text-sm transition-colors ${theme === 'dark' ? 'text-accent' : 'text-tertiary opacity-50'}`}
+              />
+            </Switch>
           </div>
         </div>
 

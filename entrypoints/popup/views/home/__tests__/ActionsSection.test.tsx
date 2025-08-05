@@ -31,7 +31,7 @@ describe('ActionsSection', () => {
 
       expect(screen.getByText('Actions')).toBeInTheDocument();
       expect(screen.getByText('▶')).toBeInTheDocument();
-      expect(screen.queryByText('Delay card')).not.toBeInTheDocument();
+      expect(screen.queryByText('1 Day')).not.toBeInTheDocument();
       expect(screen.queryByText('Delete Card')).not.toBeInTheDocument();
     });
 
@@ -41,9 +41,9 @@ describe('ActionsSection', () => {
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
-      expect(screen.getByText('Delay card')).toBeInTheDocument();
-      expect(screen.getByText('1 day')).toBeInTheDocument();
-      expect(screen.getByText('5 days')).toBeInTheDocument();
+      expect(screen.getByText('1 Day')).toBeInTheDocument();
+      expect(screen.getByText('1 Day')).toBeInTheDocument();
+      expect(screen.getByText('5 Days')).toBeInTheDocument();
       expect(screen.getByText('Delete Card')).toBeInTheDocument();
     });
 
@@ -54,11 +54,11 @@ describe('ActionsSection', () => {
 
       // Expand
       fireEvent.click(expandButton);
-      expect(screen.getByText('Delay card')).toBeInTheDocument();
+      expect(screen.getByText('1 Day')).toBeInTheDocument();
 
       // Collapse
       fireEvent.click(expandButton);
-      expect(screen.queryByText('Delay card')).not.toBeInTheDocument();
+      expect(screen.queryByText('1 Day')).not.toBeInTheDocument();
     });
 
     it('should rotate arrow icon when expanded', () => {
@@ -88,28 +88,28 @@ describe('ActionsSection', () => {
   });
 
   describe('Delay Functionality', () => {
-    it('should call onDelay with 1 when 1 day button is clicked', () => {
+    it('should call onDelay with 1 when 1 Day button is clicked', () => {
       render(<ActionsSection {...defaultProps} />);
 
       // Expand first
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
-      const delay1Button = screen.getByRole('button', { name: '1 day' });
+      const delay1Button = screen.getByRole('button', { name: /1 Day/i });
       fireEvent.click(delay1Button);
 
       expect(mockOnDelay).toHaveBeenCalledWith(1);
       expect(mockOnDelay).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onDelay with 5 when 5 days button is clicked', () => {
+    it('should call onDelay with 5 when 5 Days button is clicked', () => {
       render(<ActionsSection {...defaultProps} />);
 
       // Expand first
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
-      const delay5Button = screen.getByRole('button', { name: '5 days' });
+      const delay5Button = screen.getByRole('button', { name: /5 Days/i });
       fireEvent.click(delay5Button);
 
       expect(mockOnDelay).toHaveBeenCalledWith(5);
@@ -122,9 +122,9 @@ describe('ActionsSection', () => {
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
-      expect(screen.getByText('Delay card')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: '1 day' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: '5 days' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /1 Day/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /5 Days/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Pause/i })).toBeInTheDocument();
     });
   });
 
@@ -135,7 +135,7 @@ describe('ActionsSection', () => {
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
-      expect(screen.getByRole('button', { name: 'Pause Card' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Pause/i })).toBeInTheDocument();
     });
 
     it('should call onPause when pause button is clicked', () => {
@@ -144,7 +144,7 @@ describe('ActionsSection', () => {
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
-      const pauseButton = screen.getByRole('button', { name: 'Pause Card' });
+      const pauseButton = screen.getByRole('button', { name: /Pause/i });
       fireEvent.click(pauseButton);
 
       expect(mockOnPause).toHaveBeenCalledTimes(1);
@@ -156,7 +156,7 @@ describe('ActionsSection', () => {
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
-      const pauseButton = screen.getByRole('button', { name: 'Pause Card' });
+      const pauseButton = screen.getByRole('button', { name: /Pause/i });
       expect(pauseButton).toHaveClass('bg-warning');
     });
 
@@ -169,8 +169,8 @@ describe('ActionsSection', () => {
       const buttons = screen.getAllByRole('button');
       const buttonTexts = buttons.map((btn) => btn.textContent);
 
-      const delayIndex = buttonTexts.indexOf('5 days');
-      const pauseIndex = buttonTexts.indexOf('Pause Card');
+      const delayIndex = buttonTexts.findIndex(text => text?.includes('5 Days'));
+      const pauseIndex = buttonTexts.findIndex(text => text?.includes('Pause'));
       const deleteIndex = buttonTexts.indexOf('Delete Card');
 
       expect(pauseIndex).toBeGreaterThan(delayIndex);
@@ -276,9 +276,9 @@ describe('ActionsSection', () => {
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
-      const delay1Button = screen.getByRole('button', { name: '1 day' });
-      const delay5Button = screen.getByRole('button', { name: '5 days' });
-      const pauseButton = screen.getByRole('button', { name: 'Pause Card' });
+      const delay1Button = screen.getByRole('button', { name: /1 Day/i });
+      const delay5Button = screen.getByRole('button', { name: /5 Days/i });
+      const pauseButton = screen.getByRole('button', { name: /Pause/i });
       const deleteButton = screen.getByRole('button', { name: 'Delete Card' });
 
       // Check for bounceButton class effects (from imported styles)
@@ -294,7 +294,7 @@ describe('ActionsSection', () => {
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
-      const contentDiv = screen.getByText('Delay card').closest('div')?.parentElement;
+      const contentDiv = screen.getByText('Delete Card').closest('div')?.parentElement;
       expect(contentDiv).toHaveClass('mt-3', 'space-y-3');
 
       const deleteSection = screen.getByRole('button', { name: 'Delete Card' }).parentElement;
@@ -314,7 +314,7 @@ describe('ActionsSection', () => {
       fireEvent.click(expandButton);
 
       // Should end up expanded (odd number of clicks)
-      expect(screen.getByText('Delay card')).toBeInTheDocument();
+      expect(screen.getByText('1 Day')).toBeInTheDocument();
     });
 
     it('should handle rapid clicks on delay buttons', () => {
@@ -323,7 +323,7 @@ describe('ActionsSection', () => {
       const expandButton = screen.getByRole('button', { name: /Actions/i });
       fireEvent.click(expandButton);
 
-      const delay1Button = screen.getByRole('button', { name: '1 day' });
+      const delay1Button = screen.getByRole('button', { name: /1 Day/i });
 
       // Rapid clicks
       fireEvent.click(delay1Button);

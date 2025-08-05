@@ -175,9 +175,23 @@ function DataSection() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    const confirmed = window.confirm(
+      'Are you sure you want to import this data?\n\n' +
+        'This will replace ALL your current data including cards, review history, and notes.'
+    );
+
+    if (!confirmed) {
+      // Reset the input so the same file can be selected again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
     try {
       const text = await file.text();
       await importDataMutation.mutateAsync(text);
+      queryClient.clear();
       alert('Data imported successfully!');
     } catch (error) {
       console.error('Import failed:', error);

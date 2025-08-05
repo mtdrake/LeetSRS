@@ -172,6 +172,23 @@ describe('import-export', () => {
       expect(await storage.getItem(STORAGE_KEYS.theme)).toEqual('light');
     });
 
+    it('should clear existing data before importing', async () => {
+      // Set up existing data
+      await storage.setItem(STORAGE_KEYS.cards, { 'old-card': { id: 'old-card' } });
+      await storage.setItem(STORAGE_KEYS.stats, { '2023-12-31': { totalReviews: 10 } });
+      await storage.setItem(`${STORAGE_KEYS.notes}:old-card` as const, { text: 'old note' });
+
+      const jsonData = JSON.stringify(validExportData);
+      await importData(jsonData);
+
+      // Verify old data was cleared
+      expect(await storage.getItem(`${STORAGE_KEYS.notes}:old-card` as const)).toBeNull();
+
+      // Verify only new data exists
+      expect(await storage.getItem(STORAGE_KEYS.cards)).toEqual(validExportData.data.cards);
+      expect(await storage.getItem(STORAGE_KEYS.stats)).toEqual(validExportData.data.stats);
+    });
+
     it('should throw error for invalid JSON', async () => {
       await expect(importData('invalid json')).rejects.toThrow('Invalid JSON format');
     });
@@ -191,7 +208,11 @@ describe('import-export', () => {
       await expect(importData(JSON.stringify(invalidCards))).rejects.toThrow('Invalid cards data');
     });
 
-    it('should skip empty data sections', async () => {
+    it('should handle empty data sections by clearing existing data', async () => {
+      // Set up some existing data first
+      await storage.setItem(STORAGE_KEYS.cards, { 'existing-card': {} });
+      await storage.setItem(STORAGE_KEYS.stats, { '2024-01-01': {} });
+
       const emptyData = {
         ...validExportData,
         data: {
@@ -204,9 +225,9 @@ describe('import-export', () => {
 
       await importData(JSON.stringify(emptyData));
 
-      // Verify empty data wasn't imported
-      expect(await storage.getItem(STORAGE_KEYS.cards)).toBeNull();
-      expect(await storage.getItem(STORAGE_KEYS.stats)).toBeNull();
+      // Verify existing data was cleared and empty data was imported
+      expect(await storage.getItem(STORAGE_KEYS.cards)).toEqual({});
+      expect(await storage.getItem(STORAGE_KEYS.stats)).toEqual({});
     });
   });
 

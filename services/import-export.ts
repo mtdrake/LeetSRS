@@ -92,15 +92,14 @@ export async function importData(jsonData: string): Promise<void> {
     throw new Error('Invalid notes data');
   }
 
+  // Clear existing data for a clean import
+  await resetAllData();
+
   // Import cards
-  if (Object.keys(data.data.cards).length > 0) {
-    await storage.setItem(STORAGE_KEYS.cards, data.data.cards);
-  }
+  await storage.setItem(STORAGE_KEYS.cards, data.data.cards);
 
   // Import stats
-  if (Object.keys(data.data.stats).length > 0) {
-    await storage.setItem(STORAGE_KEYS.stats, data.data.stats);
-  }
+  await storage.setItem(STORAGE_KEYS.stats, data.data.stats);
 
   // Import notes
   for (const [cardId, note] of Object.entries(data.data.notes)) {

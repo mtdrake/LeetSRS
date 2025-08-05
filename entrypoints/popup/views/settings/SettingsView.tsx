@@ -1,5 +1,7 @@
+import { Button, TextField, Label, Input } from 'react-aria-components';
 import { ViewLayout } from '../../components/ViewLayout';
 import { useTheme } from '../../contexts/ThemeContext';
+import { bounceButton } from '@/shared/styles';
 
 export function SettingsView() {
   const { theme, toggleTheme } = useTheme();
@@ -14,44 +16,48 @@ export function SettingsView() {
         <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
           <h3 className="text-lg font-semibold mb-4">Appearance</h3>
           <div className="flex items-center justify-between">
-            <label htmlFor="theme-toggle">Theme</label>
-            <button
-              id="theme-toggle"
-              onClick={toggleTheme}
-              className="px-4 py-2 rounded-md transition-all hover:opacity-80 bg-accent text-white"
+            <span>Theme</span>
+            <Button
+              onPress={toggleTheme}
+              className={`px-4 py-2 rounded-md transition-all hover:opacity-80 bg-accent text-white ${bounceButton}`}
             >
               {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
-            </button>
+            </Button>
           </div>
         </div>
 
         <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
           <h3 className="text-lg font-semibold mb-4">Review Settings</h3>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label htmlFor="new-cards-per-day">New Cards Per Day</label>
-              <input
-                id="new-cards-per-day"
+            <TextField className="flex items-center justify-between">
+              <Label>New Cards Per Day</Label>
+              <Input
                 type="number"
                 placeholder="5"
                 className="w-20 px-2 py-1 rounded border bg-tertiary text-primary border-current"
               />
-            </div>
+            </TextField>
           </div>
         </div>
 
         <div className="mb-6 p-4 rounded-lg bg-secondary text-primary">
           <h3 className="text-lg font-semibold mb-4">Data</h3>
           <div className="space-y-2">
-            <button className="w-full px-4 py-2 rounded transition-opacity hover:opacity-80 bg-tertiary text-primary">
+            <Button
+              className={`w-full px-4 py-2 rounded transition-opacity hover:opacity-80 bg-tertiary text-primary ${bounceButton}`}
+            >
               Export Data
-            </button>
-            <button className="w-full px-4 py-2 rounded transition-opacity hover:opacity-80 bg-tertiary text-primary">
+            </Button>
+            <Button
+              className={`w-full px-4 py-2 rounded transition-opacity hover:opacity-80 bg-tertiary text-primary ${bounceButton}`}
+            >
               Import Data
-            </button>
-            <button className="w-full px-4 py-2 rounded transition-opacity hover:opacity-80 text-white bg-danger">
+            </Button>
+            <Button
+              className={`w-full px-4 py-2 rounded transition-opacity hover:opacity-80 text-white bg-danger ${bounceButton}`}
+            >
               Reset All Data
-            </button>
+            </Button>
           </div>
         </div>
 

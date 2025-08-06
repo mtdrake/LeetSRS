@@ -1,273 +1,68 @@
+import { createLeetRepsButton, RatingMenu, Tooltip } from './content-utils';
+
 export default defineContentScript({
   matches: ['*://*.leetcode.com/*'],
   main() {
-    // Wait for the navbar container to be available
-    const waitForNavbar = setInterval(() => {
-      const navbarContainer = document.getElementById('navbar-container');
+    setupLeetRepsButton();
+  },
+});
 
-      if (navbarContainer) {
-        clearInterval(waitForNavbar);
+function setupLeetRepsButton() {
+  // Wait for the navbar container to be available
+  const checkInterval = setInterval(() => {
+    const navbarContainer = document.getElementById('navbar-container');
 
-        // Find the buttons container - it's not in navbar-container, search the whole document
-        const buttonsContainer = document.querySelector('#ide-top-btns');
+    if (navbarContainer) {
+      clearInterval(checkInterval);
 
-        if (buttonsContainer) {
-          // Create wrapper structure matching the notes button exactly
-          const buttonWrapper = document.createElement('div');
-          buttonWrapper.className = 'relative flex';
+      // Find the buttons container
+      const buttonsContainer = document.querySelector('#ide-top-btns');
 
-          const innerWrapper = document.createElement('div');
-          innerWrapper.className = 'relative flex overflow-hidden rounded bg-fill-tertiary dark:bg-fill-tertiary';
+      if (buttonsContainer) {
+        // Create the button and its functionality
+        const tooltip = new Tooltip();
+        let ratingMenu: RatingMenu | null = null;
 
-          const groupWrapper = document.createElement('div');
-          groupWrapper.className =
-            'group flex flex-none items-center justify-center hover:bg-fill-quaternary dark:hover:bg-fill-quaternary';
+        const buttonWrapper = createLeetRepsButton(() => {
+          if (ratingMenu) {
+            ratingMenu.toggle();
+          }
+        });
 
-          const clickableDiv = document.createElement('div');
-          clickableDiv.className = 'flex cursor-pointer p-2 text-gray-60 dark:text-gray-60';
-          clickableDiv.setAttribute('data-state', 'closed');
-          clickableDiv.setAttribute('title', 'LeetReps');
-          clickableDiv.setAttribute('aria-label', 'LeetReps');
+        // Setup rating menu
+        ratingMenu = new RatingMenu(
+          buttonWrapper,
+          (rating, label) => {
+            console.log(`Rated: ${label} (${rating})`);
+            // TODO: Send message to background script to save the rating
+          },
+          () => {
+            console.log('Add without rating clicked');
+            // TODO: Send message to background script to add without rating
+          }
+        );
 
-          clickableDiv.innerHTML = `
-            <div class="relative text-[16px] leading-[normal] before:block before:h-4 before:w-4">
-              <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor" class="absolute left-1/2 top-1/2 h-[1em] -translate-x-1/2 -translate-y-1/2 align-[-0.125em]" role="img">
-                <path d="M320 488c0 9.5-5.6 18.1-14.2 21.9s-18.8 2.3-25.8-4.1l-80-72c-5.1-4.6-7.9-11-7.9-17.8s2.9-13.3 7.9-17.8l80-72c7-6.3 17.2-7.9 25.8-4.1s14.2 12.4 14.2 21.9v40h16c35.3 0 64-28.7 64-64V153.3C371.7 141 352 112.8 352 80c0-44.2 35.8-80 80-80s80 35.8 80 80c0 32.8-19.7 61-48 73.3V320c0 70.7-57.3 128-128 128h-16v40zM456 80a24 24 0 1 0 -48 0 24 24 0 1 0 48 0zM192 24c0-9.5 5.6-18.1 14.2-21.9s18.8-2.3 25.8 4.1l80 72c5.1 4.6 7.9 11 7.9 17.8s-2.9 13.3-7.9 17.8l-80 72c-7 6.3-17.2 7.9-25.8 4.1s-14.2-12.4-14.2-21.9V128H176c-35.3 0-64 28.7-64 64V358.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3V192c0-70.7 57.3-128 128-128h16V24zM56 432a24 24 0 1 0 48 0 24 24 0 1 0 -48 0z"/>
-              </svg>
-            </div>
-          `;
-
-          // Create menu for ratings
-          let ratingMenu: HTMLDivElement | null = null;
-
-          const showRatingMenu = () => {
-            if (ratingMenu) {
-              ratingMenu.remove();
-              ratingMenu = null;
-              return;
-            }
-
-            ratingMenu = document.createElement('div');
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            ratingMenu.style.cssText = `
-              position: absolute;
-              top: 100%;
-              right: 0;
-              margin-top: 8px;
-              min-width: 160px;
-              background-color: ${isDarkMode ? '#242424' : '#ffffff'};
-              border: 1px solid ${isDarkMode ? '#333333' : '#d4d4d4'};
-              border-radius: 6px;
-              padding: 8px;
-              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-              z-index: 50;
-            `;
-
-            // Create rating buttons container
-            const ratingButtonsContainer = document.createElement('div');
-            ratingButtonsContainer.style.cssText = `
-              display: flex;
-              gap: 4px;
-              margin-bottom: 8px;
-            `;
-
-            // Rating buttons config (from ReviewCard.tsx)
-            const ratingButtons = [
-              { rating: 1, label: 'Again', colorClass: 'bg-red-600 hover:bg-red-700' },
-              { rating: 2, label: 'Hard', colorClass: 'bg-orange-600 hover:bg-orange-700' },
-              { rating: 3, label: 'Good', colorClass: 'bg-green-600 hover:bg-green-700' },
-              { rating: 4, label: 'Easy', colorClass: 'bg-blue-600 hover:bg-blue-700' },
-            ];
-
-            // Create rating buttons
-            ratingButtons.forEach(({ rating, label, colorClass }) => {
-              const button = document.createElement('button');
-              const isDark = document.documentElement.classList.contains('dark');
-
-              // Convert color classes to actual colors (from App.css)
-              const colors: Record<string, { bg: string; hover: string; darkBg: string; darkHover: string }> = {
-                'bg-red-600 hover:bg-red-700': {
-                  bg: '#c73e3e',
-                  hover: '#b13636', // Light: rating-again
-                  darkBg: '#d14358',
-                  darkHover: '#c13a4f', // Dark: rating-again
-                },
-                'bg-orange-600 hover:bg-orange-700': {
-                  bg: '#d97706',
-                  hover: '#c26805', // Light: rating-hard
-                  darkBg: '#e88c3a',
-                  darkHover: '#d97d2e', // Dark: rating-hard
-                },
-                'bg-green-600 hover:bg-green-700': {
-                  bg: '#4271c4',
-                  hover: '#3862b5', // Light: rating-good
-                  darkBg: '#5b8fd9',
-                  darkHover: '#4c7ec8', // Dark: rating-good
-                },
-                'bg-blue-600 hover:bg-blue-700': {
-                  bg: '#3d9156',
-                  hover: '#35804a', // Light: rating-easy
-                  darkBg: '#52b169',
-                  darkHover: '#47a05d', // Dark: rating-easy
-                },
-              };
-              const colorSet = colors[colorClass];
-              const bgColor = isDark ? colorSet.darkBg : colorSet.bg;
-              const hoverColor = isDark ? colorSet.darkHover : colorSet.hover;
-
-              button.style.cssText = `
-                width: 64px;
-                padding: 6px 8px;
-                border-radius: 4px;
-                background-color: ${bgColor};
-                color: white;
-                font-size: 13px;
-                border: none;
-                cursor: pointer;
-                transition: background-color 0.2s;
-              `;
-              button.textContent = label;
-
-              button.addEventListener('mouseenter', () => {
-                button.style.backgroundColor = hoverColor;
-              });
-              button.addEventListener('mouseleave', () => {
-                button.style.backgroundColor = bgColor;
-              });
-
-              button.addEventListener('click', () => {
-                console.log(`Rated: ${label} (${rating})`);
-                ratingMenu?.remove();
-                ratingMenu = null;
-              });
-              ratingButtonsContainer.appendChild(button);
-            });
-
-            ratingMenu!.appendChild(ratingButtonsContainer);
-
-            // Add "Add without rating" button
-            const addButton = document.createElement('button');
-            const isDark = document.documentElement.classList.contains('dark');
-            addButton.style.cssText = `
-              width: 100%;
-              padding: 6px 12px;
-              border-radius: 4px;
-              background-color: ${isDark ? '#323232' : '#f5f5f5'};
-              color: ${isDark ? '#a0a0a0' : '#4a4a4a'};
-              font-size: 14px;
-              border: none;
-              cursor: pointer;
-              transition: background-color 0.2s;
-              display: block;
-            `;
-            addButton.textContent = 'Add without rating';
-
-            addButton.addEventListener('mouseenter', () => {
-              addButton.style.backgroundColor = isDark ? '#3a3a3a' : '#e8e8e8';
-            });
-            addButton.addEventListener('mouseleave', () => {
-              addButton.style.backgroundColor = isDark ? '#323232' : '#f5f5f5';
-            });
-
-            addButton.addEventListener('click', () => {
-              console.log('Add without rating clicked');
-              ratingMenu?.remove();
-              ratingMenu = null;
-            });
-            ratingMenu!.appendChild(addButton);
-
-            // Add menu to button wrapper
-            buttonWrapper.style.position = 'relative';
-            buttonWrapper.appendChild(ratingMenu);
-
-            // Close menu when clicking outside
-            const closeMenu = (e: MouseEvent) => {
-              if (!buttonWrapper.contains(e.target as Node)) {
-                ratingMenu?.remove();
-                ratingMenu = null;
-                document.removeEventListener('click', closeMenu);
-              }
-            };
-            setTimeout(() => document.addEventListener('click', closeMenu), 0);
-          };
-
-          // Add click handler
-          clickableDiv.addEventListener('click', () => {
-            showRatingMenu();
-          });
-
-          // Create custom tooltip functionality
-          let tooltipTimeout: ReturnType<typeof setTimeout> | null = null;
-          let customTooltip: HTMLDivElement | null = null;
-
-          const showTooltip = () => {
-            // Create tooltip element
-            customTooltip = document.createElement('div');
-            customTooltip.className =
-              'z-50 overflow-hidden rounded-md bg-layer-1 dark:bg-dark-layer-1 px-3 py-1.5 text-xs text-text-primary dark:text-text-primary shadow-md';
-            customTooltip.style.position = 'fixed';
-            customTooltip.style.pointerEvents = 'none';
-            customTooltip.style.opacity = '0';
-            customTooltip.style.transform = 'translateX(-50%) translateY(-4px) scale(0.95)';
-            customTooltip.style.transition = 'all 100ms cubic-bezier(0.16, 1, 0.3, 1)';
-            customTooltip.textContent = 'LeetReps';
-
-            // Add border for dark mode
-            if (document.documentElement.classList.contains('dark')) {
-              customTooltip.style.backgroundColor = 'rgb(40, 40, 40)'; // Slightly lighter than page bg
-              customTooltip.style.border = '1px solid rgba(255, 255, 255, 0.08)'; // Subtle white border
-            }
-
-            // Add data attributes for styling
-            customTooltip.setAttribute('data-state', 'open');
-            customTooltip.setAttribute('data-side', 'bottom');
-
-            // Calculate position
-            const rect = clickableDiv.getBoundingClientRect();
-            customTooltip.style.top = `${rect.bottom + 8}px`;
-            customTooltip.style.left = `${rect.left + rect.width / 2}px`;
-
-            document.body.appendChild(customTooltip);
-
-            // Trigger animation
-            requestAnimationFrame(() => {
-              if (customTooltip) {
-                customTooltip.style.opacity = '1';
-                customTooltip.style.transform = 'translateX(-50%) translateY(0) scale(1)';
-              }
-            });
-          };
-
-          const hideTooltip = () => {
-            if (customTooltip) {
-              customTooltip.remove();
-              customTooltip = null;
-            }
-          };
-
+        // Setup tooltip
+        const clickableDiv = buttonWrapper.querySelector('[data-state="closed"]') as HTMLElement;
+        if (clickableDiv) {
           clickableDiv.addEventListener('mouseenter', () => {
-            tooltipTimeout = setTimeout(showTooltip, 300); // Faster delay
+            tooltip.show(clickableDiv, 'LeetReps');
           });
 
           clickableDiv.addEventListener('mouseleave', () => {
-            if (tooltipTimeout) clearTimeout(tooltipTimeout);
-            hideTooltip();
+            tooltip.hide();
           });
+        }
 
-          groupWrapper.appendChild(clickableDiv);
-          innerWrapper.appendChild(groupWrapper);
-          buttonWrapper.appendChild(innerWrapper);
+        // Insert before the last button group (the notes button)
+        const lastButtonGroup = buttonsContainer.lastElementChild;
 
-          // Insert before the last button group (the notes button)
-          const lastButtonGroup = buttonsContainer.lastElementChild;
-
-          try {
-            buttonsContainer.insertBefore(buttonWrapper, lastButtonGroup);
-          } catch (error) {
-            console.error('Error adding button:', error);
-          }
+        try {
+          buttonsContainer.insertBefore(buttonWrapper, lastButtonGroup);
+        } catch (error) {
+          console.error('Error adding LeetReps button:', error);
         }
       }
-    }, 100);
-  },
-});
+    }
+  }, 100);
+}

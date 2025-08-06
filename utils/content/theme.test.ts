@@ -37,7 +37,7 @@ describe('theme utilities', () => {
   describe('getRatingColor', () => {
     it('should return correct colors for rating-again in light mode', () => {
       document.documentElement.classList.remove('dark');
-      const colors = getRatingColor('bg-red-600 hover:bg-red-700');
+      const colors = getRatingColor('again');
       expect(colors).toEqual({
         bg: '#c73e3e',
         hover: '#b13636',
@@ -46,7 +46,7 @@ describe('theme utilities', () => {
 
     it('should return correct colors for rating-again in dark mode', () => {
       document.documentElement.classList.add('dark');
-      const colors = getRatingColor('bg-red-600 hover:bg-red-700');
+      const colors = getRatingColor('again');
       expect(colors).toEqual({
         bg: '#d14358',
         hover: '#c13a4f',
@@ -55,7 +55,7 @@ describe('theme utilities', () => {
 
     it('should return correct colors for rating-hard', () => {
       document.documentElement.classList.remove('dark');
-      const colors = getRatingColor('bg-orange-600 hover:bg-orange-700');
+      const colors = getRatingColor('hard');
       expect(colors).toEqual({
         bg: '#d97706',
         hover: '#c26805',
@@ -64,7 +64,7 @@ describe('theme utilities', () => {
 
     it('should return correct colors for rating-good', () => {
       document.documentElement.classList.remove('dark');
-      const colors = getRatingColor('bg-green-600 hover:bg-green-700');
+      const colors = getRatingColor('good');
       expect(colors).toEqual({
         bg: '#4271c4',
         hover: '#3862b5',
@@ -73,7 +73,7 @@ describe('theme utilities', () => {
 
     it('should return correct colors for rating-easy', () => {
       document.documentElement.classList.remove('dark');
-      const colors = getRatingColor('bg-blue-600 hover:bg-blue-700');
+      const colors = getRatingColor('easy');
       expect(colors).toEqual({
         bg: '#3d9156',
         hover: '#35804a',

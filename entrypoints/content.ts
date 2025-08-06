@@ -9,6 +9,23 @@ export default defineContentScript({
   },
 });
 
+async function withProblemData<T>(
+  action: (problemData: NonNullable<ReturnType<typeof extractProblemData>>) => Promise<T>
+): Promise<T | undefined> {
+  const problemData = extractProblemData();
+  if (!problemData) {
+    console.error('Could not extract problem data');
+    return undefined;
+  }
+
+  try {
+    return await action(problemData);
+  } catch (error) {
+    console.error('Error processing action:', error);
+    return undefined;
+  }
+}
+
 function setupLeetRepsButton() {
   // Wait for the navbar container to be available
   const checkInterval = setInterval(() => {
@@ -35,13 +52,7 @@ function setupLeetRepsButton() {
         ratingMenu = new RatingMenu(
           buttonWrapper,
           async (rating, label) => {
-            const problemData = extractProblemData();
-            if (!problemData) {
-              console.error('Could not extract problem data');
-              return;
-            }
-
-            try {
+            await withProblemData(async (problemData) => {
               const result = await sendMessage({
                 type: MessageType.RATE_CARD,
                 slug: problemData.titleSlug,
@@ -51,18 +62,11 @@ function setupLeetRepsButton() {
                 difficulty: problemData.difficulty,
               });
               console.log(`${label} - Card rated:`, result);
-            } catch (error) {
-              console.error('Error rating card:', error);
-            }
+              return result;
+            });
           },
           async () => {
-            const problemData = extractProblemData();
-            if (!problemData) {
-              console.error('Could not extract problem data');
-              return;
-            }
-
-            try {
+            await withProblemData(async (problemData) => {
               const result = await sendMessage({
                 type: MessageType.ADD_CARD,
                 slug: problemData.titleSlug,
@@ -71,9 +75,8 @@ function setupLeetRepsButton() {
                 difficulty: problemData.difficulty,
               });
               console.log('Add without rating - Card added:', result);
-            } catch (error) {
-              console.error('Error adding card:', error);
-            }
+              return result;
+            });
           }
         );
 

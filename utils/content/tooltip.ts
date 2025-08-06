@@ -1,4 +1,5 @@
 import { isDarkMode } from './theme';
+import { THEME_COLORS } from './constants';
 
 export class Tooltip {
   private element: HTMLDivElement | null = null;
@@ -20,15 +21,10 @@ export class Tooltip {
       `;
 
       // Set colors based on theme
-      if (isDarkMode()) {
-        this.element.style.backgroundColor = 'rgb(40, 40, 40)';
-        this.element.style.border = '1px solid rgba(255, 255, 255, 0.08)';
-        this.element.style.color = '#e5e7eb';
-      } else {
-        this.element.style.backgroundColor = 'white';
-        this.element.style.border = '1px solid rgba(0, 0, 0, 0.08)';
-        this.element.style.color = '#374151';
-      }
+      const colors = isDarkMode() ? THEME_COLORS.dark : THEME_COLORS.light;
+      this.element.style.backgroundColor = colors.bgTooltip;
+      this.element.style.border = `1px solid ${colors.borderTooltip}`;
+      this.element.style.color = colors.textTooltip;
 
       this.element.textContent = text;
 

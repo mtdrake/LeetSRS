@@ -58,8 +58,8 @@ export class RatingMenu {
     `;
 
     // Create rating buttons
-    RATING_BUTTONS.forEach(({ rating, label, colorClass }) => {
-      const { bg, hover } = getRatingColor(colorClass);
+    RATING_BUTTONS.forEach(({ rating, label, colorKey }) => {
+      const { bg, hover } = getRatingColor(colorKey);
 
       const button = createButton({
         style: `
@@ -110,9 +110,10 @@ export class RatingMenu {
 
   private createAddWithoutRatingButton(): HTMLButtonElement {
     const isDark = isDarkMode();
-    const bgColor = isDark ? '#2e2e2e' : '#f5f5f5';
-    const hoverBgColor = isDark ? '#3a3a3a' : '#e8e8e8';
-    const textColor = isDark ? '#e0e0e0' : '#333333';
+    const colors = isDark ? THEME_COLORS.dark : THEME_COLORS.light;
+    const bgColor = colors.bgAddButton;
+    const hoverBgColor = colors.bgAddButtonHover;
+    const textColor = colors.textAddButton;
 
     const button = createButton({
       style: `

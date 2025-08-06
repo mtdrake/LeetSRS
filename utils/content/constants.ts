@@ -4,9 +4,15 @@ export const THEME_COLORS = {
     bgPrimary: '#ffffff',
     bgSecondary: '#f5f5f5',
     bgTertiary: '#e8e8e8',
+    bgAddButton: '#f5f5f5',
+    bgAddButtonHover: '#e8e8e8',
+    bgTooltip: 'white',
     textPrimary: '#1a1a1a',
     textSecondary: '#4a4a4a',
+    textAddButton: '#333333',
+    textTooltip: '#374151',
     border: '#d4d4d4',
+    borderTooltip: 'rgba(0, 0, 0, 0.08)',
     ratingAgain: '#c73e3e',
     ratingHard: '#d97706',
     ratingGood: '#4271c4',
@@ -18,9 +24,15 @@ export const THEME_COLORS = {
     bgTertiary: '#2a2a2a',
     bgQuaternary: '#3a3a3a',
     bgButton: '#323232',
+    bgAddButton: '#2e2e2e',
+    bgAddButtonHover: '#3a3a3a',
+    bgTooltip: 'rgb(40, 40, 40)',
     textPrimary: '#ffffff',
     textSecondary: '#a0a0a0',
+    textAddButton: '#e0e0e0',
+    textTooltip: '#e5e7eb',
     border: '#333333',
+    borderTooltip: 'rgba(255, 255, 255, 0.08)',
     ratingAgain: '#d14358',
     ratingHard: '#e88c3a',
     ratingGood: '#5b8fd9',
@@ -29,25 +41,25 @@ export const THEME_COLORS = {
 } as const;
 
 export const RATING_COLORS = {
-  'bg-red-600 hover:bg-red-700': {
+  again: {
     bg: THEME_COLORS.light.ratingAgain,
     hover: '#b13636',
     darkBg: THEME_COLORS.dark.ratingAgain,
     darkHover: '#c13a4f',
   },
-  'bg-orange-600 hover:bg-orange-700': {
+  hard: {
     bg: THEME_COLORS.light.ratingHard,
     hover: '#c26805',
     darkBg: THEME_COLORS.dark.ratingHard,
     darkHover: '#d97d2e',
   },
-  'bg-green-600 hover:bg-green-700': {
+  good: {
     bg: THEME_COLORS.light.ratingGood,
     hover: '#3862b5',
     darkBg: THEME_COLORS.dark.ratingGood,
     darkHover: '#4c7ec8',
   },
-  'bg-blue-600 hover:bg-blue-700': {
+  easy: {
     bg: THEME_COLORS.light.ratingEasy,
     hover: '#35804a',
     darkBg: THEME_COLORS.dark.ratingEasy,
@@ -56,8 +68,10 @@ export const RATING_COLORS = {
 } as const;
 
 export const RATING_BUTTONS = [
-  { rating: 1, label: 'Again', colorClass: 'bg-red-600 hover:bg-red-700' as const },
-  { rating: 2, label: 'Hard', colorClass: 'bg-orange-600 hover:bg-orange-700' as const },
-  { rating: 3, label: 'Good', colorClass: 'bg-green-600 hover:bg-green-700' as const },
-  { rating: 4, label: 'Easy', colorClass: 'bg-blue-600 hover:bg-blue-700' as const },
+  { rating: 1, label: 'Again', colorKey: 'again' as const },
+  { rating: 2, label: 'Hard', colorKey: 'hard' as const },
+  { rating: 3, label: 'Good', colorKey: 'good' as const },
+  { rating: 4, label: 'Easy', colorKey: 'easy' as const },
 ];
+
+export const LEETREPS_BUTTON_COLOR = '#28c244';

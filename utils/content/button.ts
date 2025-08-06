@@ -1,3 +1,5 @@
+import { LEETREPS_BUTTON_COLOR } from './constants';
+
 export function createButton(options: {
   className?: string;
   style?: string;
@@ -42,8 +44,8 @@ export function createLeetRepsButton(onClick: () => void): HTMLDivElement {
   clickableDiv.setAttribute('title', 'LeetReps');
   clickableDiv.setAttribute('aria-label', 'LeetReps');
 
-  // Use inline style for the green color
-  clickableDiv.style.color = '#28c244';
+  // Use inline style for the LeetReps button color
+  clickableDiv.style.color = LEETREPS_BUTTON_COLOR;
 
   clickableDiv.innerHTML = `
     <div class="relative text-[16px] leading-[normal] before:block before:h-4 before:w-4">

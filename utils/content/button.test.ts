@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createButton, createLeetRepsButton } from './button';
+import { LEETREPS_BUTTON_COLOR } from './constants';
 
 // @vitest-environment happy-dom
 
@@ -117,7 +118,7 @@ describe('button utilities', () => {
       const button = createLeetRepsButton(onClick);
 
       const clickableDiv = button.querySelector('[data-state="closed"]') as HTMLElement;
-      expect(clickableDiv.style.color).toBe('#28c244');
+      expect(clickableDiv.style.color).toBe(LEETREPS_BUTTON_COLOR);
     });
 
     it('should use same color for light and dark modes', () => {

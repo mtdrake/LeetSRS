@@ -1,4 +1,4 @@
-import { createLeetRepsButton, RatingMenu, Tooltip } from './content-utils';
+import { createLeetRepsButton, extractProblemData, RatingMenu, Tooltip } from '@/utils/content';
 
 export default defineContentScript({
   matches: ['*://*.leetcode.com/*'],
@@ -33,12 +33,14 @@ function setupLeetRepsButton() {
         ratingMenu = new RatingMenu(
           buttonWrapper,
           (rating, label) => {
-            console.log(`Rated: ${label} (${rating})`);
-            // TODO: Send message to background script to save the rating
+            const problemData = extractProblemData();
+            console.log(`${label}:`, { rating, problemData });
+            // TODO: Send message to background script to save the rating with problem data
           },
           () => {
-            console.log('Add without rating clicked');
-            // TODO: Send message to background script to add without rating
+            const problemData = extractProblemData();
+            console.log('Add without rating:', { problemData });
+            // TODO: Send message to background script to add without rating with problem data
           }
         );
 

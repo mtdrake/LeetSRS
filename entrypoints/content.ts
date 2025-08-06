@@ -4,8 +4,12 @@ import type { Grade } from 'ts-fsrs';
 
 export default defineContentScript({
   matches: ['*://*.leetcode.com/*'],
-  main() {
-    setupLeetSrsButton();
+  async main() {
+    // Check if the button is enabled before injecting
+    const enabledResponse = await sendMessage({ type: MessageType.GET_ENABLE_LEETCODE_BUTTON });
+    if (enabledResponse) {
+      setupLeetSrsButton();
+    }
   },
 });
 

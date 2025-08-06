@@ -14,9 +14,9 @@ export default defineContentScript({
 });
 
 async function withProblemData<T>(
-  action: (problemData: NonNullable<ReturnType<typeof extractProblemData>>) => Promise<T>
+  action: (problemData: NonNullable<Awaited<ReturnType<typeof extractProblemData>>>) => Promise<T>
 ): Promise<T | undefined> {
-  const problemData = extractProblemData();
+  const problemData = await extractProblemData();
   if (!problemData) {
     console.error('Could not extract problem data');
     return undefined;

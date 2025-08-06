@@ -37,14 +37,143 @@ export default defineContentScript({
             </div>
           `;
 
+          // Create menu for ratings
+          let ratingMenu: HTMLDivElement | null = null;
+
+          const showRatingMenu = () => {
+            if (ratingMenu) {
+              ratingMenu.remove();
+              ratingMenu = null;
+              return;
+            }
+
+            ratingMenu = document.createElement('div');
+            ratingMenu.style.cssText = `
+              position: absolute;
+              top: 100%;
+              right: 0;
+              margin-top: 8px;
+              min-width: 160px;
+              background-color: ${document.documentElement.classList.contains('dark') ? 'rgb(26, 26, 26)' : 'white'};
+              border: 1px solid ${document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
+              border-radius: 6px;
+              padding: 8px;
+              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+              z-index: 50;
+            `;
+
+            // Create rating buttons container
+            const ratingButtonsContainer = document.createElement('div');
+            ratingButtonsContainer.style.cssText = `
+              display: flex;
+              gap: 4px;
+              margin-bottom: 8px;
+            `;
+
+            // Rating buttons config (from ReviewCard.tsx)
+            const ratingButtons = [
+              { rating: 1, label: 'Again', colorClass: 'bg-red-600 hover:bg-red-700' },
+              { rating: 2, label: 'Hard', colorClass: 'bg-orange-600 hover:bg-orange-700' },
+              { rating: 3, label: 'Good', colorClass: 'bg-green-600 hover:bg-green-700' },
+              { rating: 4, label: 'Easy', colorClass: 'bg-blue-600 hover:bg-blue-700' },
+            ];
+
+            // Create rating buttons
+            ratingButtons.forEach(({ rating, label, colorClass }) => {
+              const button = document.createElement('button');
+              // Convert color classes to actual colors
+              const colors: Record<string, { bg: string; hover: string }> = {
+                'bg-red-600 hover:bg-red-700': { bg: '#dc2626', hover: '#b91c1c' },
+                'bg-orange-600 hover:bg-orange-700': { bg: '#ea580c', hover: '#c2410c' },
+                'bg-green-600 hover:bg-green-700': { bg: '#16a34a', hover: '#15803d' },
+                'bg-blue-600 hover:bg-blue-700': { bg: '#2563eb', hover: '#1d4ed8' },
+              };
+              const colorSet = colors[colorClass];
+
+              button.style.cssText = `
+                flex: 1;
+                padding: 6px 8px;
+                border-radius: 4px;
+                background-color: ${colorSet.bg};
+                color: white;
+                font-size: 13px;
+                border: none;
+                cursor: pointer;
+                transition: background-color 0.2s;
+              `;
+              button.textContent = label;
+
+              button.addEventListener('mouseenter', () => {
+                button.style.backgroundColor = colorSet.hover;
+              });
+              button.addEventListener('mouseleave', () => {
+                button.style.backgroundColor = colorSet.bg;
+              });
+
+              button.addEventListener('click', () => {
+                console.log(`Rated: ${label} (${rating})`);
+                ratingMenu?.remove();
+                ratingMenu = null;
+              });
+              ratingButtonsContainer.appendChild(button);
+            });
+
+            ratingMenu!.appendChild(ratingButtonsContainer);
+
+            // Add "Add without rating" button
+            const addButton = document.createElement('button');
+            const isDark = document.documentElement.classList.contains('dark');
+            addButton.style.cssText = `
+              width: 100%;
+              padding: 6px 12px;
+              border-radius: 4px;
+              background-color: ${isDark ? 'rgb(40, 40, 40)' : '#f3f4f6'};
+              color: ${isDark ? '#e5e7eb' : '#374151'};
+              font-size: 14px;
+              border: none;
+              cursor: pointer;
+              transition: background-color 0.2s;
+              display: block;
+            `;
+            addButton.textContent = 'Add without rating';
+
+            addButton.addEventListener('mouseenter', () => {
+              addButton.style.backgroundColor = isDark ? 'rgb(50, 50, 50)' : '#e5e7eb';
+            });
+            addButton.addEventListener('mouseleave', () => {
+              addButton.style.backgroundColor = isDark ? 'rgb(40, 40, 40)' : '#f3f4f6';
+            });
+
+            addButton.addEventListener('click', () => {
+              console.log('Add without rating clicked');
+              ratingMenu?.remove();
+              ratingMenu = null;
+            });
+            ratingMenu!.appendChild(addButton);
+
+            // Add menu to button wrapper
+            buttonWrapper.style.position = 'relative';
+            buttonWrapper.appendChild(ratingMenu);
+
+            // Close menu when clicking outside
+            const closeMenu = (e: MouseEvent) => {
+              if (!buttonWrapper.contains(e.target as Node)) {
+                ratingMenu?.remove();
+                ratingMenu = null;
+                document.removeEventListener('click', closeMenu);
+              }
+            };
+            setTimeout(() => document.addEventListener('click', closeMenu), 0);
+          };
+
           // Add click handler
           clickableDiv.addEventListener('click', () => {
-            console.log('hey we made it!');
+            showRatingMenu();
           });
 
           // Create custom tooltip functionality
-          let tooltipTimeout;
-          let customTooltip = null;
+          let tooltipTimeout: ReturnType<typeof setTimeout> | null = null;
+          let customTooltip: HTMLDivElement | null = null;
 
           const showTooltip = () => {
             // Create tooltip element
@@ -77,8 +206,10 @@ export default defineContentScript({
 
             // Trigger animation
             requestAnimationFrame(() => {
-              customTooltip.style.opacity = '1';
-              customTooltip.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+              if (customTooltip) {
+                customTooltip.style.opacity = '1';
+                customTooltip.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+              }
             });
           };
 
@@ -94,7 +225,7 @@ export default defineContentScript({
           });
 
           clickableDiv.addEventListener('mouseleave', () => {
-            clearTimeout(tooltipTimeout);
+            if (tooltipTimeout) clearTimeout(tooltipTimeout);
             hideTooltip();
           });
 

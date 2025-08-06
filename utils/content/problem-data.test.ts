@@ -1,17 +1,24 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { extractProblemData } from './problem-data';
 
 // @vitest-environment happy-dom
 
 describe('extractProblemData', () => {
   let originalGetElementById: typeof document.getElementById;
+  let consoleLogSpy: ReturnType<typeof vi.spyOn>;
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     originalGetElementById = document.getElementById;
+    // Suppress console logs
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     document.getElementById = originalGetElementById;
+    consoleLogSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
   it('should extract problem data from valid __NEXT_DATA__', () => {

@@ -29,7 +29,7 @@ describe('button utilities', () => {
     it('should attach click handler when provided', () => {
       const onClick = vi.fn();
       const button = createButton({ onClick });
-      
+
       button.click();
       expect(onClick).toHaveBeenCalledTimes(1);
     });
@@ -46,7 +46,7 @@ describe('button utilities', () => {
       expect(button.className).toBe('test-button');
       expect(button.style.padding).toBe('10px');
       expect(button.innerHTML).toBe('Click me');
-      
+
       button.click();
       expect(onClick).toHaveBeenCalledTimes(1);
     });
@@ -61,14 +61,16 @@ describe('button utilities', () => {
     it('should create a div wrapper with correct structure', () => {
       const onClick = vi.fn();
       const button = createLeetRepsButton(onClick);
-      
+
       expect(button.tagName).toBe('DIV');
       expect(button.className).toBe('relative flex');
-      
+
       // Check nested structure
       const innerWrapper = button.firstElementChild;
-      expect(innerWrapper?.className).toBe('relative flex overflow-hidden rounded bg-fill-tertiary dark:bg-fill-tertiary');
-      
+      expect(innerWrapper?.className).toBe(
+        'relative flex overflow-hidden rounded bg-fill-tertiary dark:bg-fill-tertiary'
+      );
+
       const groupWrapper = innerWrapper?.firstElementChild;
       expect(groupWrapper?.className).toContain('group flex flex-none items-center');
     });
@@ -76,7 +78,7 @@ describe('button utilities', () => {
     it('should create clickable div with correct attributes', () => {
       const onClick = vi.fn();
       const button = createLeetRepsButton(onClick);
-      
+
       const clickableDiv = button.querySelector('[data-state="closed"]');
       expect(clickableDiv).toBeTruthy();
       expect(clickableDiv?.getAttribute('title')).toBe('LeetReps');
@@ -88,23 +90,23 @@ describe('button utilities', () => {
     it('should attach click handler to clickable div', () => {
       const onClick = vi.fn();
       const button = createLeetRepsButton(onClick);
-      
+
       const clickableDiv = button.querySelector('[data-state="closed"]') as HTMLElement;
       clickableDiv.click();
-      
+
       expect(onClick).toHaveBeenCalledTimes(1);
     });
 
     it('should include SVG icon', () => {
       const onClick = vi.fn();
       const button = createLeetRepsButton(onClick);
-      
+
       const svg = button.querySelector('svg');
       expect(svg).toBeTruthy();
       expect(svg?.getAttribute('viewBox')).toBe('0 0 24 24');
       expect(svg?.getAttribute('width')).toBe('1em');
       expect(svg?.getAttribute('height')).toBe('1em');
-      
+
       // Check for the rotate icon path
       const paths = svg?.querySelectorAll('path');
       expect(paths?.length).toBeGreaterThan(0);
@@ -113,20 +115,20 @@ describe('button utilities', () => {
     it('should apply green color to clickable div', () => {
       const onClick = vi.fn();
       const button = createLeetRepsButton(onClick);
-      
+
       const clickableDiv = button.querySelector('[data-state="closed"]') as HTMLElement;
       expect(clickableDiv.style.color).toBe('#28c244');
     });
 
     it('should use same color for light and dark modes', () => {
       const onClick = vi.fn();
-      
+
       // Test light mode
       document.documentElement.classList.remove('dark');
       const buttonLight = createLeetRepsButton(onClick);
       const clickableDivLight = buttonLight.querySelector('[data-state="closed"]') as HTMLElement;
       expect(clickableDivLight.style.color).toBe('#28c244');
-      
+
       // Test dark mode
       document.documentElement.classList.add('dark');
       const buttonDark = createLeetRepsButton(onClick);

@@ -40,19 +40,19 @@ describe('RatingMenu', () => {
   describe('show', () => {
     it('should create menu element with correct structure', () => {
       menu.show();
-      
+
       const menuElement = container.querySelector('[style*="position: absolute"]');
       expect(menuElement).toBeTruthy();
-      
+
       // Check rating buttons
       const buttons = menuElement!.querySelectorAll('button');
       expect(buttons.length).toBe(5); // 4 rating buttons + 1 add without rating
-      
+
       // Verify rating buttons text
       RATING_BUTTONS.forEach((btn, index) => {
         expect(buttons[index].textContent).toBe(btn.label);
       });
-      
+
       // Verify add without rating button
       expect(buttons[4].innerHTML).toContain('Add to SRS (no rating)');
     });
@@ -60,7 +60,7 @@ describe('RatingMenu', () => {
     it('should not create duplicate menus', () => {
       menu.show();
       menu.show();
-      
+
       const menus = container.querySelectorAll('[style*="position: absolute"]');
       expect(menus.length).toBe(1);
     });
@@ -75,10 +75,10 @@ describe('RatingMenu', () => {
     it('should call onRate with correct rating and label when rating button clicked', () => {
       menu.show();
       const buttons = container.querySelectorAll('button');
-      
+
       // Click "Good" button (index 2)
       buttons[2].click();
-      
+
       expect(onRate).toHaveBeenCalledWith(3, 'Good');
       expect(onRate).toHaveBeenCalledTimes(1);
     });
@@ -86,9 +86,9 @@ describe('RatingMenu', () => {
     it('should hide menu after rating button click', () => {
       menu.show();
       const buttons = container.querySelectorAll('button');
-      
+
       buttons[0].click();
-      
+
       expect(container.querySelector('[style*="position: absolute"]')).toBeFalsy();
     });
 
@@ -97,11 +97,11 @@ describe('RatingMenu', () => {
         menu.show();
         const buttons = container.querySelectorAll('button');
         buttons[index].click();
-        
+
         expect(onRate).toHaveBeenCalledWith(ratingBtn.rating, ratingBtn.label);
         menu.hide();
       });
-      
+
       expect(onRate).toHaveBeenCalledTimes(RATING_BUTTONS.length);
     });
   });
@@ -111,9 +111,9 @@ describe('RatingMenu', () => {
       menu.show();
       const buttons = container.querySelectorAll('button');
       const addButton = buttons[buttons.length - 1];
-      
+
       addButton.click();
-      
+
       expect(onAddWithoutRating).toHaveBeenCalledTimes(1);
     });
 
@@ -121,9 +121,9 @@ describe('RatingMenu', () => {
       menu.show();
       const buttons = container.querySelectorAll('button');
       const addButton = buttons[buttons.length - 1];
-      
+
       addButton.click();
-      
+
       expect(container.querySelector('[style*="position: absolute"]')).toBeFalsy();
     });
   });
@@ -131,26 +131,26 @@ describe('RatingMenu', () => {
   describe('outside click handling', () => {
     it('should hide menu when clicking outside', async () => {
       menu.show();
-      
+
       // Wait for event listener to be attached
-      await new Promise(resolve => setTimeout(resolve, 10));
-      
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
       // Click outside
       document.body.click();
-      
+
       expect(container.querySelector('[style*="position: absolute"]')).toBeFalsy();
     });
 
     it('should not hide menu when clicking inside', async () => {
       menu.show();
-      
+
       // Wait for event listener to be attached
-      await new Promise(resolve => setTimeout(resolve, 10));
-      
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
       // Click inside menu
       const menuElement = container.querySelector('[style*="position: absolute"]');
       menuElement!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      
+
       expect(container.querySelector('[style*="position: absolute"]')).toBeTruthy();
     });
   });
@@ -161,12 +161,12 @@ describe('RatingMenu', () => {
       const buttons = container.querySelectorAll('button');
       const button = buttons[0];
       const originalBg = button.style.backgroundColor;
-      
+
       button.dispatchEvent(new MouseEvent('mouseenter'));
       const hoverBg = button.style.backgroundColor;
-      
+
       expect(hoverBg).not.toBe(originalBg);
-      
+
       button.dispatchEvent(new MouseEvent('mouseleave'));
       expect(button.style.backgroundColor).toBe(originalBg);
     });

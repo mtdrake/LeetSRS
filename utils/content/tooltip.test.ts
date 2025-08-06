@@ -23,18 +23,18 @@ describe('Tooltip', () => {
       document.body.appendChild(anchor);
 
       tooltip.show(anchor, 'Test tooltip');
-      
+
       // Tooltip should not be visible immediately
       expect(document.querySelector('.z-50')).toBeFalsy();
-      
+
       // Fast forward past the delay
       vi.advanceTimersByTime(300);
-      
+
       // Tooltip should now be visible
       const tooltipElement = document.querySelector('.z-50');
       expect(tooltipElement).toBeTruthy();
       expect(tooltipElement!.textContent).toBe('Test tooltip');
-      
+
       document.body.removeChild(anchor);
     });
 
@@ -61,11 +61,11 @@ describe('Tooltip', () => {
 
       tooltip.show(anchor, 'Test');
       vi.advanceTimersByTime(300);
-      
+
       const tooltipElement = document.querySelector('.z-50') as HTMLElement;
       expect(tooltipElement.style.left).toBe('125px'); // Centered: 100 + 25
       expect(tooltipElement.style.top).toBe('128px'); // Below anchor with 8px gap (100 + 20 + 8)
-      
+
       document.body.removeChild(anchor);
     });
 
@@ -75,12 +75,12 @@ describe('Tooltip', () => {
 
       tooltip.show(anchor, 'Test tooltip');
       tooltip.hide();
-      
+
       vi.advanceTimersByTime(300);
-      
+
       // Tooltip should not appear
       expect(document.querySelector('.z-50')).toBeFalsy();
-      
+
       document.body.removeChild(anchor);
     });
 
@@ -93,19 +93,19 @@ describe('Tooltip', () => {
       // Show first tooltip
       tooltip.show(anchor1, 'First tooltip');
       vi.advanceTimersByTime(300);
-      
+
       let tooltipElement = document.querySelector('.z-50');
       expect(tooltipElement!.textContent).toBe('First tooltip');
-      
+
       // Show second tooltip
       tooltip.show(anchor2, 'Second tooltip');
       vi.advanceTimersByTime(300);
-      
+
       // Should still only have one tooltip
       const tooltips = document.querySelectorAll('.z-50');
       expect(tooltips.length).toBe(1);
       expect(tooltips[0].textContent).toBe('Second tooltip');
-      
+
       document.body.removeChild(anchor1);
       document.body.removeChild(anchor2);
     });
@@ -118,13 +118,13 @@ describe('Tooltip', () => {
 
       tooltip.show(anchor, 'Test tooltip');
       vi.advanceTimersByTime(300);
-      
+
       expect(document.querySelector('.z-50')).toBeTruthy();
-      
+
       tooltip.hide();
-      
+
       expect(document.querySelector('.z-50')).toBeFalsy();
-      
+
       document.body.removeChild(anchor);
     });
 
@@ -133,12 +133,12 @@ describe('Tooltip', () => {
       document.body.appendChild(anchor);
 
       tooltip.show(anchor, 'Test tooltip');
-      
+
       const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       tooltip.hide();
-      
+
       expect(clearTimeoutSpy).toHaveBeenCalled();
-      
+
       document.body.removeChild(anchor);
     });
   });
@@ -150,9 +150,9 @@ describe('Tooltip', () => {
 
       tooltip.show(anchor, 'Test tooltip');
       vi.advanceTimersByTime(300);
-      
+
       const tooltipElement = document.querySelector('.z-50') as HTMLElement;
-      
+
       expect(tooltipElement.style.position).toBe('fixed');
       expect(tooltipElement.style.backgroundColor).toBe('white'); // Light mode default
       expect(tooltipElement.style.color).toBe('#374151');
@@ -161,7 +161,7 @@ describe('Tooltip', () => {
       expect(tooltipElement.style.zIndex).toBe('50');
       // Opacity will be 0 initially, then animated to 1
       expect(tooltipElement.style.opacity).toBe('0');
-      
+
       document.body.removeChild(anchor);
     });
   });

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { isDarkMode, getRatingColor } from './theme';
+import { RATING_COLORS } from './constants';
 
 // @vitest-environment happy-dom
 
@@ -82,7 +83,7 @@ describe('theme utilities', () => {
     it('should throw error for unknown color class', () => {
       // Since getRatingColor expects a valid key of RATING_COLORS,
       // it would throw an error for unknown keys
-      expect(() => getRatingColor('unknown-class' as any)).toThrow();
+      expect(() => getRatingColor('unknown-class' as keyof typeof RATING_COLORS)).toThrow();
     });
   });
 });

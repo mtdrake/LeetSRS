@@ -1,5 +1,7 @@
+import type { Difficulty } from '@/shared/cards';
+
 export interface ProblemData {
-  difficulty: string;
+  difficulty: Difficulty;
   title: string;
   titleSlug: string;
   questionFrontendId: string;
@@ -22,7 +24,7 @@ export function extractProblemData(): ProblemData | null {
         if (query.state?.data?.question) {
           const question = query.state.data.question;
           return {
-            difficulty: question.difficulty,
+            difficulty: question.difficulty as Difficulty,
             title: question.title,
             titleSlug: question.titleSlug,
             questionFrontendId: question.questionFrontendId,

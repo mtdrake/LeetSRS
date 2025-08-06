@@ -48,14 +48,15 @@ export default defineContentScript({
             }
 
             ratingMenu = document.createElement('div');
+            const isDarkMode = document.documentElement.classList.contains('dark');
             ratingMenu.style.cssText = `
               position: absolute;
               top: 100%;
               right: 0;
               margin-top: 8px;
               min-width: 160px;
-              background-color: ${document.documentElement.classList.contains('dark') ? 'rgb(26, 26, 26)' : 'white'};
-              border: 1px solid ${document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
+              background-color: ${isDarkMode ? '#242424' : '#ffffff'};
+              border: 1px solid ${isDarkMode ? '#333333' : '#d4d4d4'};
               border-radius: 6px;
               padding: 8px;
               box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -81,20 +82,44 @@ export default defineContentScript({
             // Create rating buttons
             ratingButtons.forEach(({ rating, label, colorClass }) => {
               const button = document.createElement('button');
-              // Convert color classes to actual colors
-              const colors: Record<string, { bg: string; hover: string }> = {
-                'bg-red-600 hover:bg-red-700': { bg: '#dc2626', hover: '#b91c1c' },
-                'bg-orange-600 hover:bg-orange-700': { bg: '#ea580c', hover: '#c2410c' },
-                'bg-green-600 hover:bg-green-700': { bg: '#16a34a', hover: '#15803d' },
-                'bg-blue-600 hover:bg-blue-700': { bg: '#2563eb', hover: '#1d4ed8' },
+              const isDark = document.documentElement.classList.contains('dark');
+
+              // Convert color classes to actual colors (from App.css)
+              const colors: Record<string, { bg: string; hover: string; darkBg: string; darkHover: string }> = {
+                'bg-red-600 hover:bg-red-700': {
+                  bg: '#c73e3e',
+                  hover: '#b13636', // Light: rating-again
+                  darkBg: '#d14358',
+                  darkHover: '#c13a4f', // Dark: rating-again
+                },
+                'bg-orange-600 hover:bg-orange-700': {
+                  bg: '#d97706',
+                  hover: '#c26805', // Light: rating-hard
+                  darkBg: '#e88c3a',
+                  darkHover: '#d97d2e', // Dark: rating-hard
+                },
+                'bg-green-600 hover:bg-green-700': {
+                  bg: '#4271c4',
+                  hover: '#3862b5', // Light: rating-good
+                  darkBg: '#5b8fd9',
+                  darkHover: '#4c7ec8', // Dark: rating-good
+                },
+                'bg-blue-600 hover:bg-blue-700': {
+                  bg: '#3d9156',
+                  hover: '#35804a', // Light: rating-easy
+                  darkBg: '#52b169',
+                  darkHover: '#47a05d', // Dark: rating-easy
+                },
               };
               const colorSet = colors[colorClass];
+              const bgColor = isDark ? colorSet.darkBg : colorSet.bg;
+              const hoverColor = isDark ? colorSet.darkHover : colorSet.hover;
 
               button.style.cssText = `
-                flex: 1;
+                width: 64px;
                 padding: 6px 8px;
                 border-radius: 4px;
-                background-color: ${colorSet.bg};
+                background-color: ${bgColor};
                 color: white;
                 font-size: 13px;
                 border: none;
@@ -104,10 +129,10 @@ export default defineContentScript({
               button.textContent = label;
 
               button.addEventListener('mouseenter', () => {
-                button.style.backgroundColor = colorSet.hover;
+                button.style.backgroundColor = hoverColor;
               });
               button.addEventListener('mouseleave', () => {
-                button.style.backgroundColor = colorSet.bg;
+                button.style.backgroundColor = bgColor;
               });
 
               button.addEventListener('click', () => {
@@ -127,8 +152,8 @@ export default defineContentScript({
               width: 100%;
               padding: 6px 12px;
               border-radius: 4px;
-              background-color: ${isDark ? 'rgb(40, 40, 40)' : '#f3f4f6'};
-              color: ${isDark ? '#e5e7eb' : '#374151'};
+              background-color: ${isDark ? '#323232' : '#f5f5f5'};
+              color: ${isDark ? '#a0a0a0' : '#4a4a4a'};
               font-size: 14px;
               border: none;
               cursor: pointer;
@@ -138,10 +163,10 @@ export default defineContentScript({
             addButton.textContent = 'Add without rating';
 
             addButton.addEventListener('mouseenter', () => {
-              addButton.style.backgroundColor = isDark ? 'rgb(50, 50, 50)' : '#e5e7eb';
+              addButton.style.backgroundColor = isDark ? '#3a3a3a' : '#e8e8e8';
             });
             addButton.addEventListener('mouseleave', () => {
-              addButton.style.backgroundColor = isDark ? 'rgb(40, 40, 40)' : '#f3f4f6';
+              addButton.style.backgroundColor = isDark ? '#323232' : '#f5f5f5';
             });
 
             addButton.addEventListener('click', () => {

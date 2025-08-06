@@ -161,7 +161,7 @@ export function ReviewQueue() {
             <path d="M7.16 18.37l0 .01" />
             <path d="M11 19.94l0 .01" />
           </svg>
-          button next to 'Submit'.
+          button next to &apos;Submit&apos;.
         </div>
       </div>
     );

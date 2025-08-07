@@ -182,6 +182,12 @@ export function isDueByDate(card: Card, referenceDate: Date = new Date()): boole
   return dueStr <= referenceDateStr;
 }
 
+const sortByDueDateThenSlug = (a: Card, b: Card): number => {
+  const dueDiff = a.fsrs.due.getTime() - b.fsrs.due.getTime();
+  if (dueDiff !== 0) return dueDiff;
+  return a.slug.localeCompare(b.slug);
+};
+
 export async function getReviewQueue(): Promise<Card[]> {
   const allCards = await getAllCards();
   // Filter out paused cards and cards not due yet
@@ -191,19 +197,8 @@ export async function getReviewQueue(): Promise<Card[]> {
   const reviewCards = dueCards.filter((card) => card.fsrs.state !== FsrsState.New);
   const newCards = dueCards.filter((card) => card.fsrs.state === FsrsState.New);
 
-  // Sort review cards by due date (earliest first), then by slug for stability
-  reviewCards.sort((a, b) => {
-    const dueDiff = a.fsrs.due.getTime() - b.fsrs.due.getTime();
-    if (dueDiff !== 0) return dueDiff;
-    return a.slug.localeCompare(b.slug);
-  });
-
-  // Sort new cards by creation date (oldest first), then by slug for stability
-  newCards.sort((a, b) => {
-    const createdDiff = a.createdAt.getTime() - b.createdAt.getTime();
-    if (createdDiff !== 0) return createdDiff;
-    return a.slug.localeCompare(b.slug);
-  });
+  // Sort new cards by due date first (for stable selection), then by slug
+  newCards.sort(sortByDueDateThenSlug);
 
   // Get today's stats to determine how many new cards have already been done
   const todayStats = await getTodayStats();
@@ -211,11 +206,12 @@ export async function getReviewQueue(): Promise<Card[]> {
   const maxNewCardsPerDay = await getMaxNewCardsPerDay();
   const remainingNewCards = Math.max(0, maxNewCardsPerDay - newCardsCompletedToday);
 
-  // Limit new cards to the remaining daily allowance
+  // Limit new cards to the remaining daily allowance (after sorting for stability)
   const limitedNewCards = newCards.slice(0, remainingNewCards);
 
-  // Combine with review cards first for stability
-  // This ensures the first card is always the most overdue review card,
-  // or the oldest new card if no reviews are due
-  return [...reviewCards, ...limitedNewCards];
+  // Combine review and limited new cards, then sort everything by due date
+  const allQueueCards = [...reviewCards, ...limitedNewCards];
+  allQueueCards.sort(sortByDueDateThenSlug);
+
+  return allQueueCards;
 }

@@ -141,6 +141,14 @@ body {
   .bg-rating-easy {
     background-color: var(--current-rating-easy);
   }
+  .text-rating-easy {
+    color: var(--current-rating-easy);
+  }
+
+  /* Font utilities */
+  .font-geist-mono {
+    font-family: 'Geist Mono', monospace;
+  }
 
   /* Border colors */
   .border-current {

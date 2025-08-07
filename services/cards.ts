@@ -8,7 +8,6 @@ import {
 } from 'ts-fsrs';
 import { STORAGE_KEYS } from './storage-keys';
 import { storage } from '#imports';
-import { interleaveArrays } from './utils';
 import { updateStats, getTodayStats } from './stats';
 import { deleteNote } from './notes';
 import { type Card, type Difficulty } from '@/shared/cards';
@@ -192,6 +191,20 @@ export async function getReviewQueue(): Promise<Card[]> {
   const reviewCards = dueCards.filter((card) => card.fsrs.state !== FsrsState.New);
   const newCards = dueCards.filter((card) => card.fsrs.state === FsrsState.New);
 
+  // Sort review cards by due date (earliest first), then by slug for stability
+  reviewCards.sort((a, b) => {
+    const dueDiff = a.fsrs.due.getTime() - b.fsrs.due.getTime();
+    if (dueDiff !== 0) return dueDiff;
+    return a.slug.localeCompare(b.slug);
+  });
+
+  // Sort new cards by creation date (oldest first), then by slug for stability
+  newCards.sort((a, b) => {
+    const createdDiff = a.createdAt.getTime() - b.createdAt.getTime();
+    if (createdDiff !== 0) return createdDiff;
+    return a.slug.localeCompare(b.slug);
+  });
+
   // Get today's stats to determine how many new cards have already been done
   const todayStats = await getTodayStats();
   const newCardsCompletedToday = todayStats?.newCards ?? 0;
@@ -201,5 +214,8 @@ export async function getReviewQueue(): Promise<Card[]> {
   // Limit new cards to the remaining daily allowance
   const limitedNewCards = newCards.slice(0, remainingNewCards);
 
-  return interleaveArrays(reviewCards, limitedNewCards);
+  // Combine with review cards first for stability
+  // This ensures the first card is always the most overdue review card,
+  // or the oldest new card if no reviews are due
+  return [...reviewCards, ...limitedNewCards];
 }

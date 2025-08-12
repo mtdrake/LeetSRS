@@ -267,24 +267,6 @@ export function useSetThemeMutation() {
   });
 }
 
-export function useEnableLeetCodeButtonQuery() {
-  return useQuery({
-    queryKey: queryKeys.settings.enableLeetCodeButton,
-    queryFn: () => sendMessage({ type: MessageType.GET_ENABLE_LEETCODE_BUTTON }),
-  });
-}
-
-export function useSetEnableLeetCodeButtonMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (value: boolean) => sendMessage({ type: MessageType.SET_ENABLE_LEETCODE_BUTTON, value }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.settings.enableLeetCodeButton });
-    },
-  });
-}
-
 // Import/Export mutations
 export function useExportDataMutation() {
   return useMutation({

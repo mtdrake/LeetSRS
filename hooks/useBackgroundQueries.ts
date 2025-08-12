@@ -31,7 +31,6 @@ export const queryKeys = {
     maxNewCardsPerDay: ['settings', 'maxNewCardsPerDay'] as const,
     animationsEnabled: ['settings', 'animationsEnabled'] as const,
     theme: ['settings', 'theme'] as const,
-    enableLeetCodeButton: ['settings', 'enableLeetCodeButton'] as const,
   },
 } as const;
 
